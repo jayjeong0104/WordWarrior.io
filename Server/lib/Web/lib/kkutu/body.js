@@ -1,0 +1,8758 @@
+/**
+ * Rule the words! KKuTu Online
+ * Copyright (C) 2017 JJoriping(op@jjo.kr)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+var spamWarning = 0;
+var spamCount = 0;
+// var smile = 94, tag = 35;
+
+function zeroPadding(num, len){ var s = num.toString(); return "000000000000000".slice(0, Math.max(0, len - s.length)) + s; }
+function send(type, data, toMaster, noSpam){
+	var i, r = { type: type };
+	var subj = toMaster ? ws : (rws || ws);
+	
+	for(i in data) r[i] = data[i];
+	
+	/*if($data._talkValue == r.value){
+		if(++$data._sameTalk >= 3) return fail();
+	}else $data._sameTalk = 0;
+	$data._talkValue = r.value;*/
+	
+	if(!noSpam && type != "test") if(spamCount++ > 10){
+		if(++spamWarning >= 3) return subj.close();
+		spamCount = 5;
+	}
+	subj.send(JSON.stringify(r));
+}
+function loading(text){
+	if(text){
+		$stage.loading.toggleClass("is-interactive", /<(button|a|input|select|textarea)\b/i.test(String(text)));
+		if($("#Intro").is(':visible')){
+			$stage.loading.hide();
+			$("#intro-text").html(text);
+		}else $stage.loading.show().html(text);
+	}else $stage.loading.removeClass("is-interactive").hide().empty();
+}
+function setGameTurnInputActive(active){
+	if(!$stage || !$stage.game || !$stage.game.here || !$stage.game.hereText) return;
+	$stage.game.here.css('display', active ? "block" : "none");
+	$stage.game.hereText.prop('readonly', !active);
+	if(!active) $stage.game.hereText.val("");
+}
+function resetRoomChatInputState(){
+	if(!$stage || !$stage.talk || !$stage.talk.length) return;
+	$stage.talk.prop('readonly', false).prop('disabled', false).attr('type', 'text');
+}
+function isGameTurnEntryActive(){
+	return !!($data.room && $data.room.gaming && getOnly() == "for-gaming" && $stage.game.here.is(':visible'));
+}
+function focusInputAtEnd($input, clear){
+	var input, length;
+	
+	if(!$input || !$input.length) return;
+	if(clear) $input.val("");
+	try{
+		$input.focus();
+		input = $input.get(0);
+		if(input && input.setSelectionRange){
+			length = String($input.val() || "").length;
+			input.setSelectionRange(length, length);
+		}
+	}catch(e){
+	}
+}
+function focusGameTurnInput(clear){
+	var $target;
+	try{
+		if(!isGameTurnEntryActive()){
+			resetRoomChatInputState();
+			return;
+		}
+		if(clear){
+			$stage.talk.val("");
+			$stage.game.hereText.val("");
+		}
+		$stage.game.hereText.prop('readonly', false);
+		$target = (mobile || !$stage.talk.is(':visible')) ? $stage.game.hereText : $stage.talk;
+		if($target.get(0) == $stage.game.hereText.get(0)) $stage.game.hereText.prop('readonly', false);
+		else $stage.game.hereText.val($stage.talk.val());
+		focusInputAtEnd($target, false);
+		addTimeout(function(){
+			$stage.game.hereText.prop('readonly', false);
+			$target = (mobile || !$stage.talk.is(':visible')) ? $stage.game.hereText : $stage.talk;
+			if($target.get(0) != $stage.game.hereText.get(0)) $stage.game.hereText.val($stage.talk.val());
+			focusInputAtEnd($target, false);
+		}, 80);
+	}catch(e){
+		if(window.console && console.warn) console.warn("turn input focus failed", e);
+	}
+}
+function focusTurnEntryInput(clear){
+	focusGameTurnInput(clear);
+}
+function showDialog($d, noToggle){
+	var $middle = $("#Middle");
+	var $top = $("#Top");
+	var size = [ $(window).width(), $(window).height() ];
+	var scale = $middle.length ? ($middle.data("scale") || 1) : 1;
+	var barOffset = $top.length ? ($top.outerHeight() + 10) : 0;
+	var cssOffset = $middle.length ? (parseFloat($middle.css("top")) || parseFloat($middle.css("margin-top")) || 0) : 0;
+	var topOffset = Math.max(barOffset, cssOffset);
+	var availableWidth;
+	var availableHeight;
+	var dialogWidth;
+	var dialogHeight;
+	var left;
+	var top;
+	
+	if(!$d || !$d.length) return false;
+	if(!isFinite(scale) || scale <= 0) scale = 1;
+	availableWidth = size[0] / scale;
+	availableHeight = Math.max(0, size[1] - topOffset) / scale;
+	dialogWidth = $d.outerWidth() || $d.width() || parseFloat($d.css("width")) || 0;
+	dialogHeight = $d.outerHeight() || $d.height() || parseFloat($d.css("height")) || 0;
+	left = Math.max(12, (availableWidth - dialogWidth) * 0.5);
+	top = Math.max(12, (availableHeight - dialogHeight) * 0.5);
+	
+	if(!noToggle && $d.is(":visible")){
+		$d.hide();
+		return false;
+	}else{
+		$(".dialog-front").removeClass("dialog-front");
+		$d.show().addClass("dialog-front").css({
+			'left': left,
+			'top': top
+		});
+		try{
+			refreshCustomScrollbars();
+		}catch(err){
+			console.error("refreshCustomScrollbars failed while opening dialog", err);
+		}
+		return true;
+	}
+}
+function toggleSettingsDialog(){
+	var $d = ($stage && $stage.dialog && $stage.dialog.setting) ? $stage.dialog.setting : $("#SettingDiag");
+
+	if(!$d || !$d.length) return false;
+	if($d.is(":visible") || $d.css("display") != "none"){
+		$d.hide().removeClass("dialog-front");
+		return false;
+	}
+	return showDialog($d);
+}
+function updateCustomScrollbar($el){
+	var data = $el.data("csb");
+	var scrollHeight;
+	var clientHeight;
+	var maxScrollTop;
+	var trackHeight;
+	var thumbHeight;
+	var thumbTop;
+
+	if(!data) return;
+	scrollHeight = $el.prop("scrollHeight");
+	clientHeight = $el.innerHeight();
+	maxScrollTop = scrollHeight - clientHeight;
+	trackHeight = clientHeight;
+	if(trackHeight <= 0 || maxScrollTop <= 0){
+		data.track.hide();
+		return;
+	}
+	thumbHeight = Math.max(24, clientHeight / scrollHeight * trackHeight);
+	thumbTop = maxScrollTop ? ($el.scrollTop() / maxScrollTop) * (trackHeight - thumbHeight) : 0;
+	data.track
+		.show()
+		.css({ height: trackHeight + "px", transform: "translateY(" + $el.scrollTop() + "px)" });
+	data.thumb.css({ height: thumbHeight + "px", transform: "translateY(" + thumbTop + "px)" });
+}
+function initCustomScrollbars($root){
+	if(!$root || !$root.length) return;
+	$root.find("*").addBack().each(function(){
+		var $el = $(this);
+		var overflowY;
+		var $track;
+		var $thumb;
+		var data;
+
+		if($el.data("csb")) return;
+		if($el.closest(".ClanBox").length) return;
+		overflowY = $el.css("overflow-y");
+		if(overflowY !== "scroll" && overflowY !== "auto") return;
+		$el.addClass("custom-scroll");
+		if($el.css("position") === "static") $el.css("position", "relative");
+		$track = $("<div>").addClass("custom-scrollbar-track");
+		$thumb = $("<div>").addClass("custom-scrollbar-thumb");
+		$track.append($thumb);
+		$el.append($track);
+		data = {
+			track: $track,
+			thumb: $thumb,
+			dragging: false,
+			startY: 0,
+			startScrollTop: 0
+		};
+		$el.data("csb", data);
+		$el.on("scroll", function(){ updateCustomScrollbar($el); });
+		$track.on("mousedown", function(e){
+			var scrollHeight = $el.prop("scrollHeight");
+			var clientHeight = $el.innerHeight();
+			var trackHeight = $track.height();
+			var thumbHeight = $thumb.outerHeight();
+			var maxScrollTop = scrollHeight - clientHeight;
+			var maxThumbTop = trackHeight - thumbHeight;
+			var rect;
+			var clickY;
+			var target;
+
+			if(e.target === $thumb.get(0)) return;
+			if(maxScrollTop <= 0 || maxThumbTop <= 0) return;
+			rect = $track.get(0).getBoundingClientRect();
+			clickY = e.clientY - rect.top;
+			target = (clickY - thumbHeight * 0.5) / maxThumbTop * maxScrollTop;
+			$el.scrollTop(Math.max(0, Math.min(maxScrollTop, target)));
+		});
+		$thumb.on("mousedown", function(e){
+			var scrollHeight = $el.prop("scrollHeight");
+			var clientHeight = $el.innerHeight();
+
+			if(scrollHeight <= clientHeight) return;
+			e.preventDefault();
+			data.dragging = true;
+			data.startY = e.clientY;
+			data.startScrollTop = $el.scrollTop();
+			$(document).on("mousemove.csb", function(ev){
+				var scrollHeight = $el.prop("scrollHeight");
+				var clientHeight = $el.innerHeight();
+				var trackHeight = $track.height();
+				var thumbHeight = $thumb.outerHeight();
+				var maxThumbTop = trackHeight - thumbHeight;
+				var maxScrollTop = scrollHeight - clientHeight;
+				var delta;
+				var next;
+
+				if(!data.dragging || maxThumbTop <= 0) return;
+				delta = ev.clientY - data.startY;
+				next = data.startScrollTop + delta / maxThumbTop * maxScrollTop;
+				$el.scrollTop(Math.max(0, Math.min(maxScrollTop, next)));
+			}).on("mouseup.csb", function(){
+				data.dragging = false;
+				$(document).off(".csb");
+			});
+		});
+		updateCustomScrollbar($el);
+	});
+}
+function refreshCustomScrollbars(){
+	var $root = $("#Middle");
+
+	if(!$root.length) return;
+	initCustomScrollbars($root);
+	$root.find(".custom-scroll").each(function(){
+		updateCustomScrollbar($(this));
+	});
+}
+function applyOptions(opt){
+	$data.opts = opt;
+	if(!$data.opts) $data.opts = {};
+	if(!$data.opts.hasOwnProperty('dm')) $data.opts.dm = false;
+	
+	$data.muteBGM = $data.opts.mb;
+	$data.muteEff = $data.opts.me;
+	
+	$("#mute-bgm").attr('checked', $data.muteBGM);
+	$("#mute-effect").attr('checked', $data.muteEff);
+	$("#deny-invite").attr('checked', $data.opts.di);
+	$("#deny-whisper").attr('checked', $data.opts.dw);
+	$("#deny-friend").attr('checked', $data.opts.df);
+	$("#auto-ready").attr('checked', $data.opts.ar);
+	$("#sort-user").attr('checked', $data.opts.su);
+	$("#only-waiting").attr('checked', $data.opts.ow);
+	$("#only-unlock").attr('checked', $data.opts.ou);
+	$("#dark-mode").attr('checked', $data.opts.dm);
+	$("body").toggleClass("dark-mode", $data.opts.dm);
+	
+	if($data.bgm){
+		if($data.muteBGM){
+			$data.bgm.volume = 0;
+			$data.bgm.stop();
+		}else{
+			$data.bgm.volume = 1;
+			$data.bgm = playBGM($data.bgm.key, true);
+		}
+	}
+}
+function checkInput(){
+	/*var v = $stage.talk.val();
+	var len = v.length;
+	
+	if($data.room) if($data.room.gaming){
+		if(len - $data._kd.length > 3) $stage.talk.val($data._kd);
+		if($stage.talk.is(':focus')){
+			$data._kd = v;
+		}else{
+			$stage.talk.val($data._kd);
+		}
+	}
+	$data._kd = v;*/
+}
+function addInterval(cb, v, a1, a2, a3, a4, a5){
+	var R = _setInterval(cb, v, a1, a2, a3, a4, a5);
+	
+	$data._timers.push(R);
+	return R;
+}
+function addTimeout(cb, v, a1, a2, a3, a4, a5){
+	var R = _setTimeout(cb, v, a1, a2, a3, a4, a5);
+	
+	$data._timers.push(R);
+	return R;
+}
+function clearTrespasses(){ return; // ?쇰떒 鍮꾪솢?깊솕
+	var jt = [];
+	var xStart = $data._xintv || 0;
+	var xEnd = _setTimeout(checkInput, 1);
+	var rem = 0;
+	var i;
+	
+	for(i in $.timers){
+		jt.push($.timers[i].id);
+	}
+	function censor(id){
+		if(jt.indexOf(id) == -1 && $data._timers.indexOf(id) == -1){
+			rem++;
+			clearInterval(id);
+		}
+	}
+	for(i=0; i<53; i++){
+		censor(i);
+	}
+	for(i=xStart; i<xEnd; i++){
+		censor(i);
+	}
+	$data._xintv = xEnd;
+}
+function route(func, a0, a1, a2, a3, a4){
+	if(!$data.room) return;
+	syncGameRuleFromRoom($data.room);
+	var r = RULE[MODE[$data.room.mode]];
+	
+	if(!r) return null;
+	var ruleName = r.rule;
+	if(!$lib[ruleName] || typeof $lib[ruleName][func] !== "function") return null;
+	$lib[ruleName][func].call(this, a0, a1, a2, a3, a4);
+}
+function isReverseClassicMode(modeCode){
+	return !!(RULE && RULE[modeCode] && RULE[modeCode]._back);
+}
+function connectToRoom(chan, rid){
+	var url = $data.URL.replace(/:(\d+)/, function(v, p1){
+		return ":" + (Number(p1) + 416 + Number(chan) - 1);
+	}) + "&" + chan + "&" + rid;
+	
+	if(rws) return;
+	rws = new _WebSocket(url);
+	
+	loading(L['connectToRoom'] + "\n<center><button id='ctr-close'>" + L['ctrCancel'] + "</button></center>");
+	$("#ctr-close").on('click', function(){
+		loading();
+		if(rws) rws.close();
+	});
+	rws.onopen = function(e){
+		console.log("room-conn", chan, rid);
+	};
+	rws.onmessage = _onMessage;
+	rws.onclose = function(e){
+		console.log("room-disc", chan, rid);
+		rws = undefined;
+	};
+	rws.onerror = function(e){
+		console.warn(L['error'], e);
+	};
+}
+function checkAge(){
+	if(!confirm(L['checkAgeAsk'])) return send('caj', { answer: "no" }, true);
+	
+	while(true){
+		var input = [], lv = 1;
+		
+		while(lv <= 3){
+			var str = prompt(L['checkAgeInput' + lv]);
+			
+			if(!str || isNaN(str = Number(str))){
+				if(--lv < 1) break; else continue;
+			}
+			if(lv == 1 && (str < 1000 || str > 2999)){
+				alert(str + "\n" + L['checkAgeNo']);
+				continue;
+			}
+			if(lv == 2 && (str < 1 || str > 12)){
+				alert(str + "\n" + L['checkAgeNo']);
+				continue;
+			}
+			if(lv == 3 && (str < 1 || str > 31)){
+				alert(str + "\n" + L['checkAgeNo']);
+				continue;
+			}
+			input[lv++ - 1] = str;
+		}
+		if(lv == 4){
+			if(confirm(L['checkAgeSure'] + "\n"
+			+ input[0] + L['YEAR'] + " "
+			+ input[1] + L['MONTH'] + " "
+			+ input[2] + L['DATE'])) return send('caj', { answer: "yes", input: [ input[1], input[2], input[0] ] }, true);
+		}else{
+			if(confirm(L['checkAgeCancel'])) return send('caj', { answer: "no" }, true);
+		}
+	}
+}
+function onMessage(data){
+	var i;
+	var $target;
+
+	if(!data.type && data.id && data.users) data.type = 'welcome';
+    switch (data.type) {
+        case 'recaptcha':
+            var $introText = $("#intro-text");
+            $introText.empty();
+            $introText.html((L['guestCaptchaRequired'] || 'Guest players must complete verification.') +
+                '<br/>' + (L['guestCaptchaSignIn'] || 'Sign in to skip guest verification.') + '<br/><br/>');
+            $introText.append($('<div class="g-recaptcha" id="recaptcha" style="display: table; margin: 0 auto;"></div>'));
+
+            grecaptcha.render('recaptcha', {
+                'sitekey': data.siteKey,
+                'callback': recaptchaCallback
+            });
+            break;
+		case 'welcome':
+			$data.id = data.id;
+			$data.guest = data.guest;
+			$data.admin = data.admin;
+			$data.users = data.users || {};
+			$data.robots = {};
+			$data.rooms = data.rooms || {};
+			$data.place = 0;
+			$data.friends = data.friends || {};
+			$data._friends = {};
+			$data._playTime = data.playTime || 0;
+			$data._okg = data.okg || 0;
+			$data._gaming = false;
+			$data.clan = normalizeClanState(data.clan);
+			$data.box = data.box || {};
+			$data._myInfo = false;
+			$data._shop = false;
+			$data._clans = false;
+			$data._communityOpen = false;
+			stopMatch1v1SearchClock(true);
+			$data._match1v1Open = false;
+			$data._match1v1Searching = false;
+			$data._match1v1Status = "";
+			$data._match1v1SearchStartedAt = 0;
+			setLobbySidePageIntent("");
+			$data._friendPending = {};
+			$data._friendRequestQueue = [];
+			$data._friendRequestPromptActive = false;
+			$data._pendingFriendAddTarget = "";
+			$data._topNoticeUnread = 0;
+			$data._systemNotificationKeys = {};
+			$data._communityRankingSeq = 0;
+			$data._communityLibrarySeq = 0;
+			if(data.test) alert(L['welcomeTestServer']);
+			if(location.hash[1]) tryJoin(location.hash.slice(1));
+			welcome();
+			try{
+				updateUI(undefined, true);
+				restoreChatHistoryState();
+				restoreCommunityLobbyChatState();
+				updateCommunity();
+				renderClanPageSafe();
+				restoreProfileRefreshState();
+			}catch(e){
+				if(window.console && console.error) console.error("welcome startup failed", e);
+				$data._myInfo = false;
+				$("body").removeClass("myinfo-open");
+				$("#top-profile-card").removeClass("myinfo-open");
+				toggleMyInfoOverlay(false);
+			}
+			if(data.friendReq){
+				_setTimeout(function(){
+					enqueuePendingFriendRequests(data.friendReq);
+				}, 260);
+			}
+			if(data.caj) checkAge();
+			break;
+		case 'conn':
+			$data.setUser(data.user.id, data.user);
+			updateUserList();
+			break;
+		case 'disconn':
+			$data.setUser(data.id, null);
+			updateUserList();
+			break;
+		case 'connRoom':
+			if($data._preQuick){
+				playSound('success');
+				$stage.dialog.quick.hide();
+				delete $data._preQuick;
+			}
+			if($stage.menu.match1v1) $stage.menu.match1v1.removeClass("toggled");
+			$stage.dialog.quick.hide();
+			$data.setUser(data.user.id, data.user);
+			$target = $data.usersR[data.user.id] = data.user;
+			
+			if($target.id == $data.id) loading();
+			else notice(($target.profile.title || $target.profile.name) + L['hasJoined']);
+			updateUserList();
+			break;
+		case 'disconnRoom':
+			$target = $data.usersR[data.id];
+			
+			if($target){
+				delete $data.usersR[data.id];
+				notice(($target.profile.title || $target.profile.name) + L['hasLeft']);
+				updateUserList();
+			}
+			break;
+		case 'yell':
+			yell(data.value);
+			notice(data.value, L['yell']);
+			break;
+		case 'dying':
+			yell(L['dying']);
+			notice(L['dying'], L['yell']);
+			break;
+		case 'tail':
+			notice(data.a + "|" + data.rid + "@" + data.id + ": " + ((data.msg instanceof String) ? data.msg : JSON.stringify(data.msg)).replace(/</g, "&lt;").replace(/>/g, "&gt;"), "tail");
+			break;
+		case 'chat':
+			if(data.notice){
+				announceSystem(L['notice'], L['error_' + data.code], {
+					chat: true,
+					kind: "warning"
+				});
+			}else{
+				chat(data.profile || { title: L['robot'] }, data.value, data.from, data.timestamp);
+			}
+			break;
+		case 'roomStuck':
+			rws.close();
+			break;
+		case 'preRoom':
+			connectToRoom(data.channel, data.id);
+			break;
+		case 'match1v1':
+			if(data.state == "searching"){
+				setMatch1v1LobbyOpen(true);
+				setMatch1v1SearchState(true);
+			}else if(data.state == "matched"){
+				stopMatch1v1SearchClock(true);
+				$data._match1v1Searching = false;
+				$data._match1v1Open = false;
+				$data._match1v1Status = "";
+				if($stage.menu.match1v1) $stage.menu.match1v1.removeClass("toggled");
+				loading(L['match1v1Matched']);
+			}else if(data.state == "cancelled"){
+				setMatch1v1SearchState(false, L['match1v1Cancelled'] || "Match cancelled.");
+			}else if(data.state == "opponentLeft"){
+				setMatch1v1SearchState(false, L['match1v1OpponentLeft'] || "Opponent left. Try again.");
+			}else if(data.state == "error"){
+				setMatch1v1SearchState(false, L['match1v1Error'] || "Could not start RANKED right now.");
+			}
+			break;
+		case 'room':
+			processRoom(data);
+			checkRoom(data.modify && data.myRoom);
+			updateUI(data.myRoom);
+			if(data.myRoom && $data.room){
+				syncRoomHeaders($data.room);
+			}
+			if(data.modify && $data.room && data.myRoom){
+				if($data._rTitle != $data.room.title) animModified('.room-head-title');
+				if($data._rMode != getOptions($data.room.mode, $data.room.opts, true)) animModified('.room-head-mode');
+				if($data._rLimit != $data.room.limit) animModified('.room-head-limit');
+				if($data._rRound != $data.room.round) animModified('.room-head-round');
+				if($data._rTime != $data.room.time) animModified('.room-head-time');
+			}
+			cacheRoomHeadState($data.room);
+			break;
+		case 'user':
+			$data.setUser(data.id, data);
+			if(data.id == $data.id && $data._pendingNick){
+				var updatedName = data.profile ? (data.profile.title || data.profile.name) : "";
+				if(updatedName && updatedName === $data._pendingNick){
+					delete $data._pendingNick;
+					scheduleProfileRefresh();
+				}
+			}
+			if($data.room) updateUI($data.room.id == data.place);
+			break;
+		case 'friends':
+			$data._friends = {};
+			for(i in data.list){
+				data.list[i].forEach(function(v){
+					$data._friends[v] = { server: i };
+				});
+			}
+			updateCommunity();
+			break;
+		case 'friend':
+			$data._friends[data.id] = { server: (data.stat == "on") ? data.s : false };
+			if($data._friends[data.id] && $data.friends[data.id]){
+				announceSystem(L['friend'], (((data.stat == "on") ? ("<" + L['server_' + $data._friends[data.id].server] + "> ") : "")
+					+ $data.friends[data.id] + L['fstat_' + data.stat]), {
+					notify: true,
+					kind: "friend",
+					key: "friend-stat-" + data.id + "-" + data.stat + "-" + Date.now()
+				});
+			}
+			updateCommunity();
+			break;
+		case 'friendAdd':
+			queueFriendRequestPrompt(data);
+			break;
+		case 'friendAddRes':
+			$target = (($data.users[data.target] || {}).profile) || { title: data.target, name: data.target };
+			i = ((data.name || $target.title || $target.name || data.target) + "(#" + data.target.substr(0, 5) + ")");
+			announceSystem(L['friend'], i + L['friendAddRes_' + (data.res ? 'ok' : 'no')], {
+				chat: true,
+				notify: true,
+				kind: data.res ? "success" : "warning"
+			});
+			delete $data._pendingFriendAddTarget;
+			setCommunityFriendPending(data.target, false, false);
+			if(data.res){
+				$data.friends[data.target] = data.name || $target.title || $target.name || data.target;
+				$data._friends[data.target] = {
+					server: Object.prototype.hasOwnProperty.call(data, "server") ? data.server : $data.server
+				};
+				updateCommunity();
+			}else{
+				refreshFriendSearchResults();
+			}
+			break;
+		case 'friendAddQueued':
+			delete $data._pendingFriendAddTarget;
+			setCommunityFriendPending(data.target, true, false);
+			announceSystem(L['friendAdd'] || "Friend Request", ((data.name || data.target || "") + " " + (L['friendAddQueued'] || "Friend request sent.")).trim(), {
+				chat: true,
+				notify: true,
+				kind: "friend"
+			});
+			refreshFriendSearchResults();
+			break;
+		case 'friendEdit':
+			$data.friends = data.friends;
+			if($data._friendPending){
+				for(i in $data.friends) delete $data._friendPending[i];
+			}
+			updateCommunity();
+			break;
+		case 'friendRemoved':
+			if(data.id && $data.friends) delete $data.friends[data.id];
+			if(data.id && $data._friends) delete $data._friends[data.id];
+			if(data.id) setCommunityFriendPending(data.id, false, false);
+			announceSystem(L['friend'], ((data.name || data.id || "") + " " + (L['friendRemoved'] || "Friend removed.")).trim(), {
+				chat: true,
+				notify: true,
+				kind: "warning"
+			});
+			updateCommunity();
+			break;
+		case 'clanState':
+			$data.clan = normalizeClanState(data);
+			if($data.clan && $data.clan.my && $data.clan.my.banner){
+				$data._pendingClanBanner = normalizeClanBanner($data.clan.my.banner);
+			}else{
+				delete $data._pendingClanBanner;
+			}
+			renderClanPageSafe();
+			if($data.room && !$data.room.gaming) updateRoom(false);
+			break;
+		case 'clanList':
+			$data.clan = $data.clan || { my: null, list: [] };
+			$data.clan.list = Array.isArray(data.list) ? data.list : [];
+			renderClanPageSafe();
+			break;
+		case 'clanChat':
+			$data.clan = $data.clan || { my: null, list: [] };
+			if($data.clan.my && $data.clan.my.id == data.clanId && data.item){
+				$data.clan.my.chat = Array.isArray($data.clan.my.chat) ? $data.clan.my.chat : [];
+				$data.clan.my.chat.push(data.item);
+				if($data.clan.my.chat.length > 500) $data.clan.my.chat = $data.clan.my.chat.slice(-500);
+				if($data.clan.my.mission && data.item.type != "system"){
+					$data.clan.my.mission.progress = Number($data.clan.my.mission.progress || 0) + 1;
+				}
+				renderClanPageSafe(true);
+			}
+			break;
+		case 'clanNotice':
+			if(data.value){
+				announceSystem("CLAN", data.value, {
+					chat: true,
+					notify: true,
+					head: "CLAN",
+					kind: "clan"
+				});
+			}
+			break;
+		case 'clanMissionReward':
+			if(data.reward){
+				announceSystem("CLAN", (data.clan || "Clan") + ": +" + commify(data.reward), {
+					chat: true,
+					notify: true,
+					head: "CLAN",
+					kind: "reward"
+				});
+			}
+			if(typeof data.money == "number" && $data.users[$data.id]){
+				$data.users[$data.id].money = data.money;
+				updateMe();
+			}
+			break;
+		case 'starting':
+			loading(L['gameLoading']);
+			break;
+		case 'roundReady':
+			route("roundReady", data);
+			break;
+		case 'turnStart':
+			route("turnStart", data);
+			break;
+		case 'turnError':
+			turnError(data.code, data.value);
+			break;
+		case 'turnHint':
+			route("turnHint", data);
+			break;
+		case 'turnEnd':
+			data.score = Number(data.score);
+			data.bonus = Number(data.bonus);
+			if($data.room){
+				$data._tid = data.target || $data.room.game.seq[$data.room.game.turn];
+				if($data._tid){
+					if($data._tid.robot) $data._tid = $data._tid.id;
+					turnEnd($data._tid, data);
+				}
+				if(data.baby){
+					playSound('success');
+				}
+			}
+			break;
+		case 'roundEnd':
+			for(i in data.users){
+				$data.setUser(i, data.users[i]);
+			}
+			/*if($data.guest){
+				$stage.menu.exit.trigger('click');
+				alert(L['guestExit']);
+			}*/
+			$data._resultRank = data.ranks;
+			roundEnd(data.result, data.data);
+			break;
+		case 'kickVote':
+			$data._kickTarget = $data.users[data.target];
+			if($data.id != data.target && $data.id != $data.room.master){
+				kickVoting(data.target);
+			}
+			announceSystem(L['kickVote'] || L['notice'], ($data._kickTarget.profile.title || $data._kickTarget.profile.name) + L['kickVoting'], {
+				chat: true,
+				notify: true,
+				kind: "warning"
+			});
+			break;
+		case 'kickDeny':
+			announceSystem(L['kickVote'] || L['notice'], getKickText($data._kickTarget.profile, data), {
+				chat: true,
+				notify: true,
+				kind: "warning"
+			});
+			break;
+		case 'invited':
+			i = data.from + L['invited'];
+			if($data.opts.di){
+				announceSystem(L['invite'] || L['notice'], i, {
+					notify: true,
+					kind: "invite"
+				});
+				send('inviteRes', {
+					from: data.from,
+					res: false
+				});
+			}else{
+				mirrorSystemAnnouncementToActiveChat(L['invite'] || L['notice'], i, {
+					head: L['invite'] || L['notice']
+				});
+				showWarningDialog(i, function(){
+					send('inviteRes', {
+						from: data.from,
+						res: true
+					});
+				}, function(){
+					send('inviteRes', {
+						from: data.from,
+						res: false
+					});
+				});
+			}
+			break;
+		case 'inviteNo':
+			$target = $data.users[data.target];
+			announceSystem(L['invite'] || L['notice'], ($target.profile.title || $target.profile.name) + L['inviteDenied'], {
+				chat: true,
+				notify: true,
+				kind: "warning"
+			});
+			break;
+		case 'okg':
+			if($data._playTime > data.time){
+				announceSystem(L['notice'], L['okgExpired'], {
+					chat: true,
+					notify: true,
+					kind: "warning"
+				});
+			}else if($data._okg != data.count){
+				announceSystem(L['notice'], L['okgNotice'] + " (" + L['okgCurrent'] + data.count +")", {
+					chat: true,
+					notify: true,
+					kind: "reward"
+				});
+			}
+			$data._playTime = data.time;
+			$data._okg = data.count;
+			break;
+		case 'obtain':
+			queueObtain(data);
+			// notice(L['obtained'] + ": " + iName(data.key) + " x" + data.q);
+			break;
+		case 'expired':
+			for(i in data.list){
+				announceSystem(L['notice'], iName(data.list[i]) + L['hasExpired'], {
+					chat: true,
+					notify: true,
+					kind: "warning"
+				});
+			}
+			break;
+		case 'blocked':
+			announceSystem(L['notice'], L['blocked'], {
+				chat: true,
+				kind: "warning"
+			});
+			break;
+		case 'test':
+			if($data._test = !$data._test){
+				$data._testt = addInterval(function(){
+					if($stage.talk.val() != $data._ttv){
+						send('test', { ev: "c", v: $stage.talk.val() }, true);
+						$data._ttv = $stage.talk.val();
+					}
+				}, 100);
+				document.onkeydown = function(e){
+					send('test', { ev: "d", c: e.keyCode }, true);
+				};
+				document.onkeyup = function(e){
+					send('test', { ev: "u", c: e.keyCode }, true);
+				};
+			}else{
+				clearInterval($data._testt);
+				document.onkeydown = undefined;
+				document.onkeyup = undefined;
+			}
+			break;
+		case 'error':
+			i = data.message || "";
+			if((data.code == 450 || data.code == 452 || data.code == 453 || data.code == 454) && $data._pendingFriendAddTarget){
+				setCommunityFriendPending($data._pendingFriendAddTarget, false, false);
+				delete $data._pendingFriendAddTarget;
+				refreshFriendSearchResults();
+			}
+			if(data.code == 401){
+				/* 濡쒓렇??
+				$.cookie('preprev', location.href);
+				location.href = "/login?desc=login_kkutu"; */
+			}else if(data.code == 403){
+				loading();
+			}else if(data.code == 406){
+				if($stage.dialog.quick.is(':visible')){
+					$data._preQuick = false;
+					break;
+				}
+			}else if(data.code == 409){
+				i = L['server_' + i];
+			}else if(data.code == 416){
+				// 寃뚯엫 以?
+				showWarningDialog(L['error_'+data.code], function(){
+					stopBGM();
+					$data._spectate = true;
+					$data._gaming = true;
+					send('enter', { id: data.target, password: $data._pw, spectate: true }, true);
+				});
+				return;
+			}else if(data.code == 413){
+				$stage.dialog.room.hide();
+				$stage.menu.setRoom.trigger('click');
+			}else if(data.code == 429){
+				playBGM('lobby');
+			}else if(data.code == 430){
+				$data.setRoom(data.message, null);
+				if($stage.dialog.quick.is(':visible')){
+					$data._preQuick = false;
+					break;
+				}
+			}else if(data.code == 431 || data.code == 432 || data.code == 433){
+				$stage.dialog.room.show();
+			}else if(data.code == 444){
+				i = data.message;
+				if(i.indexOf("?앸뀈?붿씪") != -1){
+					alert(L['birthdayRestrictionNotice'] || "Access is temporarily restricted because the date of birth could not be verified. Please try again later.");
+					break;
+				}
+			/* Enhanced User Block System [S] */
+				if(!data.blockedUntil) break;
+				
+				var blockedUntil = new Date(parseInt(data.blockedUntil));
+				var block = "\n" + (L['blockedUntil'] || "Access restricted until {V1}.").replace("{V1}", blockedUntil.toLocaleString(getClientLocale()));
+				
+				alert("[#444] " + L['error_444'] + i + block);
+				break;
+			}else if(data.code == 446){
+				i = data.reasonBlocked;
+				if(!data.ipBlockedUntil) break;
+				
+				var blockedUntil = new Date(parseInt(data.ipBlockedUntil));
+				var block = "\n" + (L['blockedUntil'] || "Access restricted until {V1}.").replace("{V1}", blockedUntil.toLocaleString(getClientLocale()));
+				
+				alert("[#446] " + L['error_446'] + i + block);
+				break;
+			/* Enhanced User Block System [E] */
+			} else if (data.code === 447) {
+				alert(L['captchaFailedNotice'] || "Verification failed. Return to the main page and try again.");
+				break;
+			}
+			announceSystem(L['error'] || "Error", "[#" + data.code + "] " + L['error_'+data.code] + i, {
+				warning: true,
+				kind: "warning"
+			});
+			break;
+		default:
+			break;
+	}
+	if($data._record) recordEvent(data);
+
+    function recaptchaCallback(response) {
+        ws.send(JSON.stringify({type: 'recaptcha', token: response}));
+    }
+}
+function welcome(){
+	playBGM('lobby');
+	$("#Intro").animate({ 'opacity': 1 }, 1000).animate({ 'opacity': 0 }, 1000);
+	$("#intro-text").text(L['welcome']);
+	addTimeout(function(){
+		$("#Intro").hide();
+	}, 2000);
+	
+	if($data.admin) console.log("Moderator Mode");
+}
+var CHAT_HISTORY_KEY = "kkutu_chat_history";
+var COMMUNITY_LOBBY_CHAT_KEY = "kkutu_community_lobby_chat";
+function getChatHistoryStorageKey(){
+	if(!$data.id) return null;
+	return CHAT_HISTORY_KEY + "::" + $data.id;
+}
+function saveChatHistoryState(){
+	var key = getChatHistoryStorageKey();
+	try{
+		if(!key) return;
+		if(!$data._chatHistory || !$data._chatHistory.length){
+			sessionStorage.removeItem(key);
+			return;
+		}
+		sessionStorage.setItem(key, JSON.stringify($data._chatHistory.slice(-200)));
+	}catch(e){}
+}
+function renderChatHistory(){
+	var history = $data._chatHistory || [];
+	var recent = history.slice(-100);
+
+	if(!$stage || !$stage.chat || !$stage.chatLog) return;
+	$stage.chat.empty();
+	$stage.chatLog.empty();
+	recent.forEach(function(entry){
+		$stage.chat.append(buildChatHistoryEntry(entry, false));
+	});
+	history.forEach(function(entry){
+		$stage.chatLog.append(buildChatHistoryEntry(entry, true));
+	});
+	if($stage.chat[0]) $stage.chat.scrollTop(999999999);
+}
+function restoreChatHistoryState(){
+	var key = getChatHistoryStorageKey();
+	var raw;
+	var parsed;
+
+	try{
+		if(!key) return;
+		raw = sessionStorage.getItem(key);
+		if(!raw){
+			$data._chatHistory = [];
+			renderChatHistory();
+			return;
+		}
+		parsed = JSON.parse(raw);
+		$data._chatHistory = $.isArray(parsed) ? parsed.slice(-200) : [];
+	}catch(e){
+		$data._chatHistory = [];
+		try{
+			if(key) sessionStorage.removeItem(key);
+		}catch(e2){}
+	}
+	renderChatHistory();
+}
+function getCommunityLobbyChatStorageKey(){
+	if(!$data.id) return null;
+	return COMMUNITY_LOBBY_CHAT_KEY + "::" + $data.id;
+}
+function saveCommunityLobbyChatState(){
+	var key = getCommunityLobbyChatStorageKey();
+	try{
+		if(!key) return;
+		if(!$data._communityLobbyChatLog || !$data._communityLobbyChatLog.length){
+			sessionStorage.removeItem(key);
+			return;
+		}
+		sessionStorage.setItem(key, JSON.stringify($data._communityLobbyChatLog.slice(-200)));
+	}catch(e){}
+}
+function restoreCommunityLobbyChatState(){
+	var key = getCommunityLobbyChatStorageKey();
+	var raw;
+	var parsed;
+
+	try{
+		if(!key) return;
+		raw = sessionStorage.getItem(key);
+		if(!raw){
+			$data._communityLobbyChatLog = [];
+			return;
+		}
+		parsed = JSON.parse(raw);
+		$data._communityLobbyChatLog = $.isArray(parsed) ? parsed.slice(-200) : [];
+	}catch(e){
+		$data._communityLobbyChatLog = [];
+		try{
+			if(key) sessionStorage.removeItem(key);
+		}catch(e2){}
+	}
+}
+function clearCommunityLobbyChatState(){
+	var key = getCommunityLobbyChatStorageKey();
+	try{
+		if(!key) return;
+		sessionStorage.removeItem(key);
+	}catch(e){}
+}
+function getClientLocale(){
+	var locale = String($("#LANG").text() || (document.documentElement && document.documentElement.lang) || "en_US").replace(/_/g, "-");
+	return /^[a-z]{2,3}(?:-[a-z0-9]{2,8})*$/i.test(locale) ? locale : "en-US";
+}
+function formatClientTime(date){
+	return date.toLocaleTimeString(getClientLocale());
+}
+function buildChatHistoryEntry(entry, withExpl){
+	var kind = entry && entry.kind ? entry.kind : "chat";
+	var profile = entry && entry.profile ? entry.profile : {};
+	var msg = badWords((entry && entry.value) || "");
+	var time = entry && entry.timestamp ? new Date(entry.timestamp) : new Date();
+	var equip = $data.users[profile.id] ? $data.users[profile.id].equip : (profile.equip || {});
+	var $item;
+	var $bar;
+	var $msg;
+
+	if(kind == "divider"){
+		return $("<hr>").addClass("chat-item");
+	}
+	if(kind == "notice"){
+		return $("<div>").addClass("chat-item chat-notice")
+			.append($("<div>").addClass("chat-head").text(entry.head || L['notice']))
+			.append($("<div>").addClass("chat-body").html(entry.value || ""))
+			.append($("<div>").addClass("chat-stamp").text(formatClientTime(time)));
+	}
+	$item = $("<div>").addClass("chat-item")
+		.append($bar = $("<div>").addClass("chat-head ellipse").text(profile.title || profile.name || (L['robot'] || "Robot")))
+		.append($msg = $("<div>").addClass("chat-body").text(msg))
+		.append($("<div>").addClass("chat-stamp").text(formatClientTime(time)));
+	if(profile.id){
+		$bar.on('click', function(){
+			requestProfile(profile.id);
+		});
+	}
+	applyChatLinks($msg, msg);
+	if(entry.from){
+		$msg.html("<label style='color: #7777FF; font-weight: bold;'>&lt;" + L['whisper'] + "&gt;</label>" + $msg.html());
+	}
+	addonNickname($bar, { equip: equip });
+	if(withExpl){
+		$item.append($("<div>").addClass("expl").css('font-weight', "normal").html("#" + ((profile.id || "").substr(0, 5))));
+	}
+	return $item;
+}
+function appendChatHistoryEntry(entry){
+	if(!$data._chatHistory) $data._chatHistory = [];
+	$data._chatHistory.push(entry);
+	if($data._chatHistory.length > 200){
+		$data._chatHistory = $data._chatHistory.slice(-200);
+	}
+	saveChatHistoryState();
+	renderChatHistory();
+}
+function getKickText(profile, vote){
+	var vv = L['agree'] + " " + vote.Y + ", " + L['disagree'] + " " + vote.N + L['kickCon'];
+	if(vote.Y >= vote.N){
+		vv += (profile.title || profile.name) + L['kicked'];
+	}else{
+		vv += (profile.title || profile.name) + L['kickDenied'];
+	}
+	return vv;
+}
+function runCommand(cmd){
+	var i, c;
+	var CMD = {
+		"/r": L["cmd_r"],
+		"/cls": L["cmd_cls"],
+		"/f": L["cmd_f"],
+		"/e": L["cmd_e"],
+		"/ee": L["cmd_ee"],
+		"/wb": L["cmd_wb"],
+		"/shut": L["cmd_shut"],
+		"/id": L["cmd_id"],
+		"/nick": (L["nickname"] || "nickname")
+	};
+	var key = (cmd[0] || "").toLowerCase();
+	
+	switch(key){
+		case "/r":
+			if($data.room){
+				if($data.room.master == $data.id) $stage.menu.start.trigger("click");
+				else $stage.menu.ready.trigger("click");
+			}
+			break;
+		case "/cls":
+			clearChat();
+			break;
+		case "/f":
+			showDialog($stage.dialog.chatLog);
+			$stage.chatLog.scrollTop(999999999);
+			break;
+		case "/e":
+			sendWhisper(cmd[1], cmd.slice(2).join(" "));
+			break;
+		case "/ee":
+			if($data._recentFrom){
+				sendWhisper($data._recentFrom, cmd.slice(1).join(" "));
+			}else{
+				notice(L["error_425"]);
+			}
+			break;
+		case "/wb":
+			toggleWhisperBlock(cmd[1]);
+			break;
+		case "/shut":
+			toggleShutBlock(cmd.slice(1).join(" "));
+			break;
+		case "/id":
+			if(cmd[1]){
+				c = 0;
+				cmd[1] = cmd.slice(1).join(" ");
+				for(i in $data.users){
+					if(($data.users[i].profile.title || $data.users[i].profile.name) == cmd[1]){
+						notice("[" + (++c) + "] " + i);
+					}
+				}
+				if(!c) notice(L["error_405"]);
+			}else{
+				notice(L["myId"] + $data.id);
+			}
+			break;
+		case "/nick":
+			requestNickname(cmd.slice(1).join(" "));
+			break;
+		default:
+			for(i in CMD) notice(CMD[i], i);
+			break;
+	}
+}
+var PROFILE_REFRESH_KEY = "kkutu_profile_refresh";
+function saveProfileRefreshState(){
+	try{
+		if(!$stage.dialog.profile || !$stage.dialog.profile.length) return;
+		var openProfile = $stage.dialog.profile.is(':visible');
+		var profileId = $data._profiled;
+		if(openProfile && profileId){
+			sessionStorage.setItem(PROFILE_REFRESH_KEY, JSON.stringify({ profileId: profileId }));
+		}else{
+			sessionStorage.removeItem(PROFILE_REFRESH_KEY);
+		}
+	}catch(e){}
+}
+function restoreProfileRefreshState(){
+	var raw, state, profileId;
+	try{
+		raw = sessionStorage.getItem(PROFILE_REFRESH_KEY);
+		if(!raw) return;
+		sessionStorage.removeItem(PROFILE_REFRESH_KEY);
+		state = JSON.parse(raw);
+		profileId = state && state.profileId;
+	}catch(e){
+		try{ sessionStorage.removeItem(PROFILE_REFRESH_KEY); }catch(e2){}
+		return;
+	}
+	if(!profileId) return;
+	if($data.users && ($data.users[profileId] || $data.robots[profileId])){
+		requestProfile(profileId);
+	}
+}
+function scheduleProfileRefresh(){
+	if($data._profileRefreshScheduled) return;
+	$data._profileRefreshScheduled = true;
+	saveProfileRefreshState();
+	setTimeout(function(){
+		location.reload();
+	}, 300);
+}
+function requestNickname(value){
+	var name = (value || "").toString().trim();
+	if(!name) return fail(456);
+	$data._pendingNick = name;
+	send('nick', { value: name });
+}
+function sendWhisper(target, text){
+	if(text.length){
+		$data._whisper = target;
+		send('talk', { whisper: target, value: text }, true);
+		chat({ title: "-> " + target }, text, true);
+	}
+}
+function toggleWhisperBlock(target){
+	if($data._wblock.hasOwnProperty(target)){
+		delete $data._wblock[target];
+		notice(target + L['wnblocked']);
+	}else{
+		$data._wblock[target] = true;
+		notice(target + L['wblocked']);
+	}
+}
+function toggleShutBlock(target){
+	if($data._shut.hasOwnProperty(target)){
+		delete $data._shut[target];
+		notice(target + L['userNShut']);
+	}else{
+		$data._shut[target] = true;
+		notice(target + L['userShut']);
+	}
+}
+function getDictionaryErrorText(res){
+	var code = (res && typeof res == "object") ? res.error : res;
+	
+	code = code || 500;
+	if(code == 404) return L['error_430'] || L['wpFail_404'] || "It does not exist.";
+	return code + ": " + (L['wpFail_' + code] || "Request failed.");
+}
+function tryDict(text, callback){
+	text = String(text || "").replace(/[‘’`´]/g, "'").replace(/[^\sa-zA-Z0-9'.\uac00-\ud7a3]/g, "").replace(/\s+/g, " ").trim();
+	var lang = text.match(/[\uac00-\ud7a3]/) ? 'ko' : 'en';
+	
+	if(lang == "en") text = text.toLowerCase();
+	if(text.length < 1) return callback({ error: 404 });
+	$.get("/dict/" + encodeURIComponent(text).replace(/'/g, "%27") + "?lang=" + lang, callback).fail(function(xhr){
+		callback({ error: (xhr && xhr.status) || 404 });
+	});
+}
+function processRoom(data){
+	var i, j, key, o;
+	if(data.room) data.room.id = data.room.id || data.place || $data.place || (($data.room || {}).id);
+	if(data.room) attachRoomTheme(data.room);
+	var hasMeInIncomingRoom = roomHasPlayer(data.room, $data.id);
+	var leavingPractice = !!($data.practicing && $data.room && $data.room.practice && !hasMeInIncomingRoom);
+	
+	data.myRoom = ($data.place == data.room.id) || (data.target == $data.id);
+	if(data.myRoom){
+		$target = $data.users[data.target];
+		if(data.kickVote){
+			announceSystem(L['kickVote'] || L['notice'], getKickText($target.profile, data.kickVote), {
+				chat: true,
+				notify: true,
+				kind: "warning"
+			});
+			if($target.id == data.id) alert(L['hasKicked']);
+		}
+		if(!hasMeInIncomingRoom){
+			if(leavingPractice){
+				if($data.room && $data.room.gaming){
+					clearGame();
+					playLobbyBGMFromGame();
+				}
+				delete $data.users[0];
+				$data.users[$data.id].game.ready = false;
+				$data.users[$data.id].game.team = 0;
+				$data.users[$data.id].game.form = "J";
+				$stage.menu.spectate.removeClass("toggled");
+				$stage.menu.ready.removeClass("toggled");
+				$data.practicing = false;
+				$data.resulting = false;
+				$data.room = $data._room || null;
+				$data.place = $data._place || 0;
+				$data.master = $data.__master;
+				$data._players = $data.__players || null;
+				$data._master = $data.__master || null;
+				if($data.room) cacheRoomHeadState($data.room);
+				delete $data._room;
+				delete $data._place;
+				delete $data.__master;
+				delete $data.__players;
+				addTimeout(function(){
+					applyMiddleScale();
+					refreshCustomScrollbars();
+				}, 0);
+			}else{
+			if($data.room && $data.room.gaming){
+				clearGame();
+				$data.practicing = false;
+				$data._gaming = false;
+				$stage.box.room.height(ROOM_BOX_HEIGHT);
+				playLobbyBGMFromGame();
+			}
+			$("body").removeClass("in-game in-game-chat-collapsed");
+			$stage.box.game.hide();
+			$stage.box.room.show().height(ROOM_BOX_HEIGHT);
+			$stage.box.chat.show();
+			$data.users[$data.id].game.ready = false;
+			$data.users[$data.id].game.team = 0;
+			$data.users[$data.id].game.form = "J";
+			$stage.menu.spectate.removeClass("toggled");
+			$stage.menu.ready.removeClass("toggled");
+			$data.room = null;
+			$data.resulting = false;
+			$data._players = null;
+			$data._master = null;
+			$data.place = 0;
+			addTimeout(function(){
+				applyMiddleScale();
+				refreshCustomScrollbars();
+			}, 0);
+			}
+		}else{
+			if(data.room.practice && !$data.practicing){
+				$data.practicing = true;
+				$data._room = $data.room;
+				$data._place = $data.place;
+				$data.__master = $data.master;
+				$data.__players = $data._players;
+			}
+			if($data.room){
+				$data._players = serializeRoomPlayers($data.room.players);
+				$data._master = $data.room.master;
+				cacheRoomHeadState($data.room);
+			}
+			$data.room = data.room;
+			syncGameRuleFromRoom($data.room);
+			$data.place = $data.room.id;
+			$data.master = $data.room.master == $data.id;
+			if(data.spec && data.target == $data.id){
+				if(!$data._spectate){
+					$data._spectate = true;
+					clearBoard();
+					drawRound();
+				}
+				if(data.boards){
+					// ??옄留먰???泥섎━
+					$data.selectedRound = 1;
+					for(i in data.prisoners){
+						key = i.split(',');
+						for(j in data.boards[key[0]]){
+							o = data.boards[key[0]][j];
+							if(o[0] == key[1] && o[1] == key[2] && o[2] == key[3]){
+								o[4] = data.prisoners[i];
+								break;
+							}
+						}
+					}
+					$lib.Crossword.roundReady(data, true);
+					$lib.Crossword.turnStart(data, true);
+				}
+				for(i in data.spec){
+					$data.users[i].game.score = data.spec[i];
+				}
+			}
+		}
+		if(!data.modify && data.target == $data.id) forkChat();
+	}
+	if(data.target){
+		if($data.users[data.target]){
+			if(!roomHasPlayer(data.room, data.target)){
+				$data.users[data.target].place = 0;
+			}else{
+				$data.users[data.target].place = data.room.id;
+			}
+		}
+	}
+	if(!data.room.practice){
+		if(data.room.players.length){
+			$data.setRoom(data.room.id, data.room);
+			for(i in data.room.readies){
+				if(!$data.users[i]) continue;
+				var readyInfo = data.room.readies[i] || {};
+				var nextTeam = Number(readyInfo.t);
+				$data.users[i].game.ready = !!readyInfo.r;
+				if(!isNaN(nextTeam) && nextTeam >= 0 && nextTeam <= 5){
+					$data.users[i].game.team = nextTeam;
+				}
+			}
+		}else{
+			$data.setRoom(data.room.id, null);
+		}
+	}
+}
+function getOnly(){
+	return $data.place ? (($data.room.gaming || $data.resulting) ? "for-gaming" : ($data.master ? "for-master" : "for-normal")) : "for-lobby";
+}
+function canOpenMyInfoInCurrentView(only){
+	only = only || getOnly();
+	return only == "for-lobby" || only == "for-master" || only == "for-normal";
+}
+function getMiddleBaseSize(){
+	var $middle = $("#Middle");
+	var rect;
+
+	if(!$middle.length) return { width: 0, height: 0 };
+	$middle.css("transform", "none");
+	rect = $middle.get(0).getBoundingClientRect();
+	return { width: rect.width, height: rect.height };
+}
+function getInGameGameBoxHeight(){
+	return Math.max(640, ($(window).height() || window.innerHeight || 0) - 40);
+}
+function getLobbyTopOffset(){
+	var $middle = $("#Middle");
+	var $top = $("#Top");
+	var $profile = $("#top-profile-card");
+	var node;
+	var prevTop;
+	var prevMarginTop;
+	var computedOffset = 0;
+	var topOffset = 0;
+
+	if($top.length) topOffset = Math.max(topOffset, ($top.outerHeight() || 0) + 20);
+	if($profile.length && $profile.is(":visible")) topOffset = Math.max(topOffset, ($profile.outerHeight() || 0) + 10);
+	if(!$middle.length) return topOffset;
+	node = $middle.get(0);
+	prevTop = node.style.top;
+	prevMarginTop = node.style.marginTop;
+	$middle.css({ top: "", marginTop: "" });
+	computedOffset = parseFloat($middle.css("top")) || parseFloat($middle.css("margin-top")) || 0;
+	node.style.top = prevTop;
+	node.style.marginTop = prevMarginTop;
+	return Math.max(topOffset, computedOffset);
+}
+function cacheRoomHeadState(room){
+	if(!room) return;
+	$data._rTitle = room.title;
+	$data._rMode = getOptions(room.mode, room.opts, true);
+	$data._rLimit = room.limit;
+	$data._rRound = room.round;
+	$data._rTime = room.time;
+}
+function getLobbyReserveLeft(){
+	var $menu = $(".kkutu-menu:visible");
+	var menuRect;
+
+	if(!$menu.length) return 0;
+	menuRect = $menu.get(0).getBoundingClientRect();
+	if(!menuRect) return 0;
+	// Use the non-hover menu width so layout does not jump when a button expands.
+	return Math.ceil(menuRect.left + 74) + 12;
+}
+function applyResponsiveLobbyBoxHeights(topOffset){
+	var only = getOnly();
+	var isLobbyOnly = (only == "for-lobby");
+	var $middle = $("#Middle");
+	var $userBox = $(".UserListBox");
+	var $roomBox = $(".RoomListBox");
+	var $match1v1Box = $(".Match1v1Box");
+	var $shopBox = $(".ShopBox");
+	var $clanBox = $(".ClanBox");
+	var $friendsBox = $(".FriendsBox");
+	var $chatBox = $("body").hasClass("lobby-no-chat") ? $() : $(".ChatBox:visible");
+	var $userBody = $(".UserListBox .product-body");
+	var $roomBody = $(".RoomListBox .product-body");
+	var $shopBody = $(".ShopBox .product-body");
+	var $clanBody = $(".ClanBox .product-body");
+	var $friendsBody = $(".FriendsBox .product-body");
+	var available;
+	var boxHeight;
+	var bodyHeight;
+	var curvedBodyHeight;
+	var middleHeight;
+	var chatHeight;
+	var listBoxHeight;
+	var roomChatHeight;
+	var roomHeight;
+	var roomStackHeight;
+	var roomStackTrim;
+
+	if(!isLobbyOnly){
+		$userBox.css("height", "");
+		$roomBox.css("height", "");
+		$match1v1Box.css("height", "");
+		$shopBox.css("height", "");
+		$clanBox.css("height", "");
+		$friendsBox.css("height", "");
+		$userBody.css("height", "");
+		$roomBody.css("height", "");
+		$shopBody.css("height", "");
+		$clanBody.css("height", "");
+		$friendsBody.css("height", "");
+		return;
+	}
+	middleHeight = $middle.innerHeight() || (($(window).height() || window.innerHeight || 0) - topOffset);
+	chatHeight = $chatBox.length ? ($chatBox.outerHeight() || 190) : 0;
+	available = middleHeight - chatHeight;
+	boxHeight = Math.max(360, Math.floor(available));
+	bodyHeight = Math.max(330, boxHeight - 30);
+	roomChatHeight = $(".ChatBox:visible").outerHeight() || 190;
+	roomHeight = Math.max(360, Math.floor(middleHeight - roomChatHeight));
+	roomStackHeight = roomHeight + roomChatHeight;
+	roomStackTrim = 6;
+	listBoxHeight = Math.max(358, Math.floor(roomStackHeight - roomStackTrim));
+	curvedBodyHeight = Math.max(322, listBoxHeight - 36);
+
+	$userBox.css("height", listBoxHeight);
+	$roomBox.css("height", listBoxHeight);
+	$match1v1Box.css("height", listBoxHeight);
+	$shopBox.css("height", boxHeight);
+	$clanBox.css("height", boxHeight);
+	$friendsBox.css("height", boxHeight);
+	$userBody.css("height", curvedBodyHeight);
+	$roomBody.css("height", curvedBodyHeight);
+	$shopBody.css("height", bodyHeight);
+	$clanBody.css("height", bodyHeight);
+	$friendsBody.css("height", bodyHeight);
+}
+function applyResponsiveRoomBoxHeight(topOffset){
+	var only = getOnly();
+	var isRoomOnly = (only == "for-master" || only == "for-normal");
+	var $middle = $("#Middle");
+	var $roomBox = $(".RoomBox");
+	var $chatBox = $(".ChatBox:visible");
+	var available;
+	var middleHeight;
+	var roomHeight;
+
+	if(!isRoomOnly){
+		$roomBox.css("height", "");
+		return;
+	}
+	middleHeight = $middle.innerHeight() || (($(window).height() || window.innerHeight || 0) - topOffset);
+	available = middleHeight - ($chatBox.outerHeight() || 190);
+	roomHeight = Math.max(360, Math.floor(available));
+	$roomBox.css("height", roomHeight);
+}
+function syncInGameViewportLayout(){
+	var viewportWidth = $(window).width() || window.innerWidth || 0;
+	var availableWidth = Math.max(320, viewportWidth - 160);
+	var $gameBody = $(".GameBox .game-body");
+	var $gameSurface = $(".GameBox .product-body");
+	var $historyHolder = $(".GameBox .history-holder");
+	var $chain = $stage && $stage.game ? $stage.game.chain : $(".GameBox .chain");
+	var count;
+	var neededWidth;
+	var scale;
+	var cardWidth = 146;
+	var gap = 8;
+
+	if($historyHolder.length && $gameSurface.length && !$historyHolder.parent().is($gameSurface)){
+		$historyHolder.appendTo($gameSurface);
+	}
+	if($chain.length && $gameSurface.length && !$chain.parent().is($gameSurface)){
+		$chain.appendTo($gameSurface);
+	}
+
+	if($gameBody.length && !$gameBody.hasClass("cw")){
+		count = $gameBody.children(".game-user").length || 1;
+		neededWidth = count * cardWidth + Math.max(0, count - 1) * gap;
+		scale = Math.min(1, availableWidth / neededWidth);
+		$gameBody.css({
+			width: neededWidth + "px",
+			"--game-user-scale": scale.toFixed(4)
+		});
+	}else if($gameBody.length){
+		$gameBody.css({
+			width: "",
+			"--game-user-scale": ""
+		});
+	}
+	syncChainSignToDefinitions();
+}
+function syncChainSignToDefinitions(){
+	var $gameSurface = $(".GameBox .product-body");
+	var $chain = ($stage && $stage.game && $stage.game.chain && $stage.game.chain.length) ? $stage.game.chain : $(".chain");
+	var $holder = ($stage && $stage.game && $stage.game.history && $stage.game.history.length) ? $stage.game.history.parent() : $(".history-holder");
+	var surfaceRect;
+	var holderRect;
+	var chainWidth;
+	var chainHeight;
+	var left;
+	var top;
+	
+	if(!$chain.length) return;
+	if(!$("body").hasClass("in-game")){
+		$chain.removeClass("chain-above-definitions");
+		clearChainSignDefinitionPosition($chain);
+		return;
+	}
+	$chain.addClass("chain-above-definitions");
+	if($gameSurface.length && !$chain.parent().is($gameSurface)){
+		$chain.appendTo($gameSurface);
+	}
+	if(!$gameSurface.length || !$holder.length || !$gameSurface.get(0) || !$holder.get(0)){
+		clearChainSignDefinitionPosition($chain);
+		return;
+	}
+	surfaceRect = $gameSurface.get(0).getBoundingClientRect();
+	holderRect = $holder.get(0).getBoundingClientRect();
+	if(!surfaceRect.width || !surfaceRect.height || !holderRect.width || !holderRect.height){
+		clearChainSignDefinitionPosition($chain);
+		return;
+	}
+	chainWidth = $chain.outerWidth() || 232;
+	chainHeight = $chain.outerHeight() || 74;
+	left = holderRect.left - surfaceRect.left + holderRect.width * 0.5 - chainWidth * 0.5;
+	top = Math.max(6, holderRect.top - surfaceRect.top - chainHeight - 10);
+	$chain.addClass("chain-above-definitions").css({
+		"--chain-above-definitions-left": Math.round(left) + "px",
+		"--chain-above-definitions-top": Math.round(top) + "px"
+	});
+}
+function clearChainSignDefinitionPosition($chain){
+	$chain.each(function(){
+		if(!this || !this.style) return;
+		this.style.removeProperty("--chain-above-definitions-left");
+		this.style.removeProperty("--chain-above-definitions-top");
+	});
+}
+function applyMiddleScale(){
+	var $middle = $("#Middle");
+	var base;
+	var topOffset;
+	var availableWidth;
+	var availableHeight;
+	var scale;
+	var reserveLeft = 0;
+	var viewportWidth;
+	var inGameUi;
+	var rightPadding = 12;
+	var minLobbyWidth = 920;
+	var middleWidth;
+	var middleHeight;
+
+	if(!$middle.length) return;
+	topOffset = getLobbyTopOffset();
+	if(topOffset) $middle.css({ top: topOffset, marginTop: 0 });
+	base = getMiddleBaseSize();
+	if(!base.width || !base.height) return;
+	viewportWidth = $(window).width();
+	inGameUi = $("body").hasClass("in-game");
+	if(inGameUi) topOffset = 0;
+	if(!inGameUi){
+		reserveLeft = getLobbyReserveLeft();
+		if(!isFinite(reserveLeft) || reserveLeft < 0) reserveLeft = 0;
+		availableWidth = viewportWidth - reserveLeft - rightPadding;
+		if(availableWidth <= 0) return;
+		middleHeight = Math.max(320, ($(window).height() || window.innerHeight || 0) - topOffset);
+		middleWidth = Math.max(minLobbyWidth, availableWidth);
+		$middle.css({
+			left: reserveLeft,
+			right: "auto",
+			top: topOffset,
+			marginTop: 0,
+			width: middleWidth,
+			height: middleHeight,
+			"min-height": middleHeight,
+			"transform-origin": "top left",
+			transform: "none",
+			"margin-left": 0,
+			"margin-right": 0
+		}).data("scale", 1);
+		applyResponsiveLobbyBoxHeights(topOffset);
+		applyResponsiveRoomBoxHeight(topOffset);
+		if($("body").hasClass("clan-open")) syncClanPageBoxBounds(getClanPageBox());
+		if($("body").hasClass("community-open")) syncCommunityPageBoxBounds(getCommunityPageBox());
+		return;
+	}
+	availableWidth = viewportWidth - rightPadding;
+	availableHeight = $(window).height() - topOffset;
+	if(availableHeight <= 0 || availableWidth <= 0) return;
+	$middle.css({
+		left: 0,
+		right: 0,
+		top: topOffset,
+		marginTop: 0,
+		width: "auto",
+		height: "",
+		"min-height": "",
+		"transform-origin": "top left",
+		transform: "none",
+		"margin-left": 0,
+		"margin-right": 0
+	});
+	$middle.data("scale", 1);
+	syncInGameViewportLayout();
+}
+function isInGameUiMode(only){
+	if(only == "for-gaming") return true;
+	if($data.practicing) return true;
+	if($data.room && $data.room.gaming) return true;
+	if($stage && $stage.box && $stage.box.game && $stage.box.game.length && $stage.box.game.is(":visible")) return true;
+	return false;
+}
+function syncReplayDisplayMode(active){
+	var $body = $("body");
+	var boxes;
+	var i;
+
+	active = !!active;
+	$body.toggleClass("replay-mode", active);
+	if(active){
+		$body.addClass("in-game")
+			.toggleClass("beta-test-mode", (typeof isBetaTestMode == "function") && isBetaTestMode())
+			.removeClass("in-room lobby-no-chat clan-open community-open match1v1-open myinfo-open in-game-chat-collapsed");
+		$("#top-profile-card").removeClass("myinfo-open");
+		if(typeof toggleMyInfoOverlay == "function") toggleMyInfoOverlay(false);
+		boxes = ($stage && $stage.box) ? $stage.box : {};
+		for(i in boxes){
+			if(boxes[i] && boxes[i].hide) boxes[i].hide();
+		}
+		if(boxes.game && boxes.game.show) boxes.game.stop(true, true).show();
+		if($stage && $stage.chat) $stage.chat.css("height", "");
+		$data._inGameChatCollapsed = true;
+		$(".kkutu-menu button").hide();
+		applyMiddleScale();
+		syncInGameViewportLayout();
+		addTimeout(function(){
+			applyMiddleScale();
+			syncInGameViewportLayout();
+			syncChainSignToDefinitions();
+		}, 0);
+	}else{
+		$body.removeClass("replay-mode in-game beta-test-mode in-game-chat-collapsed");
+		if($stage && $stage.chat) $stage.chat.css("height", "");
+		$data._menuVisibilitySynced = false;
+	}
+}
+function syncInGameMenuButtons(inGameUi, only){
+	var $exit = $("#ExitBtn");
+	var $dict = $("#DictionaryBtn");
+	var $community = $("#CommunityBtn");
+	var resetStyle = {
+		position: "",
+		top: "",
+		right: "",
+		left: "",
+		width: "",
+		height: "",
+		padding: "",
+		"align-items": "",
+		"justify-content": "",
+		"text-align": "",
+		"font-size": "",
+		color: "",
+		"text-shadow": "",
+		"border-radius": "",
+		"z-index": ""
+	};
+
+	$community.removeClass("in-game-menu-hidden");
+	$exit.removeClass("in-game-menu-icon");
+	$dict.removeClass("in-game-menu-icon");
+	$exit.css(resetStyle);
+	$dict.css(resetStyle);
+	$exit.find("i").css({ margin: "", "font-size": "", color: "" });
+	$dict.find("i").css({ margin: "", "font-size": "", color: "" });
+	if(only){
+		$community.css("display", $community.hasClass(only) ? "" : "none");
+		$exit.css("display", $exit.hasClass(only) ? "" : "none");
+		$dict.css("display", $dict.hasClass(only) ? "" : "none");
+	}
+}
+function ensureInGameChatControls(){
+	if(!$stage || !$stage.box || !$stage.box.chat || !$stage.box.chat.length) return;
+	if(!$stage.box.chat.find(".chatbox-close").length){
+		$stage.box.chat.find(".product-title").append(
+			$("<button>").attr("type", "button").addClass("chatbox-close").attr("aria-label", L['close'] || "Close").text("×")
+		);
+	}
+	if(!$("#InGameChatToggle").length){
+		$("body").append(
+			$("<button>").attr("type", "button").attr("id", "InGameChatToggle").attr("aria-label", L['chatHere'] || "Chat")
+				.append($("<i>").addClass("fa fa-comment"))
+		);
+	}
+	$stage.box.chat.find(".chatbox-close").off(".ingamechat").on("click.ingamechat", function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		setInGameChatCollapsed(true);
+	});
+	$("#InGameChatToggle").off(".ingamechat").on("click.ingamechat", function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		setInGameChatCollapsed(false);
+	});
+}
+function scrollMainChatToBottom(){
+	addTimeout(function(){
+		if(!$stage || !$stage.chat || !$stage.chat.length) return;
+		$stage.chat.scrollTop($stage.chat.prop("scrollHeight") || 999999999);
+		refreshCustomScrollbars();
+	}, 0);
+}
+function syncInGameChatState(only, previousOnly){
+	if(!$stage || !$stage.box || !$stage.box.chat || !$stage.box.chat.length) return;
+	if(only == "for-gaming"){
+		if(previousOnly != "for-gaming"){
+			$data._inGameChatCollapsed = true;
+		}
+		ensureInGameChatControls();
+		$("body").toggleClass("in-game-chat-collapsed", !!$data._inGameChatCollapsed);
+		if($data._inGameChatCollapsed){
+			$stage.box.chat.hide();
+		}else{
+			$stage.box.chat.show().css({ width: "", height: "" });
+			$stage.chat.css("height", "");
+		}
+	}else{
+		$("body").removeClass("in-game-chat-collapsed");
+		$data._inGameChatCollapsed = false;
+		$stage.box.chat.show().css({ width: "", height: "" });
+		$stage.chat.css("height", "");
+	}
+}
+function setInGameChatCollapsed(collapsed){
+	$data._inGameChatCollapsed = !!collapsed;
+	syncInGameChatState(getOnly(), "for-gaming");
+	if(!$data._inGameChatCollapsed) scrollMainChatToBottom();
+}
+function clearLobbySidePageIntent(){
+	setLobbySidePageIntent("");
+}
+function syncLobbySidePageIntent(only){
+	var buttonIntent;
+
+	if(!$data) return;
+	if(only != "for-lobby"){
+		setLobbySidePageIntent("");
+		return;
+	}
+	if($data._myInfo || $data._shop || $data._match1v1Open || $data._match1v1Searching){
+		setLobbySidePageIntent("");
+		return;
+	}
+	buttonIntent = getLobbySidePageStoredIntent() || ($data._clans ? "clan" : ($data._communityOpen ? "community" : ""));
+	if(buttonIntent) setLobbySidePageIntent(buttonIntent);
+	if($data._lobbySidePage == "clan"){
+		$data._clans = true;
+		$data._communityOpen = false;
+	}else if($data._lobbySidePage == "community"){
+		$data._communityOpen = true;
+		$data._clans = false;
+	}
+}
+function finalizeLobbySidePageVisibility(only){
+	var type;
+	var isClan;
+	var $box;
+	var $other;
+	var reserve;
+
+	if(!$data || only != "for-lobby") return;
+	type = $data._clans ? "clan" : ($data._communityOpen ? "community" : getLobbySidePageStoredIntent());
+	if(!type) return;
+	isClan = type == "clan";
+	$data._clans = isClan;
+	$data._communityOpen = !isClan;
+	if(isClan){
+		if(!ensureClanPageBox()) return;
+		$box = getClanPageBox();
+		$other = getCommunityPageBox();
+	}else{
+		if(!ensureCommunityPageBox()) return;
+		$box = getCommunityPageBox();
+		$other = getClanPageBox();
+	}
+	if(!$box.length) return;
+	reserve = getClanPageRightGap();
+	if(document.documentElement && document.documentElement.style){
+		document.documentElement.style.setProperty(isClan ? "--clan-sidebar-reserve" : "--community-sidebar-reserve", reserve + "px");
+	}
+	setLobbySidePageIntent(type);
+	if($stage && $stage.box){
+		if($stage.box.userList) $stage.box.userList.show();
+		if($stage.box.roomList) $stage.box.roomList.hide();
+		if($stage.box.match1v1) $stage.box.match1v1.hide();
+		if($stage.box.shop) $stage.box.shop.hide();
+		if($stage.box.myInfo) $stage.box.myInfo.hide();
+		$stage.box[isClan ? "clans" : "friends"] = $box;
+		if($stage.box[isClan ? "friends" : "clans"]) $stage.box[isClan ? "friends" : "clans"].removeClass("is-lobby-side-page-active").hide();
+	}
+	if($other && $other.length) $other.removeClass("is-lobby-side-page-active").hide();
+	if($stage && $stage.menu){
+		if($stage.menu.clans && $stage.menu.clans.length) $stage.menu.clans.toggleClass("toggled", isClan);
+		if($stage.menu.community && $stage.menu.community.length) $stage.menu.community.toggleClass("toggled", !isClan);
+		if($stage.menu.shop && $stage.menu.shop.length) $stage.menu.shop.removeClass("toggled");
+		if($stage.menu.match1v1 && $stage.menu.match1v1.length) $stage.menu.match1v1.removeClass("toggled");
+	}
+	$("body").addClass("lobby-no-chat")
+		.toggleClass("clan-open", isClan)
+		.toggleClass("community-open", !isClan)
+		.removeClass("myinfo-open match1v1-open");
+	$box.addClass("is-lobby-side-page-active").css({
+		display: "block",
+		visibility: "visible",
+		opacity: 1,
+		"pointer-events": "auto",
+		position: "relative",
+		left: "auto",
+		top: "auto",
+		right: "auto",
+		bottom: "auto",
+		float: "left",
+		"z-index": 24,
+		width: "calc(100% - " + reserve + "px)"
+	}).show();
+}
+function updateUI(myRoom, refresh){
+/*
+	myRoom??undefined??寃쎌슦: ?곸젏/寃곌낵 ?뺤씤
+	myRoom??true/false??寃쎌슦: 洹???
+*/
+	var only = getOnly();
+	var previousOnly = $data._only;
+	var i;
+	var shouldScrollChatToBottom = false;
+
+	if($data._replay){
+		if(myRoom === undefined || myRoom){
+			replayStop();
+		}else return;
+	}
+	if($data._replay) return;
+	if(only == "for-gaming" && !myRoom) return;
+	if($data.practicing) only = "for-gaming";
+	syncLobbySidePageIntent(only);
+	if(only != "for-gaming"){
+		setGameTurnInputActive(false);
+		resetRoomChatInputState();
+	}
+	
+	if(only != previousOnly || !$data._menuVisibilitySynced){
+		$(".kkutu-menu button").hide();
+	}
+	for(i in $stage.box){
+		if(only == "for-lobby" && ((i == "clans" && $data._clans) || (i == "friends" && $data._communityOpen))) continue;
+		$stage.box[i].hide();
+	}
+	$stage.box.me.show();
+	$stage.box.chat.show().width(790).height(190);
+	$stage.chat.height(120);
+	
+	if(only == "for-lobby"){
+		$("body").removeClass("in-game in-game-chat-collapsed");
+		$stage.box.game.hide();
+		$data._ar_first = true;
+		$stage.box.chat.hide();
+		$stage.chat.height(120);
+		$stage.box.userList.show();
+		if($data._match1v1Open){
+			$stage.box.userList.hide();
+			$stage.box.roomList.hide();
+			$stage.box.match1v1.show();
+			$stage.box.shop.hide();
+			$stage.box.clans.hide();
+			$stage.box.friends.hide();
+			$stage.box.myInfo.hide();
+			if($stage.menu.clans && $stage.menu.clans.length){
+				$stage.menu.clans.removeClass("toggled");
+			}
+			$stage.menu.community.removeClass("toggled");
+			if($stage.menu.match1v1 && $stage.menu.match1v1.length){
+				$stage.menu.match1v1.addClass("toggled");
+			}
+			renderMatch1v1Panel();
+		}else if($data._myInfo){
+			$stage.box.roomList.show();
+			$stage.box.match1v1.hide();
+			$stage.box.shop.hide();
+			$stage.box.clans.hide();
+			$stage.box.friends.hide();
+			$stage.box.myInfo.show();
+			if($stage.menu.clans && $stage.menu.clans.length){
+				$stage.menu.clans.removeClass("toggled");
+			}
+			$stage.menu.community.removeClass("toggled");
+		}else if($data._shop){
+			$stage.box.roomList.hide();
+			$stage.box.match1v1.hide();
+			$stage.box.shop.show();
+			$stage.box.clans.hide();
+			$stage.box.friends.hide();
+			$stage.box.myInfo.hide();
+			if($stage.menu.clans && $stage.menu.clans.length){
+				$stage.menu.clans.removeClass("toggled");
+			}
+			$stage.menu.community.removeClass("toggled");
+		}else if($data._clans){
+			if(showClanPageBox()){
+				$stage.box.match1v1.hide();
+				if($stage.menu.clans && $stage.menu.clans.length){
+					$stage.menu.clans.addClass("toggled");
+				}
+				$stage.menu.community.removeClass("toggled");
+				if($stage.menu.match1v1 && $stage.menu.match1v1.length){
+					$stage.menu.match1v1.removeClass("toggled");
+				}
+				if(!getClanPageSection().children().length) renderClanPageSafe();
+			}else{
+				$data._clans = false;
+				$stage.box.roomList.show();
+				$stage.box.match1v1.hide();
+				$stage.box.shop.hide();
+				$stage.box.clans.hide();
+				$stage.box.friends.hide();
+				$stage.box.myInfo.hide();
+				if($stage.menu.clans && $stage.menu.clans.length){
+					$stage.menu.clans.removeClass("toggled");
+				}
+				$stage.menu.community.removeClass("toggled");
+			}
+		}else if($data._communityOpen){
+			if(showCommunityPageBox()){
+				$stage.box.match1v1.hide();
+				$stage.menu.community.addClass("toggled");
+				if($stage.menu.match1v1 && $stage.menu.match1v1.length){
+					$stage.menu.match1v1.removeClass("toggled");
+				}
+				if(!getCommunityPageBox().find(".friends-page").children().length) renderFriendsPage();
+			}else{
+				$data._communityOpen = false;
+				$stage.box.roomList.show();
+				$stage.box.match1v1.hide();
+				$stage.box.shop.hide();
+				$stage.box.clans.hide();
+				$stage.box.friends.hide();
+				$stage.box.myInfo.hide();
+				$stage.menu.community.removeClass("toggled");
+			}
+		}else{
+			$stage.box.roomList.show();
+			$stage.box.match1v1.hide();
+			$stage.box.shop.hide();
+			$stage.box.clans.hide();
+			$stage.box.friends.hide();
+			$stage.box.myInfo.hide();
+			if($stage.menu.clans && $stage.menu.clans.length){
+				$stage.menu.clans.removeClass("toggled");
+			}
+			$stage.menu.community.removeClass("toggled");
+		}
+		updateUserList(refresh || only != $data._only);
+		updateRoomList(refresh || only != $data._only);
+		updateMe();
+		if($data._jamsu){
+			clearTimeout($data._jamsu);
+			delete $data._jamsu;
+		}
+	}else if(only == "for-master" || only == "for-normal"){
+		$("body").removeClass("in-game in-game-chat-collapsed");
+		$(".team-chosen").removeClass("team-chosen");
+		if($data.users[$data.id].game.ready){
+			$stage.menu.ready.addClass("toggled");
+			$(".team-selector").addClass("team-unable");
+		}else if($data.users[$data.id].game.form == "S"){
+			$stage.menu.ready.addClass("toggled");
+			$(".team-selector").removeClass("team-unable");
+		}else{
+			$stage.menu.ready.removeClass("toggled");
+			$(".team-selector").removeClass("team-unable");
+			$("#team-" + $data.users[$data.id].game.team).addClass("team-chosen");
+			if($data.opts.ar && $data._ar_first){
+				$stage.menu.ready.addClass("toggled");
+				$stage.menu.ready.trigger('click');
+				$data._ar_first = false;
+			}
+		}
+		$data._shop = false;
+		$data._clans = false;
+		$data._communityOpen = false;
+		$data._match1v1Open = false;
+		stopMatch1v1SearchClock(true);
+		$data._match1v1Searching = false;
+		$data._match1v1Status = "";
+		if($stage.menu.match1v1 && $stage.menu.match1v1.length){
+			$stage.menu.match1v1.removeClass("toggled");
+		}
+		$stage.box.game.hide();
+		$stage.box.room.show().height(ROOM_BOX_HEIGHT);
+		if(only == "for-master") if($stage.dialog.inviteList.is(':visible')) updateUserList();
+		updateRoom(false);
+		updateMe();
+		shouldScrollChatToBottom = previousOnly != only;
+	}else if(only == "for-gaming"){
+		if($data._gAnim){
+			$stage.box.room.show();
+			$data._gAnim = false;
+		}
+		$data._shop = false;
+		$data._myInfo = false;
+		$data._clans = false;
+		$data._communityOpen = false;
+		$data._match1v1Open = false;
+		stopMatch1v1SearchClock(true);
+		$data._match1v1Searching = false;
+		$data._match1v1Status = "";
+		$data._ar_first = true;
+		$stage.box.me.hide();
+		$stage.box.game.show();
+		$(".ChatBox").width(1000).height(142);
+		$stage.chat.height(70);
+		updateRoom(true);
+	}
+	$data._only = only;
+	setLocation($data.place);
+	if(only != previousOnly || !$data._menuVisibilitySynced){
+		$(".kkutu-menu ."+only).show();
+		$data._menuVisibilitySynced = true;
+	}
+	if($data.room && $data.room.match1v1){
+		if($stage.menu.setRoom) $stage.menu.setRoom.hide();
+		if($stage.menu.practice) $stage.menu.practice.hide();
+		if($stage.menu.invite) $stage.menu.invite.hide();
+	}
+	var inGameUi = isInGameUiMode(only);
+	$("body").toggleClass("in-game", inGameUi);
+	$("body").toggleClass("beta-test-mode", inGameUi && isBetaTestMode());
+	$("body").toggleClass("in-room", only == "for-master" || only == "for-normal");
+	$("body").toggleClass("lobby-no-chat", only == "for-lobby");
+	$("body").toggleClass("clan-open", only == "for-lobby" && !!$data._clans);
+	$("body").toggleClass("community-open", only == "for-lobby" && !!$data._communityOpen);
+	$("body").toggleClass("match1v1-open", only == "for-lobby" && !!$data._match1v1Open);
+	syncInGameMenuButtons(inGameUi, only);
+	syncInGameChatState(only, previousOnly);
+	if(shouldScrollChatToBottom) scrollMainChatToBottom();
+	var isMyInfoOpen = $data._myInfo && canOpenMyInfoInCurrentView(only);
+	$("#top-profile-card").toggleClass("myinfo-open", isMyInfoOpen);
+	$("body").toggleClass("myinfo-open", isMyInfoOpen);
+	toggleMyInfoOverlay(isMyInfoOpen);
+	if(!isMyInfoOpen){
+		applyMiddleScale();
+	}
+	refreshCustomScrollbars();
+	finalizeLobbySidePageVisibility(only);
+}
+function toggleMyInfoOverlay(open){
+	var $box = $(".MyInfoBox");
+	var openingTimer = $box.data("opening-timer");
+	if(!$box.length) return;
+
+	if(open){
+		lockBodyScroll(true);
+		if(!$box.data("orig-parent")){
+			$box.data("orig-parent", $box.parent());
+			$box.data("orig-next", $box.next());
+		}
+		if(!$box.data("floating")){
+			resetMyInfoTabsToProfile();
+			$("body").append($box);
+			$box.data("floating", true);
+		}
+		$box.show();
+		if(openingTimer){
+			clearTimeout(openingTimer);
+			$box.removeData("opening-timer");
+		}
+		$box.removeClass("myinfo-opening");
+		if($box.length && $box.get(0)) $box.get(0).offsetWidth;
+		$box.addClass("myinfo-opening");
+		$box.data("opening-timer", setTimeout(function(){
+			$box.removeClass("myinfo-opening");
+			$box.removeData("opening-timer");
+		}, 140));
+	}else if($box.data("floating")){
+		var $parent = $box.data("orig-parent");
+		var $next = $box.data("orig-next");
+		restoreMyInfoInlineDress();
+		restoreMyInfoInlineCharFactory();
+		if(openingTimer){
+			clearTimeout(openingTimer);
+			$box.removeData("opening-timer");
+		}
+		$box.removeClass("myinfo-opening");
+		if($parent && $parent.length){
+			if($next && $next.length) $box.insertBefore($next);
+			else $parent.append($box);
+		}
+		$box.data("floating", false);
+		lockBodyScroll(false);
+		$box.hide();
+	}else if(!open){
+		restoreMyInfoInlineDress();
+		restoreMyInfoInlineCharFactory();
+		lockBodyScroll(false);
+		$box.removeClass("myinfo-opening").hide();
+	}
+}
+function lockBodyScroll(lock){
+	if(lock){
+		$("html, body").css({ overflow: "hidden" });
+	}else{
+		$("html, body").css({ overflow: "" });
+	}
+}
+function animModified(cls){
+	$(cls).addClass("room-head-modified");
+	addTimeout(function(){ $(cls).removeClass("room-head-modified"); }, 3000);
+}
+function checkRoom(modify){
+	if(!$data._players) return;
+	if(!$data.room) return;
+	
+	var OBJ = {} + '';
+	var i, arr = $data._players.split(',');
+	var lb = arr.length, la = $data.room.players.length;
+	var u;
+	
+	for(i in arr){
+		if(arr[i] == OBJ) lb--;
+	}
+	for(i in $data.room.players){
+		if(($data.room.players[i] && $data.room.players[i].robot) || resolveGameUser($data.room.players[i]).robot) la--;
+	}
+	if(modify){
+		for(i in arr){
+			if(arr[i] != OBJ) $data.users[arr[i]].game.ready = false;
+		}
+		notice(L['hasModified']);
+	}
+	if($data._gaming != $data.room.gaming){
+		if($data.room.gaming){
+			gameReady();
+			$data._replay = false;
+			startRecord($data.room.game.title);
+		}else{
+			if(!$data.resulting) haltGameAudio();
+			if($data.resulting){
+				if($data._spectate || $data.practicing || !$rec || !$rec.events || !$rec.events.length){
+					$stage.dialog.resultSave.hide();
+				}else{
+					$stage.dialog.resultSave.show().attr('disabled', false);
+				}
+				clearInterval($data._tTime);
+			}else if($data._spectate){
+				$stage.dialog.resultSave.hide();
+				$data._spectate = false;
+			}else{
+				$stage.dialog.resultSave.hide();
+				$data.resulting = false;
+			}
+			if(!$data.resulting){
+				clearGame();
+				clearInterval($data._tTime);
+				$stage.box.game.hide();
+				$stage.box.room.show().height(ROOM_BOX_HEIGHT);
+				updateUI(true, true);
+				playLobbyBGMFromGame();
+			}
+		}
+	}
+	if($data._master != $data.room.master){
+		u = $data.users[$data.room.master];
+		announceSystem(L['notice'], (u.profile.title || u.profile.name) + L['hasMaster'], {
+			chat: true,
+			notify: true,
+			kind: "info"
+		});
+	}
+	$data._players = serializeRoomPlayers($data.room.players);
+	$data._master = $data.room.master;
+	$data._gaming = $data.room.gaming;
+}
+function getMatch1v1SearchStatus(){
+	var startedAt = Number($data && $data._match1v1SearchStartedAt);
+	var seconds = Math.max(0, Math.floor((Date.now() - startedAt) / 1000));
+
+	if(!startedAt || !isFinite(startedAt)){
+		startedAt = Date.now();
+		if($data && $data._match1v1Searching) $data._match1v1SearchStartedAt = startedAt;
+		seconds = 0;
+	}
+	return "looking for an opponent for " + seconds + " seconds...";
+}
+function updateMatch1v1SearchClock(){
+	var status;
+
+	if(!$data || !$data._match1v1Searching){
+		stopMatch1v1SearchClock(false);
+		return;
+	}
+	if(!$data._match1v1SearchStartedAt) $data._match1v1SearchStartedAt = Date.now();
+	status = getMatch1v1SearchStatus();
+	$data._match1v1Status = status;
+	$("#Match1v1Status").text(status);
+}
+function startMatch1v1SearchClock(reset){
+	if(!$data) return;
+	if(match1v1SearchTimer) clearInterval(match1v1SearchTimer);
+	if(reset || !$data._match1v1SearchStartedAt) $data._match1v1SearchStartedAt = Date.now();
+	updateMatch1v1SearchClock();
+	match1v1SearchTimer = _setInterval(updateMatch1v1SearchClock, 1000);
+}
+function stopMatch1v1SearchClock(clearStatus){
+	if(match1v1SearchTimer){
+		clearInterval(match1v1SearchTimer);
+		match1v1SearchTimer = null;
+	}
+	if($data){
+		$data._match1v1SearchStartedAt = 0;
+		if(clearStatus) $data._match1v1Status = "";
+	}
+}
+function cancelMatch1v1Search(silent){
+	if($data && $data._match1v1Searching){
+		$data._match1v1Searching = false;
+		stopMatch1v1SearchClock(!!silent);
+		if(!silent) $data._match1v1Status = L['match1v1Cancelled'] || "Match cancelled.";
+		send('match1v1', { cancel: true }, true, true);
+	}
+	renderMatch1v1Panel();
+}
+function closeMatch1v1LobbyView(cancelSearch){
+	if(!$data) return;
+	if(cancelSearch) cancelMatch1v1Search(true);
+	stopMatch1v1SearchClock(true);
+	$data._match1v1Open = false;
+	$data._match1v1Status = "";
+	if($stage && $stage.menu && $stage.menu.match1v1) $stage.menu.match1v1.removeClass("toggled");
+	$("body").removeClass("match1v1-open");
+}
+function setMatch1v1LobbyOpen(open){
+	open = !!open;
+	if(open){
+		clearLobbySidePageIntent();
+		$data._myInfo = false;
+		$data._shop = false;
+		$data._clans = false;
+		$data._communityOpen = false;
+		$data._match1v1Open = true;
+		$("body").removeClass("myinfo-open clan-open community-open");
+		$("#top-profile-card").removeClass("myinfo-open");
+		if($stage && $stage.menu){
+			if($stage.menu.shop) $stage.menu.shop.removeClass("toggled");
+			if($stage.menu.clans) $stage.menu.clans.removeClass("toggled");
+			if($stage.menu.community) $stage.menu.community.removeClass("toggled");
+			if($stage.menu.match1v1) $stage.menu.match1v1.addClass("toggled");
+		}
+		if(typeof toggleMyInfoOverlay == "function") toggleMyInfoOverlay(false);
+		renderMatch1v1Panel();
+	}else{
+		closeMatch1v1LobbyView(true);
+	}
+}
+function setMatch1v1SearchState(searching, status){
+	var wasSearching = !!($data && $data._match1v1Searching);
+
+	$data._match1v1Searching = !!searching;
+	if($data._match1v1Searching){
+		$data._match1v1Open = true;
+		startMatch1v1SearchClock(!wasSearching);
+	}else{
+		stopMatch1v1SearchClock(false);
+		$data._match1v1Status = status || "";
+	}
+	if($stage && $stage.menu && $stage.menu.match1v1){
+		$stage.menu.match1v1.toggleClass("toggled", !!$data._match1v1Open || !!$data._match1v1Searching);
+	}
+	renderMatch1v1Panel();
+}
+function getRankedTrophyValue(data){
+	var ranked = data && data.ranked;
+	var trophy = ranked && ranked.trophy != null ? ranked.trophy : (data ? data.trophy : 0);
+
+	trophy = Math.round(Number(trophy));
+	return isNaN(trophy) ? 0 : Math.max(0, trophy);
+}
+function renderRankedResultTrophy(trophy){
+	var $ranked = $(".result-me-ranked");
+	var delta;
+	var label;
+	var className;
+
+	if(!$ranked.length){
+		$ranked = $("<div>").addClass("result-me-ranked").insertAfter($(".result-me-money").first());
+	}
+	$(".result-me").removeClass("has-ranked-trophy");
+	$ranked.hide().empty().removeClass("ranked-gain ranked-loss ranked-draw");
+	if(!trophy) return;
+	delta = Math.round(Number(trophy.delta) || 0);
+	className = delta > 0 ? "ranked-gain" : (delta < 0 ? "ranked-loss" : "ranked-draw");
+	label = trophy.outcome > 0 ? "RANKED WIN" : (trophy.outcome < 0 ? "RANKED LOSS" : "RANKED DRAW");
+	$ranked
+		.addClass(className)
+		.append($("<i>").addClass("fa fa-trophy").attr("aria-hidden", "true"))
+		.append($("<span>").addClass("ranked-result-label").text(label))
+		.append($("<span>").addClass("ranked-result-value").text(commify(trophy.after || 0)))
+		.append($("<span>").addClass("ranked-result-delta").text(delta > 0 ? ("+" + commify(delta)) : commify(delta)))
+		.show();
+	$(".result-me").addClass("has-ranked-trophy");
+}
+function renderMatch1v1Panel(){
+	var $box = $stage && $stage.box ? $stage.box.match1v1 : $(".Match1v1Box");
+	var $avatar;
+	var $button;
+	var $status;
+	var $name;
+	var $level;
+	var $trophy;
+	var my;
+	var score;
+	var trophy;
+
+	if(!$box || !$box.length) return;
+	my = ($data && $data.users) ? $data.users[$data.id] : null;
+	$avatar = $box.find(".match1v1-avatar");
+	$button = $box.find("#Match1v1BattleBtn");
+	$status = $box.find("#Match1v1Status");
+	$name = $box.find("#Match1v1PlayerName");
+	$level = $box.find("#Match1v1PlayerLevel");
+	$trophy = $box.find("#Match1v1PlayerTrophy");
+	$box.toggleClass("is-searching", !!$data._match1v1Searching);
+	if(my){
+		my.equip = my.equip || {};
+		my.profile = my.profile || {};
+		my.data = my.data || {};
+		score = Number(my.data.score) || 0;
+		trophy = getRankedTrophyValue(my.data);
+		renderMoremi($avatar, my.equip);
+		$name.text(my.profile.title || my.profile.name || $data.id || "PLAYER");
+		$level.text("LV " + getLevel(score) + "  /  " + commify(score) + " XP");
+		if($trophy.length){
+			$trophy.find("span").text(commify(trophy) + " TROPHIES");
+			if(!$trophy.find("span").length) $trophy.text(commify(trophy) + " TROPHIES");
+		}
+	}
+	$button
+		.toggleClass("is-searching", !!$data._match1v1Searching)
+		.text($data._match1v1Searching ? "CANCEL" : "BATTLE");
+	if($data._match1v1Searching){
+		$status.text(getMatch1v1SearchStatus());
+		if(match1v1SearchTimer) updateMatch1v1SearchClock();
+		else startMatch1v1SearchClock(false);
+	}else{
+		$status.text($data._match1v1Status || "");
+	}
+}
+function updateMe(){
+	var my = $data.users[$data.id];
+	var i, gw = 0;
+	if(!my) return;
+	my.profile = my.profile || { title: $data.id || (L['guest'] || "GUEST"), name: $data.id || (L['guest'] || "GUEST"), image: "" };
+	my.data = my.data || {};
+	my.data.score = Number(my.data.score) || 0;
+	my.data.record = my.data.record || {};
+	my.equip = my.equip || {};
+	my.money = Number(my.money) || 0;
+	var lv = getLevel(my.data.score);
+	var prev = EXP[lv-2] || 0;
+	var goal = EXP[lv-1];
+	
+	for(i in my.data.record) gw += my.data.record[i][1];
+	renderMoremi(".my-image", my.equip);
+	// $(".my-image").css('background-image', "url('"+my.profile.image+"')");
+	$(".my-stat-level").replaceWith(getLevelImage(my.data.score).addClass("my-stat-level"));
+	$(".my-stat-name").html(my.profile.title || my.profile.name);
+	$(".my-stat-record").html(L['globalWin'] + " " + gw + L['W']);
+	$(".my-stat-ping").html(formatPing(my.money));
+	$(".my-okg .graph-bar").width(($data._playTime % 600000) / 6000 + "%");
+	$(".my-okg-text").html(prettyTime($data._playTime));
+	$(".my-level").html(L['LEVEL'] + " " + lv);
+	$(".my-gauge .graph-bar").width((my.data.score-prev)/(goal-prev)*190);
+	$(".my-gauge-text").html(commify(my.data.score) + " / " + commify(goal));
+	var $onlineMyInfo = $("#online-myinfo-card");
+	if($onlineMyInfo.length){
+		var levelScore = Math.max(0, my.data.score - prev);
+		var levelGoal = (goal > prev) ? (goal - prev) : goal;
+		var progress = levelGoal ? (levelScore / levelGoal * 100) : 100;
+		if(!isFinite(progress)) progress = 0;
+		progress = Math.max(0, Math.min(100, progress));
+		renderMoremi($onlineMyInfo.find(".online-myinfo-avatar"), my.equip);
+		$onlineMyInfo.find(".online-myinfo-level-img").replaceWith(getLevelImage(my.data.score).addClass("online-myinfo-level-img"));
+		$onlineMyInfo.find(".online-myinfo-name").text(my.profile.title || my.profile.name || my.profile.nick || my.profile.nickname || $data.id || "");
+		$onlineMyInfo.find(".online-myinfo-record").html(L['globalWin'] + " " + gw + L['W']);
+		$onlineMyInfo.find(".online-myinfo-level-text").text(L['LEVEL'] + " " + lv);
+		$onlineMyInfo.find(".online-myinfo-xp-fill").css("width", progress + "%");
+		$onlineMyInfo.find(".online-myinfo-xp-text").text(commify(levelScore) + " / " + commify(levelGoal));
+	}
+
+	var $top = $("#top-profile-card");
+	if($top.length){
+		var name = my.profile.title || my.profile.name || L['guest'];
+		var sessionImage = $("#PROFILE_IMAGE").text();
+		var avatarUrl = (typeof my.profile.image === "string" && my.profile.image) ? my.profile.image : (sessionImage || "");
+		$top.find(".top-profile-name").text(name);
+		$top.find(".top-profile-level-text").text("LV " + lv);
+		setProfileBackground($top.find(".top-profile-avatar"), avatarUrl, my.profile);
+		$top.find(".top-profile-gems").html(formatPing(my.money));
+		$top.find(".top-profile-level-bar .graph-bar")
+			.css("width", (my.data.score-prev)/(goal-prev)*100 + "%");
+		$top.find(".top-profile-level-img")
+			.replaceWith(getLevelImage(my.data.score).addClass("top-profile-level-img"));
+		var $bar = $top.find(".top-profile-level-bar");
+		if($bar.length){
+			var barRect = $bar.get(0).getBoundingClientRect();
+			var cardRect = $top.get(0).getBoundingClientRect();
+			var decoLeft = barRect.left - cardRect.left + (barRect.width / 2);
+			$top.css("--myinfo-deco-left", decoLeft + "px");
+		}
+		$top.find("#top-login-btn").toggle(!!$data.guest);
+	}
+	renderMyInfoSections(my);
+	renderShopCartState();
+	renderMatch1v1Panel();
+}
+function getModeLabel(modeId){
+	return L['mode' + modeId] || "";
+}
+function toFiniteNumber(value){
+	var n = Number(value);
+	return isFinite(n) ? n : 0;
+}
+function formatWinRate(value){
+	return (Number(value) || 0).toFixed(2) + "%";
+}
+function formatJoinedDate(value){
+	var joined = Number(value) || Date.UTC(2026, 3, 17);
+	var date = new Date(joined);
+	var mm = String(date.getMonth() + 1).padStart(2, "0");
+	var dd = String(date.getDate()).padStart(2, "0");
+
+	return mm + "/" + dd + " " + date.getFullYear();
+}
+function formatOrdinal(value){
+	var n = Number(value);
+	var mod100;
+
+	if(!isFinite(n) || n < 1) return "";
+	n = Math.floor(n);
+	mod100 = n % 100;
+	if(mod100 >= 11 && mod100 <= 13) return n + "th";
+	switch(n % 10){
+		case 1: return n + "st";
+		case 2: return n + "nd";
+		case 3: return n + "rd";
+		default: return n + "th";
+	}
+}
+function collectProfileStats(my){
+	var rows = [];
+	var record = (my && my.data && my.data.record) || {};
+	var seen = {};
+	var total = {
+		games: 0,
+		wins: 0,
+		losses: 0,
+		exp: 0
+	};
+
+	function appendMode(modeId){
+		var r = record[modeId] || [];
+		var modeName = getModeLabel(modeId);
+		var games = Math.max(0, toFiniteNumber(r[0]));
+		var wins = Math.max(0, toFiniteNumber(r[1]));
+		var losses = Math.max(0, games - wins);
+		var exp = Math.max(0, toFiniteNumber(r[2]));
+		var winRate;
+
+		if(seen[modeId]) return;
+		seen[modeId] = true;
+		if(!modeName) return;
+		winRate = games > 0 ? (wins / games) * 100 : 0;
+		rows.push({
+			mode: modeId,
+			modeName: modeName,
+			games: games,
+			wins: wins,
+			losses: losses,
+			winRate: winRate,
+			exp: exp
+		});
+		total.games += games;
+		total.wins += wins;
+		total.losses += losses;
+		total.exp += exp;
+	}
+	(MODE || []).forEach(appendMode);
+	Object.keys(record).forEach(appendMode);
+	rows.sort(function(a, b){
+		var ia = (MODE || []).indexOf(a.mode);
+		var ib = (MODE || []).indexOf(b.mode);
+
+		if(ia !== -1 || ib !== -1) return (ia === -1 ? 9999 : ia) - (ib === -1 ? 9999 : ib);
+		return String(a.mode).localeCompare(String(b.mode));
+	});
+	total.winRate = total.games > 0 ? (total.wins / total.games) * 100 : 0;
+	return {
+		rows: rows,
+		total: total
+	};
+}
+function getMyPlaceText(my){
+	if($data.room) return $data.room.id + L['roomNumber'];
+	if(my && my.rank != null && !isNaN(Number(my.rank))) return formatOrdinal(Number(my.rank) + 1);
+	return L['lobby'] || "Lobby";
+}
+function renderMyInfoSections(my){
+	$data._myInfoUser = my || ($data.users && $data.users[$data.id]);
+	renderMyInfoProfile();
+	if(!shouldPreserveMyInfoInventory()) renderMyInfoInventoryPlaceholder();
+	if(!shouldPreserveMyInfoLetterMerger()) renderMyInfoLetterMergerPlaceholder();
+	else renderMyInfoLetterMerger();
+	renderMyInfoReplay();
+	renderMyInfoSettings();
+}
+function shouldPreserveMyInfoInventory(){
+	return $("body").hasClass("myinfo-open") && $(".MyInfoBox .myinfo-section[data-section=\"inventory\"]").hasClass("is-active");
+}
+function shouldPreserveMyInfoLetterMerger(){
+	return $("body").hasClass("myinfo-open") && $(".MyInfoBox .myinfo-section[data-section=\"letter-merger\"]").hasClass("is-active");
+}
+function resetMyInfoTabsToProfile(){
+	var $box = $(".MyInfoBox");
+	if(!$box.length) return;
+	$box.find(".myinfo-tab").removeClass("active");
+	$box.find('.myinfo-tab[data-section="profile"]').addClass("active");
+	$box.find(".myinfo-section").removeClass("is-active");
+	$box.find('.myinfo-section[data-section="profile"]').addClass("is-active");
+}
+function renderMyInfoProfile(){
+	var my = $data._myInfoUser || ($data.users && $data.users[$data.id]);
+	var $shell = $(".myinfo-profile-shell");
+	var stats;
+	var lv;
+	var prev;
+	var goal;
+	var progress;
+	var displayName;
+	var $hero;
+	var $avatarWrap;
+	var $summary;
+	var $table;
+	var joinedText;
+
+	if(!$shell.length || !my || !my.profile || !my.data) return;
+	stats = collectProfileStats(my);
+	lv = getLevel(my.data.score);
+	prev = EXP[lv - 2] || 0;
+	goal = EXP[lv - 1] || prev;
+	progress = (goal > prev) ? ((my.data.score - prev) / (goal - prev) * 100) : 100;
+	progress = Math.max(0, Math.min(100, progress));
+	displayName = my.profile.title || my.profile.name || $data.id;
+	joinedText = formatJoinedDate(my.data.joinedAt);
+	$shell.empty();
+	$shell.append($("<div>").addClass("myinfo-panel-title").text("PROFILE"));
+
+	$hero = $("<div>").addClass("myinfo-hero-card")
+		.append($avatarWrap = $("<div>").addClass("myinfo-avatar-wrap moremi")
+			.append(getImage(my.profile.image, my.profile).addClass("myinfo-avatar-large"))
+		)
+		.append($("<div>").addClass("myinfo-hero-meta")
+			.append($("<div>").addClass("myinfo-hero-name").text(displayName))
+			.append($("<div>").addClass("myinfo-hero-sub").text("#" + my.id.toString().substr(0, 5) + "  ·  " + getMyPlaceText(my)))
+			.append($("<div>").addClass("myinfo-hero-level").text((L['LEVEL'] || "LEVEL") + " " + lv + "  ·  " + commify(my.data.score) + " / " + commify(goal) + (L['PTS'] || "pts")))
+			.append($("<div>").addClass("myinfo-level-progress graph")
+				.append($("<div>").addClass("graph-bar").css("width", progress + "%"))
+			)
+			.append($("<div>").addClass("myinfo-hero-exordial").text(my.exordial || ""))
+		);
+	$shell.append($hero);
+	renderMoremi($avatarWrap, my.equip);
+
+	$summary = $("<div>").addClass("myinfo-stat-grid")
+		.append($("<div>").addClass("myinfo-stat-card")
+			.append($("<div>").addClass("myinfo-stat-label").text("WINS / LOSSES"))
+			.append($("<div>").addClass("myinfo-stat-value").text(commify(stats.total.wins) + "W " + commify(stats.total.losses) + "L"))
+		)
+		.append($("<div>").addClass("myinfo-stat-card")
+			.append($("<div>").addClass("myinfo-stat-label").text("WIN RATE"))
+			.append($("<div>").addClass("myinfo-stat-value").text(formatWinRate(stats.total.winRate)))
+		)
+		.append($("<div>").addClass("myinfo-stat-card")
+			.append($("<div>").addClass("myinfo-stat-label").text("TOTAL EXP GAINED"))
+			.append($("<div>").addClass("myinfo-stat-value").text(commify(stats.total.exp)))
+		)
+		.append($("<div>").addClass("myinfo-stat-card")
+			.append($("<div>").addClass("myinfo-stat-label").text("JOINED"))
+			.append($("<div>").addClass("myinfo-stat-value").text(joinedText))
+		);
+	$shell.append($summary);
+
+	$table = $("<div>").addClass("myinfo-mode-table")
+		.append($("<div>").addClass("myinfo-mode-row myinfo-mode-head")
+			.append($("<div>").text("GAME MODE"))
+			.append($("<div>").text("WINS / LOSSES"))
+			.append($("<div>").text("WIN RATE"))
+			.append($("<div>").text("TOTAL EXP"))
+		);
+	if(!stats.rows.length){
+		$table.append($("<div>").addClass("myinfo-mode-empty").text("No match record yet."));
+	}else{
+		stats.rows.forEach(function(row){
+			$table.append($("<div>").addClass("myinfo-mode-row")
+				.append($("<div>").text(row.modeName))
+				.append($("<div>").text(commify(row.wins) + "W " + commify(row.losses) + "L"))
+				.append($("<div>").text(formatWinRate(row.winRate)))
+				.append($("<div>").text(commify(row.exp)))
+			);
+		});
+	}
+	$shell.append($table);
+
+	$shell.append($("<div>").addClass("myinfo-action-row")
+		.append($("<button>").addClass("myinfo-action-btn js-profile-dress").text(L['dress'] || "Dress"))
+		.append($("<button>").addClass("myinfo-action-btn").text("YOUR PROFILE").on("click", function(){
+			requestProfile($data.id);
+		}))
+	);
+}
+function renderMyInfoInventory(){
+	var my = $data._myInfoUser || ($data.users && $data.users[$data.id]);
+	var $shell = $(".myinfo-inventory-shell");
+	var $panel;
+
+	if(!$shell.length || !my || !my.profile) return;
+	$shell.removeData("inventory-pending");
+	if($shell.data("inventory-loaded") && $("#myinfo-dress-inline").closest($shell).length) return;
+	restoreMyInfoInlineDress();
+	$shell.empty();
+	$shell.append($("<div>").addClass("myinfo-panel-title").text("INVENTORY"));
+	$panel = mountMyInfoInlineDress($shell);
+	if(!$panel){
+		$shell.append($("<div>").addClass("myinfo-inventory-list")
+			.append($("<div>").addClass("myinfo-mode-empty").text("Inventory customization is not available here."))
+		);
+		return;
+	}
+	loadMyInfoInlineDress();
+}
+function scheduleMyInfoInventoryRender(){
+	var $shell = $(".myinfo-inventory-shell");
+	var run;
+
+	if(!$shell.length) return;
+	if($shell.data("inventory-loaded") && $("#myinfo-dress-inline").closest($shell).length){
+		renderMyInfoInventory();
+		return;
+	}
+	renderMyInfoInventoryLoadingShell();
+	if($data._myInfoInventoryFrame && window.cancelAnimationFrame){
+		window.cancelAnimationFrame($data._myInfoInventoryFrame);
+	}
+	if($data._myInfoInventoryTimer){
+		clearTimeout($data._myInfoInventoryTimer);
+	}
+	run = function(){
+		$data._myInfoInventoryFrame = null;
+		$data._myInfoInventoryTimer = null;
+		if(!$(".MyInfoBox .myinfo-section[data-section=\"inventory\"]").hasClass("is-active")) return;
+		renderMyInfoInventory();
+	};
+	if(window.requestAnimationFrame){
+		$data._myInfoInventoryFrame = window.requestAnimationFrame(function(){
+			$data._myInfoInventoryTimer = setTimeout(run, 0);
+		});
+	}else{
+		$data._myInfoInventoryTimer = setTimeout(run, 0);
+	}
+}
+function renderMyInfoInventoryLoadingShell(){
+	var $shell = $(".myinfo-inventory-shell");
+	var $loading;
+
+	if(!$shell.length) return;
+	if($shell.data("inventory-pending")) return;
+	if($("#myinfo-dress-inline").closest($shell).length) return;
+	$shell.data("inventory-pending", true);
+	$shell.empty()
+		.append($("<div>").addClass("myinfo-panel-title").text("INVENTORY"));
+	$loading = $("<div>").addClass("myinfo-inventory-loading");
+	$shell.append($loading);
+	showMyInfoInventorySpinner($loading);
+}
+function renderMyInfoInventoryPlaceholder(){
+	var $shell = $(".myinfo-inventory-shell");
+	if(!$shell.length) return;
+	restoreMyInfoInlineDress();
+	$shell.removeData("inventory-loaded");
+	$shell.empty()
+		.append($("<div>").addClass("myinfo-panel-title").text("INVENTORY"))
+		.append($("<div>").addClass("myinfo-inventory-list myinfo-inventory-placeholder")
+			.append($("<div>").addClass("myinfo-mode-empty").text("Inventory will load when this tab is opened."))
+		);
+}
+function openMyInfoInventory(){
+	var $box = $(".MyInfoBox");
+	if(!$box.length) return false;
+	$box.find(".myinfo-tab").removeClass("active");
+	$box.find('.myinfo-tab[data-section="inventory"]').addClass("active");
+	$box.find(".myinfo-section").removeClass("is-active");
+	$box.find('.myinfo-section[data-section="inventory"]').addClass("is-active");
+	scheduleMyInfoInventoryRender();
+	return true;
+}
+function restoreMyInfoInlineDress(){
+	var $panel = $("#myinfo-dress-inline");
+	var $dialogBody = $("#DressDiag .dialog-body");
+	if($panel.length && $dialogBody.length && $panel.children().length){
+		hideMyInfoInventorySpinner($panel);
+		$panel.find(".myinfo-inline-dress-message").remove();
+		$dialogBody.append($panel.children());
+	}
+	$(".myinfo-inventory-shell").removeData("inventory-loaded");
+}
+function restoreMyInfoInlineCharFactory(){
+	var $panel = $("#myinfo-charfactory-inline");
+	var $dialogBody = $("#CharFactoryDiag .dialog-body");
+	if($panel.length && $dialogBody.length && $panel.children().length){
+		hideMyInfoInventorySpinner($panel);
+		$panel.find(".myinfo-inline-letter-message").remove();
+		$dialogBody.append($panel.children());
+	}
+	$(".myinfo-letter-shell").removeData("letter-loaded");
+}
+function mountMyInfoInlineDress($shell){
+	var $dialogBody = $("#DressDiag .dialog-body");
+	var $panel;
+	if(!$dialogBody.length || !$dialogBody.children().length) return null;
+	$panel = $("<div>").attr("id", "myinfo-dress-inline").addClass("myinfo-inline-dress");
+	$panel.append($dialogBody.children());
+	$panel.find("#dress-nick").closest(".dialog-bar").addClass("myinfo-dress-row myinfo-dress-nick-row");
+	$panel.find("#dress-exordial").closest(".dialog-bar").addClass("myinfo-dress-row myinfo-dress-exordial-row");
+	$panel.find("#dress-view").closest(".dialog-bar").addClass("myinfo-dress-preview");
+	$panel.find("#dress-goods").closest(".dialog-bar").addClass("myinfo-dress-goods");
+	$panel.find("#dress-ok").closest(".dialog-bar").addClass("myinfo-dress-actions");
+	$shell.append($panel);
+	return $panel;
+}
+function showMyInfoInventorySpinner($panel){
+	if(!$panel || !$panel.length) return;
+	$panel.addClass("is-loading");
+	if(!$panel.children(".myinfo-inventory-spinner").length){
+		$panel.append($("<div>").addClass("myinfo-inventory-spinner")
+			.append($("<div>").addClass("myinfo-inventory-spinner-ring"))
+		);
+	}
+}
+function hideMyInfoInventorySpinner($panel){
+	if(!$panel || !$panel.length) return;
+	$panel.removeClass("is-loading");
+	$panel.children(".myinfo-inventory-spinner").remove();
+}
+function loadMyInfoInlineDress(){
+	var $panel = $("#myinfo-dress-inline");
+	var $shell = $(".myinfo-inventory-shell");
+	if(!$panel.length) return;
+	$panel.find(".myinfo-inline-dress-message").remove();
+	hideMyInfoInventorySpinner($panel);
+	$panel.removeClass("is-disabled has-inventory-message");
+	if($data.guest){
+		$panel.addClass("is-disabled has-inventory-message").prepend($("<div>").addClass("myinfo-inline-dress-message").text("Login is required to customize inventory."));
+		return;
+	}
+	if($data._gaming){
+		$panel.addClass("is-disabled has-inventory-message").prepend($("<div>").addClass("myinfo-inline-dress-message").text("Inventory editing is unavailable during a game."));
+		return;
+	}
+	if($data._myInfoBoxLoaded && $data.box){
+		drawMyDress();
+		$shell.data("inventory-loaded", true);
+		return;
+	}
+	if($data._myInfoBoxLoading){
+		showMyInfoInventorySpinner($panel);
+		return;
+	}
+	$data._myInfoBoxLoading = true;
+	showMyInfoInventorySpinner($panel);
+	$.get("/box", function(res){
+		var $currentPanel = $("#myinfo-dress-inline");
+		var $currentShell = $(".myinfo-inventory-shell");
+		$data._myInfoBoxLoading = false;
+		if(!$currentPanel.length) return;
+		$currentPanel.removeClass("has-inventory-message").find(".myinfo-inline-dress-message").remove();
+		hideMyInfoInventorySpinner($currentPanel);
+		if(res.error) return fail(res.error);
+		$data.box = res;
+		$data._myInfoBoxLoaded = true;
+		drawMyDress();
+		$currentShell.data("inventory-loaded", true);
+	}).fail(function(){
+		var $currentPanel = $("#myinfo-dress-inline");
+		$data._myInfoBoxLoading = false;
+		if(!$currentPanel.length) return;
+		$currentPanel.find(".myinfo-inline-dress-message").remove();
+		hideMyInfoInventorySpinner($currentPanel);
+		$currentPanel.addClass("has-inventory-message").prepend($("<div>").addClass("myinfo-inline-dress-message").text("Inventory failed to load. Try opening it again."));
+	});
+}
+function renderMyInfoLetterMerger(){
+	var $shell = $(".myinfo-letter-shell");
+	var $panel;
+
+	if(!$shell.length) return;
+	$shell.removeData("letter-pending");
+	if($shell.data("letter-loaded") && $("#myinfo-charfactory-inline").closest($shell).length) return;
+	restoreMyInfoInlineCharFactory();
+	$shell.empty()
+		.append($("<div>").addClass("myinfo-panel-title").text("LETTER MERGER"));
+	$panel = mountMyInfoInlineCharFactory($shell);
+	if(!$panel){
+		$shell.append($("<div>").addClass("myinfo-letter-desc")
+			.text("Letter merger is not available here."));
+		return;
+	}
+	loadMyInfoInlineCharFactory();
+}
+function scheduleMyInfoLetterMergerRender(){
+	var $shell = $(".myinfo-letter-shell");
+	var run;
+
+	if(!$shell.length) return;
+	if($shell.data("letter-loaded") && $("#myinfo-charfactory-inline").closest($shell).length){
+		renderMyInfoLetterMerger();
+		return;
+	}
+	renderMyInfoLetterMergerLoadingShell();
+	if($data._myInfoLetterFrame && window.cancelAnimationFrame){
+		window.cancelAnimationFrame($data._myInfoLetterFrame);
+	}
+	if($data._myInfoLetterTimer){
+		clearTimeout($data._myInfoLetterTimer);
+	}
+	run = function(){
+		$data._myInfoLetterFrame = null;
+		$data._myInfoLetterTimer = null;
+		if(!$(".MyInfoBox .myinfo-section[data-section=\"letter-merger\"]").hasClass("is-active")) return;
+		renderMyInfoLetterMerger();
+	};
+	if(window.requestAnimationFrame){
+		$data._myInfoLetterFrame = window.requestAnimationFrame(function(){
+			$data._myInfoLetterTimer = setTimeout(run, 0);
+		});
+	}else{
+		$data._myInfoLetterTimer = setTimeout(run, 0);
+	}
+}
+function renderMyInfoLetterMergerLoadingShell(){
+	var $shell = $(".myinfo-letter-shell");
+	var $loading;
+
+	if(!$shell.length) return;
+	if($shell.data("letter-pending")) return;
+	if($("#myinfo-charfactory-inline").closest($shell).length) return;
+	$shell.data("letter-pending", true);
+	$shell.empty()
+		.append($("<div>").addClass("myinfo-panel-title").text("LETTER MERGER"));
+	$loading = $("<div>").addClass("myinfo-inventory-loading");
+	$shell.append($loading);
+	showMyInfoInventorySpinner($loading);
+}
+function renderMyInfoLetterMergerPlaceholder(){
+	var $shell = $(".myinfo-letter-shell");
+	if(!$shell.length) return;
+	restoreMyInfoInlineCharFactory();
+	$shell.removeData("letter-loaded");
+	$shell.empty()
+		.append($("<div>").addClass("myinfo-panel-title").text("LETTER MERGER"))
+		.append($("<div>").addClass("myinfo-letter-desc")
+			.text("Letter merger will load when this tab is opened."));
+}
+function openMyInfoLetterMerger(){
+	var $box = $(".MyInfoBox");
+	if(!$box.length) return false;
+	$box.find(".myinfo-tab").removeClass("active");
+	$box.find('.myinfo-tab[data-section="letter-merger"]').addClass("active");
+	$box.find(".myinfo-section").removeClass("is-active");
+	$box.find('.myinfo-section[data-section="letter-merger"]').addClass("is-active");
+	scheduleMyInfoLetterMergerRender();
+	return true;
+}
+function mountMyInfoInlineCharFactory($shell){
+	var $dialogBody = $("#CharFactoryDiag .dialog-body");
+	var $panel;
+	if(!$dialogBody.length || !$dialogBody.children().length) return null;
+	$panel = $("<div>").attr("id", "myinfo-charfactory-inline").addClass("myinfo-inline-charfactory");
+	$panel.append($dialogBody.children());
+	$panel.find("#cf-tray").closest(".dialog-bar").addClass("myinfo-cf-build");
+	$panel.find("#cf-reward").closest(".dialog-bar").addClass("myinfo-cf-reward");
+	$panel.find("#cf-cost").closest(".dialog-bar").addClass("myinfo-cf-cost");
+	$panel.find("#cf-goods").closest(".dialog-bar").addClass("myinfo-cf-goods");
+	$panel.find("#cf-compose").closest(".dialog-bar").addClass("myinfo-cf-actions");
+	$panel.find("button").attr("type", "button");
+	$shell.append($panel);
+	return $panel;
+}
+function showMyInfoLetterMessage($panel, text){
+	if(!$panel || !$panel.length) return;
+	$panel.find(".myinfo-inline-letter-message").remove();
+	$panel.addClass("is-disabled").prepend($("<div>").addClass("myinfo-inline-letter-message").text(text));
+}
+function loadMyInfoInlineCharFactory(){
+	var $panel = $("#myinfo-charfactory-inline");
+	var $shell = $(".myinfo-letter-shell");
+	if(!$panel.length) return;
+	$panel.find(".myinfo-inline-letter-message").remove();
+	hideMyInfoInventorySpinner($panel);
+	$panel.removeClass("is-disabled");
+	if($data.guest){
+		showMyInfoLetterMessage($panel, "Login is required to use the letter merger.");
+		return;
+	}
+	if($data._gaming){
+		showMyInfoLetterMessage($panel, "Letter merger is unavailable during a game.");
+		return;
+	}
+	if($data._myInfoBoxLoaded && $data.box){
+		drawCharFactory();
+		$shell.data("letter-loaded", true);
+		return;
+	}
+	if($data._myInfoLetterLoading){
+		showMyInfoInventorySpinner($panel);
+		return;
+	}
+	$data._myInfoLetterLoading = true;
+	showMyInfoInventorySpinner($panel);
+	$.get("/box", function(res){
+		var $currentPanel = $("#myinfo-charfactory-inline");
+		var $currentShell = $(".myinfo-letter-shell");
+		$data._myInfoLetterLoading = false;
+		if(!$currentPanel.length) return;
+		$currentPanel.find(".myinfo-inline-letter-message").remove();
+		hideMyInfoInventorySpinner($currentPanel);
+		if(res.error) return fail(res.error);
+		$data.box = res;
+		$data._myInfoBoxLoaded = true;
+		drawCharFactory();
+		$currentShell.data("letter-loaded", true);
+	}).fail(function(){
+		var $currentPanel = $("#myinfo-charfactory-inline");
+		$data._myInfoLetterLoading = false;
+		if(!$currentPanel.length) return;
+		hideMyInfoInventorySpinner($currentPanel);
+		showMyInfoLetterMessage($currentPanel, "Letter merger failed to load. Try opening it again.");
+	});
+}
+function renderMyInfoReplay(){
+	var $shell = $(".myinfo-replay-shell");
+
+	if(!$shell.length) return;
+	if(!$("#myinfo-replay-date").text().trim()) $("#myinfo-replay-date").text("-");
+	if(!$("#myinfo-replay-version").text().trim()) $("#myinfo-replay-version").text("-");
+	if(!$("#myinfo-replay-players").text().trim()) $("#myinfo-replay-players").text("-");
+}
+function openMyInfoReplay(){
+	var $box = $(".MyInfoBox");
+
+	if(!$box.length) return false;
+	$box.find(".myinfo-tab").removeClass("active");
+	$box.find('.myinfo-tab[data-section="replay"]').addClass("active");
+	$box.find(".myinfo-section").removeClass("is-active");
+	$box.find('.myinfo-section[data-section="replay"]').addClass("is-active");
+	renderMyInfoReplay();
+	return true;
+}
+function openMyInfoReplayPage(){
+	$data._myInfo = true;
+	$data._shop = false;
+	$data._clans = false;
+	$data._communityOpen = false;
+	clearLobbySidePageIntent();
+	closeMatch1v1LobbyView(true);
+	if($stage && $stage.menu){
+		if($stage.menu.shop) $stage.menu.shop.removeClass("toggled");
+		if($stage.menu.clans) $stage.menu.clans.removeClass("toggled");
+		if($stage.menu.community) $stage.menu.community.removeClass("toggled");
+	}
+	updateUI();
+	addTimeout(function(){
+		openMyInfoReplay();
+	}, 0);
+}
+function renderMyInfoSettings(){
+	var $shell = $(".myinfo-settings-shell");
+	var opts = $data.opts || {};
+	var defs = [
+		{ key: "mb", label: L['bgm'] || "BGM", fallback: $data.muteBGM },
+		{ key: "me", label: L['effect'] || "Effect", fallback: $data.muteEff },
+		{ key: "di", label: L['denyInvite'] || "Deny Invite" },
+		{ key: "dw", label: L['whisper'] || "Deny Whisper" },
+		{ key: "df", label: L['friendAdd'] || "Deny Friend Add" },
+		{ key: "ar", label: L['autoReady'] || "Auto Ready" },
+		{ key: "su", label: L['sortUser'] || "Sort User" },
+		{ key: "ow", label: L['onlyWaiting'] || "Only Waiting" },
+		{ key: "ou", label: L['onlyUnlock'] || "Only Unlock" },
+		{ key: "dm", label: L['darkMode'] || "Dark Mode" }
+	];
+	var $list;
+
+	if(!$shell.length) return;
+	$shell.empty();
+	$shell.append($("<div>").addClass("myinfo-panel-title").text("SETTINGS"));
+	$list = $("<div>").addClass("myinfo-settings-list");
+	defs.forEach(function(item){
+		var checked = opts.hasOwnProperty(item.key) ? !!opts[item.key] : !!item.fallback;
+		$list.append($("<label>").addClass("myinfo-setting-row")
+			.append($("<input>").attr({ type: "checkbox", "data-opt-key": item.key }).prop("checked", checked))
+			.append($("<span>").text(item.label))
+		);
+	});
+	$shell.append($list);
+	$shell.append($("<div>").addClass("myinfo-action-row")
+		.append($("<button>").addClass("myinfo-action-btn js-myinfo-save-settings").text(L['save'] || "SAVE"))
+		.append($("<button>").addClass("myinfo-action-btn js-myinfo-open-settings").text("OPEN FULL SETTINGS"))
+	);
+}
+$(document).on("click", ".js-myinfo-open-letter", function(){
+	if($data._gaming) return fail(438);
+	openMyInfoLetterMerger();
+});
+$(document).on("click", ".js-myinfo-open-settings", function(){
+	toggleSettingsDialog();
+});
+$(document).on("click", ".js-myinfo-save-settings", function(){
+	var next = $.extend({}, $data.opts || {});
+	$(".myinfo-settings-shell input[data-opt-key]").each(function(){
+		var key = $(this).attr("data-opt-key");
+		if(!key) return;
+		next[key] = $(this).is(":checked");
+	});
+	applyOptions(next);
+	$.cookie('kks', JSON.stringify($data.opts));
+	notice(L['saved'] || "Saved.");
+});
+function normalizeClanRows(rows){
+	var safe = [];
+
+	if(!Array.isArray(rows)) return safe;
+	rows.forEach(function(row){
+		if(row && typeof row == "object") safe.push(row);
+	});
+	return safe;
+}
+function normalizeClanState(payload){
+	var src = payload && typeof payload == "object" ? payload : {};
+	var state = {
+		my: null,
+		list: []
+	};
+
+	state.list = normalizeClanRows(src.list);
+	if(src.my && typeof src.my == "object"){
+		state.my = src.my;
+		state.my.members = normalizeClanRows(state.my.members);
+		state.my.chat = normalizeClanRows(state.my.chat);
+	}
+	return state;
+}
+function normalizeClanBanner(raw){
+	var src = raw && typeof raw == "object" ? raw : {};
+	var shape = "shield";
+	var border = /^#[0-9a-f]{6}$/i.test(String(src.border || "")) ? String(src.border) : "#1f2a44";
+	var fill = /^#[0-9a-f]{6}$/i.test(String(src.fill || "")) ? String(src.fill) : "#de3f4e";
+	var logo = String(src.logo || "crown").toLowerCase();
+	var pattern = String(src.pattern || "solid").toLowerCase();
+	var validShapes = [ "shield" ];
+	var validLogos = [
+		"crown", "bolt", "sword", "star", "gem",
+		"mori",
+		"keyboard", "pencil", "letters"
+	];
+	var validPatterns = [ "solid", "tiles4", "vstripes3", "hstripes3", "vsplit2", "hsplit2" ];
+	var text = sanitizeClanBannerText(src.text);
+
+	if(logo == "flower") logo = "crown";
+	if(validShapes.indexOf(shape) < 0) shape = "shield";
+	if(validLogos.indexOf(logo) < 0) logo = "crown";
+	if(validPatterns.indexOf(pattern) < 0) pattern = "solid";
+	if(logo != "letters") text = "";
+	if(logo == "letters" && !text) text = "KK";
+	return { shape: shape, border: border, fill: fill, logo: logo, pattern: pattern, text: text };
+}
+function readClanBannerForm($section){
+	if(!$section || !$section.length) return normalizeClanBanner({});
+	return normalizeClanBanner({
+		border: $section.find(".js-clan-border").val(),
+		fill: $section.find(".js-clan-fill").val(),
+		pattern: $section.find(".js-clan-pattern").val(),
+		logo: $section.find(".js-clan-logo").val(),
+		text: $section.find(".js-clan-logo-text").val()
+	});
+}
+function sanitizeClanBannerText(value){
+	var raw = (value || "").toString();
+	var trimmed = raw.replace(/[<>\r\n\t]/g, "").replace(/\s+/g, "");
+
+	return trimmed.slice(0, 2);
+}
+var CLAN_BANNER_SHIELD_PATH = "M28 60H48c5 0 8-1 12-5l26-22c5-4 11-4 16 0l26 22c4 4 7 5 12 5h20c6 0 10 4 10 10v108c0 5-2 9-6 12l-61 50c-6 5-12 5-18 0l-61-50c-4-3-6-7-6-12V70c0-6 4-10 10-10z";
+function createClanBannerShieldSvg(){
+	var ns = "http://www.w3.org/2000/svg";
+	var svg = document.createElementNS(ns, "svg");
+	var fill = document.createElementNS(ns, "path");
+	var stroke = document.createElementNS(ns, "path");
+
+	svg.setAttribute("class", "clan-banner-shield-svg");
+	svg.setAttribute("viewBox", "0 0 188 267");
+	svg.setAttribute("preserveAspectRatio", "none");
+	svg.setAttribute("aria-hidden", "true");
+	svg.setAttribute("focusable", "false");
+	fill.setAttribute("class", "clan-banner-shield-fill");
+	fill.setAttribute("d", CLAN_BANNER_SHIELD_PATH);
+	stroke.setAttribute("class", "clan-banner-shield-stroke");
+	stroke.setAttribute("d", CLAN_BANNER_SHIELD_PATH);
+	svg.appendChild(fill);
+	svg.appendChild(stroke);
+	return $(svg);
+}
+function getClanBannerLogoSpec(config){
+	switch(config.logo){
+		case "crown": return { type: "svg", cls: "clan-banner-logo-crown", svg:
+			'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 48V22l11 10l11-18l11 18l11-10v26z" fill="currentColor"/><path d="M10 42h44v8c0 2.2-1.8 4-4 4H14c-2.2 0-4-1.8-4-4z" fill="rgba(255,255,255,0.26)"/><path d="M18 42l7-8l7 7l7-7l7 8z" fill="rgba(255,255,255,0.18)"/></svg>'
+		};
+		case "bolt": return { type: "icon", cls: "fa-bolt clan-banner-icon-bolt" };
+		case "sword": return { type: "svg", cls: "clan-banner-logo-sword", svg:
+			'<svg viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(-7 0) rotate(-47 32 32)" opacity="0.78"><path d="M32 4L40.2 12.5L36.8 18.9L35.1 37.6L32 42.9L28.9 37.6L27.2 18.9L23.8 12.5Z" fill="currentColor"/><path d="M32 7.3L36.1 12.3L33.7 18.1L32.7 31.1L32 35.7L31.3 31.1L30.3 18.1L27.9 12.3Z" fill="rgba(255,255,255,0.2)"/><path d="M21.5 37.8C23.9 35.1 27 33.6 30.1 33.6H33.9C37 33.6 40.1 35.1 42.5 37.8L39.9 42.1C39.5 42.8 38.6 43.1 37.9 42.8L32 40.2L26.1 42.8C25.4 43.1 24.5 42.8 24.1 42.1Z" fill="currentColor"/><rect x="29.3" y="42.1" width="5.4" height="10.3" rx="1.3" fill="currentColor"/><path d="M30.2 42.8h1v8.9h-1zm2.6 0h1v8.9h-1z" fill="rgba(255,255,255,0.2)"/><path d="M28.1 54.1L32 58.4L35.9 54.1L34.4 51.7H29.6Z" fill="currentColor"/></g><g transform="translate(7 0) rotate(47 32 32)"><path d="M32 4L40.2 12.5L36.8 18.9L35.1 37.6L32 42.9L28.9 37.6L27.2 18.9L23.8 12.5Z" fill="currentColor"/><path d="M32 7.3L36.1 12.3L33.7 18.1L32.7 31.1L32 35.7L31.3 31.1L30.3 18.1L27.9 12.3Z" fill="rgba(255,255,255,0.2)"/><path d="M21.5 37.8C23.9 35.1 27 33.6 30.1 33.6H33.9C37 33.6 40.1 35.1 42.5 37.8L39.9 42.1C39.5 42.8 38.6 43.1 37.9 42.8L32 40.2L26.1 42.8C25.4 43.1 24.5 42.8 24.1 42.1Z" fill="currentColor"/><rect x="29.3" y="42.1" width="5.4" height="10.3" rx="1.3" fill="currentColor"/><path d="M30.2 42.8h1v8.9h-1zm2.6 0h1v8.9h-1z" fill="rgba(255,255,255,0.2)"/><path d="M28.1 54.1L32 58.4L35.9 54.1L34.4 51.7H29.6Z" fill="currentColor"/></g></svg>'
+		};
+		case "star": return { type: "icon", cls: "fa-star clan-banner-icon-star" };
+		case "gem": return { type: "svg", cls: "clan-banner-logo-gem", svg:
+			'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M18 20h28l8 10l-22 26L10 30z" fill="currentColor"/><path d="M18 20h28l-8 10H26z" fill="rgba(255,255,255,0.26)"/><path d="M18 20l8 10H10z" fill="rgba(255,255,255,0.14)"/><path d="M46 20l-8 10h16z" fill="rgba(255,255,255,0.12)"/><path d="M26 30l6 26l6-26z" fill="rgba(255,255,255,0.18)"/></svg>'
+		};
+		case "keyboard": return { type: "icon", cls: "fa-keyboard-o clan-banner-icon-keyboard" };
+		case "pencil": return { type: "svg", cls: "clan-banner-logo-pencil", svg:
+			'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M8 30c0-9 5-16 12-21c-1 8 2 14 8 18c-5 2-8 6-10 12c-5 0-8-2-10-9z" fill="#ff6b2e"/><path d="M12 33c2-5 5-8 9-9c-1 5-1 9 2 14c-5 0-9-1-11-5z" fill="#ffd84f"/><path d="M18 46l4-10l18-18l8 8L30 44z" fill="#ffffff"/><path d="M40 18l5-5l8 8l-5 5z" fill="#ffffff"/><path d="M18 46l12-4l-8-8z" fill="#ffffff"/><path d="M16 49l4-3l3 3l-3 5z" fill="#f7fbff"/></svg>'
+		};
+		case "mori": return { type: "svg", cls: "clan-banner-logo-mori", svg:
+			'<svg viewBox="0 0 64 64" aria-hidden="true"><g transform="translate(0 1.3)"><path d="M21.4 8C24.1 10.8 28.2 11.9 32 11.9C35.8 11.9 39.9 10.8 42.6 8C49.1 8.9 52.5 12.5 52.5 16.9C52.5 20.4 49.4 22.8 44.8 22.8C41.4 22.8 38.6 22.1 32 20.3C25.4 22.1 22.6 22.8 19.2 22.8C14.6 22.8 11.5 20.4 11.5 16.9C11.5 12.5 14.9 8.9 21.4 8Z" fill="currentColor"/></g><circle cx="32" cy="33.5" r="7.2" fill="currentColor"/><circle cx="22.8" cy="49.6" r="7.2" fill="currentColor"/><circle cx="41.2" cy="49.6" r="7.2" fill="currentColor"/></svg>'
+		};
+		case "letters": return { type: "text", cls: "clan-banner-logo-letters", text: config.text || "KK" };
+		default: return { type: "svg", cls: "clan-banner-logo-crown", svg:
+			'<svg viewBox="0 0 64 64" aria-hidden="true"><path d="M10 48V22l11 10l11-18l11 18l11-10v26z" fill="currentColor"/><path d="M10 42h44v8c0 2.2-1.8 4-4 4H14c-2.2 0-4-1.8-4-4z" fill="rgba(255,255,255,0.26)"/><path d="M18 42l7-8l7 7l7-7l7 8z" fill="rgba(255,255,255,0.18)"/></svg>'
+		};
+	}
+}
+function applyClanBannerColors($el, config){
+	var node = $el && $el.length ? $el.get(0) : null;
+	if(!node || !node.style) return;
+	node.style.setProperty("--banner-border", config.border);
+	node.style.setProperty("--banner-fill", config.fill);
+}
+function updateClanLogoTextFieldVisibility($section){
+	var isLetters = ($section.find(".js-clan-logo").val() || "") == "letters";
+	var $field = $section.find(".js-clan-logo-text-wrap");
+
+	if(!$field.length) return;
+	$field.toggle(isLetters);
+}
+function createClanBannerElement(banner, small){
+	var config = normalizeClanBanner(banner);
+	var logoSpec = getClanBannerLogoSpec(config);
+	var $el = $("<div>").addClass("clan-banner clan-banner-" + config.shape + (small ? " is-small" : ""))
+		.addClass("clan-banner-pattern-" + config.pattern)
+		.attr("data-logo", config.logo);
+
+	applyClanBannerColors($el, config);
+	$el.append(createClanBannerShieldSvg());
+	if(logoSpec.type == "text"){
+		$el.append($("<span>").addClass("clan-banner-logo-text " + logoSpec.cls).text(logoSpec.text || ""));
+	}else if(logoSpec.type == "svg"){
+		$el.append($("<span>").addClass("clan-banner-logo " + logoSpec.cls).html(logoSpec.svg || ""));
+	}else{
+		$el.append($("<i>").addClass("fa " + logoSpec.cls));
+	}
+	return $el;
+}
+function getRoomUserClanBanner(user){
+	var clan = user && user.clan;
+	var profileClan = user && user.profile && user.profile.clan;
+	var pendingClanBanner = $data && $data._pendingClanBanner;
+	var myClan = $data && $data.clan && $data.clan.my;
+	var members;
+	var i;
+
+	if(clan && clan.banner) return clan.banner;
+	if(profileClan && profileClan.banner) return profileClan.banner;
+	if(user && user.id == $data.id && pendingClanBanner) return pendingClanBanner;
+	if(!myClan || !myClan.banner || !Array.isArray(myClan.members)) return null;
+	members = myClan.members;
+	for(i=0; i<members.length; i++){
+		if(members[i] && members[i].id == user.id) return myClan.banner;
+	}
+	return null;
+}
+function syncClanBannerPreview($section){
+	var data = readClanBannerForm($section);
+	var $holder = $section.find(".js-clan-banner-preview");
+
+	if(!$holder.length) return;
+	$section.data("clanBannerConfig", data);
+	updateClanLogoTextFieldVisibility($section);
+	$holder.empty().append(createClanBannerElement(data));
+}
+function filterClanRowsByName($section){
+	var query = (($section.find(".js-clan-search").val() || "") + "").trim().toLowerCase();
+	var $list = $section.find(".clan-list-panel");
+	var $target = $section.find(".clan-list-scroll");
+	var $rows = $section.find(".clan-list-row");
+	var shown = 0;
+
+	if(!$target.length) $target = $list;
+	$target.find(".js-clan-search-empty").remove();
+	if(!$rows.length){
+		$target.find(".myinfo-clan-empty").remove();
+		$target.append($("<div>").addClass("myinfo-clan-empty" + (query ? " js-clan-search-empty" : ""))
+			.text(query ? "No matching clans." : (L['clanNoClan'] || "No clans yet.")));
+		return;
+	}
+	$rows.each(function(){
+		var $row = $(this);
+		var key = ($row.attr("data-name-key") || "").toLowerCase();
+		var matched = !query || key.indexOf(query) >= 0;
+
+		$row.toggle(matched);
+		if(matched) shown++;
+	});
+	if(!shown){
+		$target.append($("<div>").addClass("myinfo-clan-empty js-clan-search-empty")
+			.text(query ? "No matching clans." : (L['clanNoClan'] || "No clans yet.")));
+	}
+}
+function countClanOnlineMembers(members){
+	var count = 0;
+
+	members = normalizeClanRows(members);
+	members.forEach(function(member){
+		if(member && member.online) count++;
+	});
+	return count;
+}
+function buildSocialHubPageHeader(title, subtitle, kind){
+	var $heading = $("<div>").addClass("social-hub-heading")
+		.append($("<h2>").addClass("social-hub-title").text(title));
+	var $header = $("<div>").addClass("social-hub-page-header");
+
+	if(subtitle) $heading.append($("<p>").addClass("social-hub-subtitle").text(subtitle));
+	if(kind == "clan"){
+		$header.append($("<img>").addClass("social-hub-page-icon").attr({ src: "/img/kkutu/clans_shield_people.svg", alt: "", "aria-hidden": "true" }));
+	}else if(kind == "community"){
+		$header.append($("<i>").addClass("social-hub-page-icon fa fa-comments").attr("aria-hidden", "true"));
+	}
+	return $header.append($heading);
+}
+function setSocialHubButtonLabels($section){
+	$section.find("button").each(function(){
+		var $button = $(this);
+		var text = $.trim($button.text());
+
+		if(text && !$button.attr("aria-label")) $button.attr("aria-label", text);
+	});
+}
+function captureClanPageRenderState($section, identity){
+	var state = { identity: identity, fields: {} };
+	var active = document.activeElement;
+	var selectors = [
+		".js-clan-name", ".js-clan-about", ".js-clan-search", ".js-clan-border", ".js-clan-fill",
+		".js-clan-pattern", ".js-clan-logo", ".js-clan-logo-text", ".js-clan-message"
+	];
+
+	if($section.data("clanRenderIdentity") !== identity) return null;
+	selectors.forEach(function(selector){
+		var $field = $section.find(selector).first();
+		if(!$field.length) return;
+		state.fields[selector] = $field.val();
+		if($field[0] !== active) return;
+		state.focus = selector;
+		if(typeof active.selectionStart === "number"){
+			state.selectionStart = active.selectionStart;
+			state.selectionEnd = active.selectionEnd;
+			state.selectionDirection = active.selectionDirection;
+		}
+	});
+	return state;
+}
+function restoreClanPageRenderState($section, state, focus){
+	var field;
+
+	if(!state || $section.data("clanRenderIdentity") !== state.identity) return;
+	Object.keys(state.fields).forEach(function(selector){
+		$section.find(selector).first().val(state.fields[selector]);
+	});
+	if(!focus || !state.focus) return;
+	field = $section.find(state.focus).first()[0];
+	if(!field) return;
+	try{
+		field.focus({ preventScroll: true });
+		if(typeof state.selectionStart === "number" && typeof field.setSelectionRange === "function"){
+			field.setSelectionRange(state.selectionStart, state.selectionEnd, state.selectionDirection);
+		}
+	}catch(err){
+		// Color inputs and selects do not support a text selection range.
+	}
+}
+function renderClanPageSafe(keepScroll){
+	try{
+		ensureClanPageBox();
+		renderClanPage(keepScroll);
+	}catch(err){
+		var $section = getClanPageSection();
+
+		if(window.console && console.error) console.error("Clan page render failed", err);
+		if(!$section.length) return;
+		$section.off(".clan")
+			.removeClass("is-member")
+			.addClass("is-recruiting")
+			.empty()
+			.append($("<div>").addClass("myinfo-clan-empty").text("Clan page could not be loaded."));
+	}
+}
+function renderClanPage(keepScroll){
+	ensureClanPageBox();
+	var $section = getClanPageSection();
+	var state = normalizeClanState($data.clan || {});
+	var my = state.my;
+	var identity = String($data.id || "") + ":" + (my ? "clan:" + String(my.id || "") : "recruiting");
+	var renderState = captureClanPageRenderState($section, identity);
+	var $chatExisting = $section.find(".myinfo-clan-chat-list");
+	var previousTop = (keepScroll && $chatExisting.length) ? $chatExisting.scrollTop() : null;
+	var i;
+
+	if(!$section.length) return;
+	$section.off(".clan");
+	$section.removeClass("is-recruiting is-member").empty();
+	$section.data("clanRenderIdentity", identity);
+
+	if(!my){
+		$section.addClass("is-recruiting");
+		var tCreate = L['clanCreate'] || "Create Clan";
+		var tName = L['clanName'] || "Clan name";
+		var tAbout = L['clanAbout'] || "Clan description";
+		var tSearch = L['search'] || "Search";
+		var tJoin = L['clanJoin'] || "Join";
+		var tNoClan = L['clanNoClan'] || "No clans yet.";
+		var tMembers = L['clanMembers'] || "members";
+		var tMission = L['clanMission'] || "mission";
+		var $layout = $("<div>").addClass("clan-page-layout is-recruiting");
+		var $create = $("<div>").addClass("myinfo-clan-create clan-create-panel")
+			.append($("<div>").addClass("clan-panel-head social-hub-section-head")
+				.append($("<h3>").addClass("myinfo-clan-title social-hub-section-title").text(tCreate))
+				.append($("<span>").addClass("clan-create-cost social-hub-section-meta").text("500 " + (L['gems'] || "gems")))
+			)
+			.append($("<label>").addClass("social-hub-field")
+				.append($("<span>").addClass("social-hub-field-label").text(tName))
+				.append($("<input>").attr({ type: "text", maxlength: 24, autocomplete: "off" }).addClass("myinfo-clan-input js-clan-name"))
+			)
+			.append($("<label>").addClass("social-hub-field")
+				.append($("<span>").addClass("social-hub-field-label").text(tAbout))
+				.append($("<textarea>").attr({ maxlength: 120 }).addClass("myinfo-clan-about js-clan-about"))
+			)
+			.append($("<div>").addClass("clan-banner-builder")
+				.append($("<div>").addClass("clan-banner-preview-wrap")
+					.append($("<span>").addClass("social-hub-field-label").text(L['clanBanner'] || "Clan crest"))
+					.append($("<div>").addClass("js-clan-banner-preview clan-banner-preview"))
+				)
+				.append($("<div>").addClass("clan-banner-controls")
+					.append($("<label>").text("Border")
+						.append($("<input>").attr({ type: "color", value: "#1f2a44" }).addClass("js-clan-border"))
+					)
+					.append($("<label>").text("Banner")
+						.append($("<input>").attr({ type: "color", value: "#de3f4e" }).addClass("js-clan-fill"))
+					)
+					.append($("<label>").text("Pattern")
+						.append($("<select>").addClass("js-clan-pattern")
+							.append($("<option>").attr("value", "solid").text("Solid"))
+							.append($("<option>").attr("value", "tiles4").text("4 Tiles"))
+							.append($("<option>").attr("value", "vstripes3").text("3 Vertical"))
+							.append($("<option>").attr("value", "hstripes3").text("3 Horizontal"))
+							.append($("<option>").attr("value", "vsplit2").text("2 Vertical Areas"))
+							.append($("<option>").attr("value", "hsplit2").text("2 Horizontal Areas"))
+						)
+					)
+					.append($("<label>").text("Logo")
+						.append($("<select>").addClass("js-clan-logo")
+							.append($("<option>").attr("value", "crown").text("Crown"))
+							.append($("<option>").attr("value", "sword").text("Sword"))
+							.append($("<option>").attr("value", "bolt").text("Bolt"))
+							.append($("<option>").attr("value", "star").text("Star"))
+							.append($("<option>").attr("value", "gem").text("Gem"))
+							.append($("<option>").attr("value", "mori").text("Mori"))
+							.append($("<option>").attr("value", "keyboard").text("Keyboard"))
+							.append($("<option>").attr("value", "pencil").text("Pencil"))
+							.append($("<option>").attr("value", "letters").text("2 Letters"))
+						)
+					)
+					.append($("<label>").addClass("js-clan-logo-text-wrap").text("Letters")
+						.append($("<input>").attr({
+							type: "text",
+							maxlength: 2,
+							placeholder: "KK"
+						}).addClass("js-clan-logo-text"))
+					)
+				)
+			)
+			.append($("<button>").addClass("myinfo-clan-btn js-clan-create").text(tCreate));
+		var $createFields = $("<div>").addClass("clan-create-fields")
+			.append($create.children(".social-hub-field,.clan-banner-builder"));
+		$createFields.insertBefore($create.children(".js-clan-create"));
+		var $list = $("<div>").addClass("myinfo-clan-public-list clan-list-panel clan-directory-panel")
+			.append($("<div>").addClass("clan-panel-head social-hub-section-head")
+				.append($("<h3>").addClass("myinfo-clan-title social-hub-section-title").text(L['clanFind'] || "Find your clan"))
+				.append($("<span>").addClass("social-hub-section-meta").text(state.list.length + " " + (L['clanCountLabel'] || "clans")))
+			)
+			.append($("<label>").addClass("clan-search-wrap social-hub-field")
+				.append($("<span>").addClass("social-hub-field-label").text(tSearch + " " + tName))
+				.append($("<i>").addClass("fa fa-search").attr("aria-hidden", "true"))
+				.append($("<input>").attr({ type: "text", maxlength: 24, placeholder: tSearch + " " + tName }).addClass("myinfo-clan-input js-clan-search"))
+			);
+		var $listRows = $("<div>").addClass("clan-list-scroll");
+
+		if(!state.list.length){
+			$listRows.append($("<div>").addClass("myinfo-clan-empty").text(tNoClan));
+		}else{
+			state.list.forEach(function(item){
+				var mission = item && item.mission ? item.mission : {};
+				var progress = Number(mission.progress || 0);
+				var goal = Math.max(1, Number(mission.goal || 1));
+				var progressPct = Math.max(0, Math.min(100, progress / goal * 100));
+				var banner = normalizeClanBanner(item && item.banner);
+
+				$listRows.append($("<div>").addClass("myinfo-clan-row clan-list-row")
+					.attr("data-name-key", (item.name || "").toString().toLowerCase())
+					.append(createClanBannerElement(banner, true))
+					.append($("<div>").addClass("myinfo-clan-row-main")
+						.append($("<div>").addClass("myinfo-clan-row-name").text(item.name || "-"))
+						.append($("<div>").addClass("myinfo-clan-row-about").text(item.about || ""))
+						.append($("<div>").addClass("clan-row-statline")
+							.append($("<span>").text((item.memberCount || 0) + " " + tMembers))
+							.append($("<span>").text(tMission + " " + progress + "/" + goal))
+						)
+						.append($("<div>").addClass("clan-row-mission-bar")
+							.append($("<div>").addClass("clan-row-mission-fill").css("width", progressPct + "%"))
+						)
+					)
+					.append($("<button>").addClass("myinfo-clan-btn js-clan-join").attr("data-id", item.id).text(tJoin))
+				);
+			});
+		}
+		$list.append($listRows);
+		$layout.append($list).append($create);
+		$section.append(buildSocialHubPageHeader(L['clanTitle'] || "CLANS", L['clanHubSubtitle'] || "Find a crew for your next round.", "clan")).append($layout);
+		restoreClanPageRenderState($section, renderState, false);
+		syncClanBannerPreview($section);
+		filterClanRowsByName($section);
+		$section.on("change.clan input.clan", ".js-clan-border,.js-clan-fill,.js-clan-pattern,.js-clan-logo,.js-clan-logo-text", function(){
+			syncClanBannerPreview($section);
+		});
+		$section.on("input.clan", ".js-clan-search", function(){
+			filterClanRowsByName($section);
+		});
+		$section.on("click.clan", ".js-clan-create", function(){
+			var bannerData = readClanBannerForm($section);
+
+			$data._pendingClanBanner = bannerData;
+			if($data.room && !$data.room.gaming) updateRoom(false);
+			send("clanCreate", {
+				name: $section.find(".js-clan-name").val(),
+				about: $section.find(".js-clan-about").val(),
+				banner: bannerData,
+				clanShape: bannerData.shape,
+				clanBorder: bannerData.border,
+				clanFill: bannerData.fill,
+				clanPattern: bannerData.pattern,
+				clanLogo: bannerData.logo,
+				clanText: bannerData.text
+			}, true);
+		});
+		$section.on("click.clan", ".js-clan-join", function(e){
+			var id = $(e.currentTarget).attr("data-id");
+			if(!id) return;
+			send("clanJoin", { id: id }, true);
+		});
+		restoreClanPageRenderState($section, renderState, true);
+		setSocialHubButtonLabels($section);
+		return;
+	}
+
+	$section.addClass("is-member");
+	var mission = my.mission || {};
+	var progressValue = Number(mission.progress || 0);
+	var goalValue = Math.max(1, Number(mission.goal || 1));
+	var progressPct = Math.max(0, Math.min(100, progressValue / goalValue * 100));
+	var bannerData = normalizeClanBanner(my.banner);
+	var createdLabel = L['clanCreated'] || "Created";
+	var createdText = my.createdAt ? new Date(my.createdAt).toLocaleDateString(getClientLocale()) : "-";
+	var memberCount = my.memberCount || (my.members || []).length || 0;
+	var onlineMemberCount = countClanOnlineMembers(my.members || []);
+	var $header = $("<div>").addClass("myinfo-clan-header clan-member-hero social-hub-page-header")
+		.append(createClanBannerElement(bannerData))
+		.append($("<div>").addClass("myinfo-clan-header-main")
+			.append($("<h2>").addClass("myinfo-clan-name social-hub-title").text(my.name || "Clan"))
+			.append($("<div>").addClass("myinfo-clan-about-text").text(my.about || ""))
+			.append($("<div>").addClass("clan-member-meta")
+				.append($("<span>").text(createdLabel + " " + createdText))
+				.append($("<span>").text(memberCount + " " + (L['clanMembers'] || "members")))
+			)
+		)
+		.append($("<button>").addClass("myinfo-clan-btn js-clan-leave").text(L['clanLeave'] || "Leave"));
+	var $mission = $("<div>").addClass("myinfo-clan-mission clan-mission-strip")
+		.append($("<div>").addClass("clan-panel-head social-hub-section-head")
+			.append($("<h3>").addClass("myinfo-clan-title social-hub-section-title").text(L['clanMission'] || "Shared Mission"))
+			.append($("<span>").addClass("clan-mission-reward social-hub-section-meta").text((L['reward'] || "Reward") + " " + commify(mission.reward || 0)))
+		)
+		.append($("<div>").addClass("myinfo-clan-mission-text")
+			.append($("<span>").text(mission.title || "Send clan messages together"))
+			.append($("<span>").addClass("clan-mission-progress").text(progressValue + " / " + goalValue))
+		)
+		.append($("<div>").addClass("myinfo-clan-mission-bar").attr({
+			role: "progressbar", "aria-label": L['clanMission'] || "Shared Mission",
+			"aria-valuemin": 0, "aria-valuemax": goalValue, "aria-valuenow": Math.min(goalValue, Math.max(0, progressValue))
+		})
+			.append($("<div>").addClass("myinfo-clan-mission-bar-inner").css("width", progressPct + "%"))
+		);
+	var $body = $("<div>").addClass("myinfo-clan-body");
+	var $members = $("<div>").addClass("myinfo-clan-members")
+		.append($("<div>").addClass("clan-panel-head social-hub-section-head")
+			.append($("<h3>").addClass("myinfo-clan-title social-hub-section-title").text(L['clanMembers'] || "Members"))
+			.append($("<span>").addClass("social-hub-section-meta").text(onlineMemberCount + " " + (L['online'] || "online")))
+		);
+	var $chat = $("<div>").addClass("myinfo-clan-chat")
+		.append($("<div>").addClass("clan-panel-head social-hub-section-head")
+			.append($("<h3>").addClass("myinfo-clan-title social-hub-section-title").text(L['clanChat'] || "Clan Chat"))
+		);
+	var $chatList = $("<div>").addClass("myinfo-clan-chat-list");
+	var $chatInput = $("<div>").addClass("myinfo-clan-chat-input")
+		.append($("<label>").addClass("social-hub-field clan-chat-field")
+			.append($("<span>").addClass("social-hub-field-label").text(L['clanMessage'] || "Message"))
+			.append($("<input>").attr({ type: "text", maxlength: 200, autocomplete: "off", placeholder: (L['clanChat'] || "Clan Chat") + "..." }).addClass("js-clan-message"))
+		)
+		.append($("<button>").addClass("myinfo-clan-btn js-clan-send").text(L['clanSend'] || "Send"));
+
+	(my.members || []).forEach(function(member){
+		var role = member.role == "owner" ? "owner" : "member";
+		$members.append($("<div>").addClass("myinfo-clan-member " + (member.online ? "is-online" : "is-offline"))
+			.append($("<span>").addClass("myinfo-clan-member-status"))
+			.append($("<span>").addClass("myinfo-clan-member-name").text(member.name || member.id || "-"))
+			.append($("<span>").addClass("myinfo-clan-member-role").text(role))
+			.append($("<span>").addClass("myinfo-clan-member-online").text(member.online ? "online" : "offline"))
+		);
+	});
+	if(!my.members || !my.members.length){
+		$members.append($("<div>").addClass("myinfo-clan-empty").text(L['clanNoMembers'] || "No members to display."));
+	}
+
+	(my.chat || []).forEach(function(row){
+		var itemClass = "myinfo-clan-chat-item" + (row.type == "system" ? " is-system" : "");
+		var sender = row.type == "system" ? "System" : (row.senderName || row.senderId || "-");
+		var stamp = row.time ? formatClientTime(new Date(row.time)) : "";
+
+		$chatList.append($("<div>").addClass(itemClass)
+			.append($("<div>").addClass("myinfo-clan-chat-head").text(sender + (stamp ? " · " + stamp : "")))
+			.append($("<div>").addClass("myinfo-clan-chat-text").text(row.text || ""))
+		);
+	});
+	if(!my.chat || !my.chat.length){
+		$chatList.append($("<div>").addClass("myinfo-clan-empty").text(L['clanNoMessage'] || "No messages yet."));
+	}
+
+	$chat.append($chatList).append($chatInput);
+	$body.append($chat).append($members);
+	$section.append($header).append($mission).append($body);
+	restoreClanPageRenderState($section, renderState, false);
+
+	$section.on("click.clan", ".js-clan-leave", function(){
+		send("clanLeave", {}, true);
+	});
+	$section.on("click.clan", ".js-clan-send", function(){
+		var value = $section.find(".js-clan-message").val();
+		if(!value || !value.trim()) return;
+		send("clanChat", { value: value }, true);
+		$section.find(".js-clan-message").val("");
+	});
+	$section.on("keydown.clan", ".js-clan-message", function(e){
+		if(e.keyCode == 13){
+			e.preventDefault();
+			$section.find(".js-clan-send").trigger("click");
+		}
+	});
+	if($chatList.length){
+		if(previousTop !== null){
+			$chatList.scrollTop(previousTop);
+		}else{
+			$chatList.scrollTop($chatList.prop("scrollHeight"));
+		}
+	}
+	restoreClanPageRenderState($section, renderState, true);
+	setSocialHubButtonLabels($section);
+}
+function prettyTime(time){
+	var min = Math.floor(time / 60000) % 60, sec = Math.floor(time * 0.001) % 60;
+	var hour = Math.floor(time / 3600000);
+	var txt = [];
+	
+	if(hour) txt.push(hour + L['HOURS']);
+	if(min) txt.push(min + L['MINUTE']);
+	if(!hour) txt.push(sec + L['SECOND']);
+	return txt.join(' ');
+}
+function updateUserList(refresh){
+	var $bar;
+	var i, o, len = 0;
+	var arr;
+	
+	// refresh = true;
+	// if(!$stage.box.userList.is(':visible')) return;
+	if($data.opts.su){
+		arr = [];
+		for(i in $data.users){
+			len++;
+			arr.push($data.users[i]);
+		}
+		arr.sort(function(a, b){ return b.data.score - a.data.score; });
+		refresh = true;
+	}else{
+		arr = $data.users;
+		
+		for(i in $data.users) len++;
+	}
+	$stage.lobby.userListTitle.html("<span class='online-dot' aria-hidden='true'></span>"
+		+ len + " online");
+	
+	if(refresh){
+		$stage.lobby.userList.empty();
+		$stage.dialog.inviteList.empty();
+		for(i in arr){
+			o = arr[i];
+			if(o.robot) continue;
+			
+			$stage.lobby.userList.append(userListBar(o));
+			if(o.place == 0) $stage.dialog.inviteList.append(userListBar(o, true));
+		}
+	}
+}
+function userListBar(o, forInvite){
+	var $R;
+	
+	if(forInvite){
+		$R = $("<div>").attr('id', "invite-item-"+o.id).addClass("invite-item users-item")
+		.append(setProfileBackground($("<div>").addClass("jt-image users-image"), o.profile.image, o.profile))
+		.append(getLevelImage(o.data.score).addClass("users-level"))
+		// .append($("<div>").addClass("jt-image users-from").css('background-image', "url('/img/kkutu/"+o.profile.type+".png')"))
+		.append($("<div>").addClass("users-name").html(o.profile.title || o.profile.name))
+		.on('click', function(e){
+			requestInvite($(e.currentTarget).attr('id').slice(12));
+		});
+	}else{
+		$R = $("<div>").attr('id', "users-item-"+o.id).addClass("users-item")
+		.append(setProfileBackground($("<div>").addClass("jt-image users-image"), o.profile.image, o.profile))
+		.append(getLevelImage(o.data.score).addClass("users-level"))
+		// .append($("<div>").addClass("jt-image users-from").css('background-image', "url('/img/kkutu/"+o.profile.type+".png')"))
+		.append($("<div>").addClass("users-name ellipse").html(o.profile.title || o.profile.name))
+		.on('click', function(e){
+			requestProfile($(e.currentTarget).attr('id').slice(11));
+		});
+	}
+	addonNickname($R, o);
+	
+	return $R;
+}
+function addonNickname($R, o){
+	var equip = (o && o.equip) || {};
+	if(equip['NIK']) $R.addClass("x-" + equip['NIK']);
+	if(equip['BDG'] == "b1_gm") $R.addClass("x-gm");
+}
+function renderShopPreviewNickname($target, profile, equip){
+	var className = "shop-preview-name";
+
+	if(equip && equip['NIK']) className += " x-" + equip['NIK'];
+	$target.attr("class", className).text(profile.title || profile.name || $data.id);
+}
+var ROOM_THEME_NAMES = [ "blue", "brown", "gray", "green", "pink", "purple", "red", "yellow" ];
+var ROOM_THEME_BASE_ID = 100;
+var ROOM_THEME_META = {
+	blue: { dot: "#72B8FF", base: "#3F8FD4", border: "rgba(42, 112, 184, 0.76)" },
+	brown: { dot: "#B7824C", base: "#9A6437", border: "rgba(105, 62, 30, 0.76)" },
+	gray: { dot: "#A9B2BC", base: "#7C8793", border: "rgba(82, 94, 107, 0.74)" },
+	green: { dot: "#8DD979", base: "#5DAE56", border: "rgba(62, 132, 57, 0.76)" },
+	pink: { dot: "#FF8FB9", base: "#D85F9A", border: "rgba(184, 70, 126, 0.72)" },
+	purple: { dot: "#B98CFF", base: "#8B62CE", border: "rgba(105, 72, 169, 0.76)" },
+	red: { dot: "#FF7777", base: "#D95555", border: "rgba(178, 54, 54, 0.76)" },
+	yellow: { dot: "#F1D45B", base: "#D0A73B", border: "rgba(158, 119, 34, 0.78)" }
+};
+function getRoomThemeName(value){
+	var name = String(value || "").trim().toLowerCase();
+
+	return ROOM_THEME_META[name] ? name : "";
+}
+function buildRoomTheme(name){
+	var meta;
+
+	name = getRoomThemeName(name) || ROOM_THEME_NAMES[0];
+	meta = ROOM_THEME_META[name] || ROOM_THEME_META.blue;
+	return {
+		name: name,
+		dot: meta.dot,
+		base: meta.base,
+		border: meta.border,
+		image: "/img/kkutu/gamebg_" + name + ".png"
+	};
+}
+function getRoomThemeIndex(roomOrId){
+	var raw = (roomOrId && typeof roomOrId == "object") ? roomOrId.id : roomOrId;
+	var id = parseInt(raw, 10);
+	var index;
+
+	if(isNaN(id)) return 0;
+	index = (id - ROOM_THEME_BASE_ID) % ROOM_THEME_NAMES.length;
+	return index < 0 ? index + ROOM_THEME_NAMES.length : index;
+}
+function getRoomTheme(roomOrId){
+	var id;
+	var name;
+	var mapName;
+
+	if(roomOrId && typeof roomOrId == "object"){
+		name = getRoomThemeName(roomOrId.themeColor || roomOrId.roomTheme);
+		id = String(roomOrId.id == null ? "" : roomOrId.id);
+		mapName = $data && $data._roomThemeMap ? getRoomThemeName($data._roomThemeMap[id]) : "";
+		if(name || mapName) return buildRoomTheme(name || mapName);
+	}
+	name = ROOM_THEME_NAMES[getRoomThemeIndex(roomOrId)] || ROOM_THEME_NAMES[0];
+	return buildRoomTheme(name);
+}
+function attachRoomTheme(room){
+	var theme;
+	var id;
+	var storedName;
+
+	if(!room) return null;
+	id = String(room.id == null ? "" : room.id);
+	$data._roomThemeMap = $data._roomThemeMap || {};
+	storedName = getRoomThemeName(room.themeColor || room.roomTheme) || getRoomThemeName($data._roomThemeMap[id]) || ROOM_THEME_NAMES[getRoomThemeIndex(room)] || ROOM_THEME_NAMES[0];
+	if(id) $data._roomThemeMap[id] = storedName;
+	theme = buildRoomTheme(storedName);
+	room.themeColor = theme.name;
+	return theme;
+}
+function applyRoomHeaderTheme(room){
+	var theme = getRoomTheme(room);
+	var values = {
+		bg: "url('" + theme.image + "')",
+		color: theme.base,
+		border: theme.border
+	};
+	var applyVars = function(node){
+		if(!node || !node.style || !node.style.setProperty) return;
+		node.style.setProperty("--room-theme-header-bg", values.bg);
+		node.style.setProperty("--room-theme-header-color", values.color);
+		node.style.setProperty("--room-theme-header-border", values.border);
+	};
+
+	$("body").attr("data-room-theme", theme.name).each(function(){
+		applyVars(this);
+	});
+	$(".RoomBox .product-title, .GameBox .product-title, .ChatBox .product-title").each(function(){
+		applyVars(this);
+	});
+}
+function renderRoomListTitle(len, roomListLabel, roomCountLabel){
+	var title = "<i class='fa fa-bars'></i> " + len + " " + roomCountLabel;
+	var quickLabel = L['quickRoom'] || "SEARCH";
+
+	$stage.lobby.roomListTitle.empty()
+		.append($("<strong>").addClass("room-list-title-text").html(title))
+		.append($("<button>").attr({
+			id: "RoomSearchBtn",
+			type: "button",
+			title: quickLabel,
+			"aria-label": quickLabel
+		}).addClass("room-list-search-btn").html("<i class='fa fa-search'></i>"));
+}
+function updateRoomList(refresh){
+	var i;
+	var len = 0;
+	var opts = $data.opts || {};
+	var roomListLabel = L['RoomList'] || "<i class='fa fa-bars'></i>Room List";
+	var roomCountLabel = L['GAE'] || "rooms";
+	
+	if(!refresh){
+		$(".rooms-create").remove();
+		for(i in $data.rooms) len++;
+	}else{
+		$stage.lobby.roomList.empty();
+		for(i in $data.rooms){
+			$stage.lobby.roomList.append(roomListBar($data.rooms[i]));
+			len++;
+		}
+	}
+	renderRoomListTitle(len, roomListLabel, roomCountLabel);
+	
+	if(len){
+		$(".rooms-gaming").css('display', opts.ow ? "none" : "");
+		$(".rooms-locked").css('display', opts.ou ? "none" : "");
+	}else{
+		$stage.lobby.roomList.append($stage.lobby.createBanner.clone().on('click', onBanner));
+	}
+	function onBanner(e){
+		$stage.menu.newRoom.trigger('click');
+	}
+}
+function roomListBar(o){
+	var $R, $ch, $num;
+	var hasPassword = !!o.password;
+	var opts = getOptions(o.mode, o.opts);
+	var theme = attachRoomTheme(o) || getRoomTheme(o);
+	
+	$R = $("<div>").attr('id', "room-"+o.id)
+	.addClass("rooms-item room-theme-" + theme.name)
+	.attr("data-room-theme", theme.name)
+	.append($ch = $("<div>").addClass("rooms-channel room-theme-dot").attr("title", theme.name).on('click', function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		requestRoomInfo(o.id);
+	}))
+	.append($num = $("<div>").addClass("rooms-number").html(o.id).on('click', function(e){
+		e.preventDefault();
+		e.stopPropagation();
+		requestRoomInfo(o.id);
+	}))
+	.append($("<div>").addClass("rooms-title ellipse").text(badWords(o.title)))
+	.append($("<div>").addClass("rooms-limit").html(o.players.length + " / " + o.limit))
+	.append($("<div>").addClass("rooms-info").width(296)
+		.append($("<div>").addClass("rooms-mode").html(opts.join(" / ").toString()))
+		.append($("<div>").addClass("rooms-round").html(formatRoomRoundText(o.round)))
+		.append($("<div>").addClass("rooms-time").html(formatRoomTimeText(o.time)))
+	)
+	.append($("<div>").addClass("rooms-lock").html(hasPassword ? "<i class='fa fa-lock'></i>" : ""))
+	.on('click', function(e){
+		if(e.target == $ch.get(0) || e.target == $num.get(0)) return;
+		tryJoin($(e.currentTarget).attr('id').slice(5));
+	});
+	if($R[0] && $R[0].style && $R[0].style.setProperty) $R[0].style.setProperty("--room-theme-dot-color", theme.dot);
+	$ch.css("background-color", theme.dot);
+	if(o.gaming) $R.addClass("rooms-gaming");
+	if(hasPassword) $R.addClass("rooms-locked");
+	
+	return $R;
+}
+function normalGameUserBar(o){
+	var $m, $n, $bar;
+	var $R = $("<div>").attr('id', "game-user-"+o.id).addClass("game-user")
+		.append($m = $("<div>").addClass("moremi game-user-image"))
+		.append($("<div>").addClass("game-user-title")
+			.append(getLevelImage(o.data.score).addClass("game-user-level"))
+			.append($bar = $("<div>").addClass("game-user-name ellipse").html(o.profile.title || o.profile.name))
+			.append($("<div>").addClass("expl").html(L['LEVEL'] + " " + getLevel(o.data.score)))
+		)
+		.append($n = $("<div>").addClass("game-user-score"));
+	renderMoremi($m, o.equip);
+	global.expl($R);
+	addonNickname($bar, o);
+	if(o.game.team) $n.addClass("team-" + o.game.team);
+	
+	return $R;
+}
+function miniGameUserBar(o){
+	var $n, $bar;
+	var $R = $("<div>").attr('id', "game-user-"+o.id).addClass("game-user")
+		.append($("<div>").addClass("game-user-title")
+			.append(getLevelImage(o.data.score).addClass("game-user-level"))
+			.append($bar = $("<div>").addClass("game-user-name ellipse").html(o.profile.title || o.profile.name))
+		)
+		.append($n = $("<div>").addClass("game-user-score"));
+	if(o.id == $data.id) $bar.addClass("game-user-my-name");
+	addonNickname($bar, o);
+	if(o.game.team) $n.addClass("team-" + o.game.team);
+	
+	return $R;
+}
+function resolveGameUser(entry){
+	var id = (entry && typeof entry == "object") ? (entry.id || entry._id || (entry.profile && entry.profile.id)) : entry;
+	var o, mappedUser, mappedRobot;
+	var entryHasGame = !!(entry && typeof entry == "object" && entry.game && typeof entry.game == "object");
+	var entryHasProfile = !!(entry && typeof entry == "object" && entry.profile && typeof entry.profile == "object");
+
+	if($data._replay){
+		return $rec.users[entry] || entry;
+	}
+	mappedUser = id ? $data.users[id] : null;
+	mappedRobot = id ? $data.robots[id] : null;
+	if(entry && typeof entry == "object"){
+		if(mappedUser && (entryHasGame || entryHasProfile)){
+			o = $.extend(true, {}, mappedUser, entry);
+		}else if(mappedRobot && (entryHasGame || entryHasProfile)){
+			o = $.extend(true, {}, mappedRobot, entry);
+		}else{
+			o = entryHasGame || entryHasProfile ? entry : ((mappedUser || mappedRobot) || null);
+		}
+	}else{
+		o = (mappedUser || mappedRobot) || null;
+	}
+	if(o && o.robot){
+		ensureAIProfile(o);
+		if(o.id) $data.robots[o.id] = o;
+	}
+	if(!o || typeof o != "object"){
+		o = {
+			id: id || "",
+			profile: {
+				name: String(id || (L['guest'] || "Guest")),
+				title: "",
+				image: ""
+			},
+			equip: {},
+			game: { score: 0, team: 0 },
+			data: { score: 0 }
+		};
+	}else{
+		o.id = o.id || id || "";
+		o.profile = o.profile || { name: String(o.id || (L['guest'] || "Guest")), title: "", image: "" };
+		o.data = o.data || { score: 0 };
+		o.game = o.game || { score: 0, team: 0 };
+		o.equip = o.equip || {};
+	}
+	return o;
+}
+function getRenderableRoomUser(entry){
+	var id = getRoomPlayerId(entry);
+	var raw = (entry && typeof entry == "object") ? $.extend(true, {}, entry) : {};
+	var mapped = resolveGameUser(entry);
+	var o;
+
+	if(mapped && typeof mapped == "object"){
+		o = $.extend(true, {}, raw, mapped);
+	}else{
+		o = raw;
+	}
+	o.id = o.id || o._id || (o.profile && o.profile.id) || id || "";
+	o.profile = o.profile || {};
+	o.profile.name = o.profile.name || String(o.id || (L['guest'] || "Guest"));
+	o.profile.title = o.profile.title || "";
+	o.profile.image = o.profile.image || "";
+	o.data = o.data || {};
+	if(o.data.score == null) o.data.score = 0;
+	o.game = o.game || {};
+	if(o.game.team == null) o.game.team = 0;
+	if(o.game.score == null) o.game.score = 0;
+	if(o.game.ready == null) o.game.ready = false;
+	if(o.game.practice == null) o.game.practice = false;
+	if(o.game.form == null) o.game.form = "J";
+	o.equip = o.equip || {};
+	if(o.robot){
+		ensureAIProfile(o);
+		if(o.id) $data.robots[o.id] = o;
+	}
+	return o;
+}
+function getRoomPlayerId(entry){
+	if(entry && typeof entry == "object") return entry.id || entry._id || (entry.profile && entry.profile.id) || "";
+	return entry || "";
+}
+function roomHasPlayer(room, id){
+	var i;
+	if(!room || !room.players) return false;
+	for(i in room.players){
+		if(getRoomPlayerId(room.players[i]) == id) return true;
+	}
+	return false;
+}
+function serializeRoomPlayers(players){
+	var i, out = [];
+	if(!players) return "";
+	for(i in players){
+		out.push(getRoomPlayerId(players[i]) || "[object Object]");
+	}
+	return out.toString();
+}
+function setRoomUserReadyBadge($badge, text, statusClass, spectating, practicing){
+	$badge.empty().addClass(statusClass || "");
+	if(practicing){
+		$badge.addClass("room-user-practice")
+			.append($("<i>").addClass("fa fa-plane room-user-practice-icon").attr("aria-hidden", "true"));
+	}else if(spectating){
+		$badge.addClass("room-user-spectate")
+			.append($("<i>").addClass("fa fa-eye room-user-spectate-icon").attr("aria-hidden", "true"));
+	}
+	$badge.append($("<span>").addClass("room-user-ready-text").text(text || ""));
+	return $badge;
+}
+function appendFallbackRoomUserCard($container, entry){
+	var o = getRenderableRoomUser(entry);
+	var $ready;
+	var $name;
+	if(!o || typeof o != "object") return;
+	$container.append(
+		$("<div>").attr('id', "room-user-"+o.id).addClass("room-user")
+			.append($("<div>").addClass("room-user-image"))
+			.append($("<div>").addClass("room-user-stat")
+				.append($ready = $("<div>").addClass("room-user-ready"))
+				.append($("<div>").addClass("room-user-team team-" + (o.game.team || 0)).html(""))
+			)
+			.append($("<div>").addClass("room-user-title")
+				.append($name = $("<div>").addClass("room-user-name").text(o.profile.title || o.profile.name || o.id))
+			)
+	);
+	if(o.id == $data.room.master){
+		setRoomUserReadyBadge($ready, L['master'], "room-user-master", o.game.form == "S", o.game.practice);
+	}else if(o.game.ready || o.robot){
+		setRoomUserReadyBadge($ready, L['stat_ready'], "room-user-readied", o.game.form == "S", o.game.practice);
+	}else if(o.game.practice){
+		setRoomUserReadyBadge($ready, L['stat_noready'], "room-user-noready", o.game.form == "S", true);
+	}else{
+		setRoomUserReadyBadge($ready, L['stat_noready'], "room-user-noready", o.game.form == "S", o.game.practice);
+	}
+	if(o.id == $data.id) $name.addClass("room-user-my-name");
+}
+function appendRoomInviteCard($container){
+	var room = $data.room;
+	var players;
+	var limit;
+	var openSlots;
+	var label;
+	if(!room || room.gaming || room.master != $data.id || !room.players) return;
+	players = room.players.length || 0;
+	limit = Number(room.limit) || 0;
+	if(!limit || players >= limit) return;
+	openSlots = Math.max(1, limit - players);
+	label = (L && L['invite']) || "INVITE";
+	$container.append(
+		$("<div>")
+			.addClass("room-user room-invite-card")
+			.attr({
+				role: "button",
+				tabindex: 0,
+				title: label,
+				"aria-label": label
+			})
+			.append($("<div>").addClass("room-invite-card-inner")
+				.append($("<div>").addClass("room-invite-card-icon")
+					.append($("<i>").addClass("fa fa-envelope").attr("aria-hidden", "true"))
+				)
+				.append($("<div>").addClass("room-invite-card-label").text(label))
+				.append($("<div>").addClass("room-invite-card-slots").text(openSlots + " OPEN"))
+			)
+	);
+}
+function shouldReturnToRoomOnGameExit(){
+	var i, player, user;
+	var otherHumans = 0;
+
+	if($data.practicing || ($data.room && $data.room.practice)) return false;
+	if(!$data.room || !$data.room.gaming || !$data.room.players) return false;
+
+	for(i in $data.room.players){
+		player = $data.room.players[i];
+		user = resolveGameUser(player);
+		if(!user || user.id == $data.id) continue;
+		if(user.robot || (player && typeof player == "object" && player.robot)) continue;
+		otherHumans++;
+	}
+	return otherHumans === 0;
+}
+function getAIProfile(level, nickname){
+	var title = (nickname || "").toString().trim();
+	if(!title) title = L['aiLevel' + level] + ' ' + L['robot'];
+	return {
+		title: title,
+		name: title,
+		image: "/img/kkutu/robot.png"
+	};
+}
+function ensureAIProfile(o){
+	var profile;
+	if(!o || !o.robot) return (o && o.profile) || getAIProfile(2);
+	profile = getAIProfile(o.level, o.nickname);
+	o.profile = o.profile || {};
+	o.profile.title = profile.title;
+	o.profile.name = profile.name;
+	o.profile.image = o.profile.image || profile.image;
+	o.equip = o.equip || {};
+	o.equip.robot = true;
+	return o.profile;
+}
+function syncRoomHeaders(room){
+	if(!room) return;
+	applyRoomHeaderTheme(room);
+	setRoomHead($(".RoomBox .product-title"), room);
+	setRoomHead($(".GameBox .product-title"), room);
+}
+function updateRoom(gaming){
+	var i, o, $r;
+	var $y, $z;
+	var $m;
+	var $bar, $title;
+	var playerEntry;
+	var rule = RULE[MODE[$data.room.mode]];
+	var renderer = (mobile || rule.big) ? miniGameUserBar : normalGameUserBar;
+	var spec;
+	var arAcc = false, allReady = true;
+	
+	syncRoomHeaders($data.room);
+	if(gaming){
+		$r = $(".GameBox .game-body").empty();
+		// updateScore(true);
+		for(i in $data.room.game.seq){
+			if($data._replay){
+				o = $rec.users[$data.room.game.seq[i]] || $data.room.game.seq[i];
+			}else{
+				o = $data.users[$data.room.game.seq[i]] || $data.robots[$data.room.game.seq[i].id] || $data.room.game.seq[i];
+			}
+			if(o.robot){
+				ensureAIProfile(o);
+				$data.robots[o.id] = o;
+			}
+			$r.append(renderer(o));
+			updateScore(o.id, o.game.score || 0);
+		}
+		clearTimeout($data._jamsu);
+		delete $data._jamsu;
+	}else{
+		$r = $(".room-users").empty();
+		o = resolveGameUser($data.id);
+		spec = !!(o && o.game && o.game.form == "S");
+		// 李멸???
+		for(i in $data.room.players){
+			playerEntry = $data.room.players[i];
+			o = getRenderableRoomUser(playerEntry);
+			
+			var spec = o.game.form == "S";
+			
+			if(o.robot){
+				ensureAIProfile(o);
+				$data.robots[o.id] = o;
+			}
+			try{
+				$r.append($("<div>").attr('id', "room-user-"+o.id).addClass("room-user")
+					.append($m = $("<div>").addClass("moremi room-user-image"))
+					.append($("<div>").addClass("room-user-stat")
+						.append($y = $("<div>").addClass("room-user-ready"))
+						.append($z = $("<div>").addClass("room-user-team team-" + o.game.team).html(""))
+					)
+					.append($title = $("<div>").addClass("room-user-title")
+						.append(getLevelImage(o.data.score).addClass("room-user-level"))
+						.append($bar = $("<div>").addClass("room-user-name").html(o.profile.title || o.profile.name))
+					).on('click', function(e){
+						requestProfile($(e.currentTarget).attr('id').slice(10));
+					})
+				);
+			renderMoremi($m, o.equip);
+			if(spec) $z.hide();
+			if(o.id == $data.room.master){
+				setRoomUserReadyBadge($y, L['master'], "room-user-master", spec, o.game.practice);
+			}else if(o.game.ready || o.robot){
+				setRoomUserReadyBadge($y, L['stat_ready'], "room-user-readied", spec, o.game.practice);
+				if(!o.robot && !spec) arAcc = true;
+			}else if(o.game.practice){
+				setRoomUserReadyBadge($y, L['stat_noready'], "room-user-noready", spec, true);
+				if(!spec) allReady = false;
+			}else{
+				setRoomUserReadyBadge($y, L['stat_noready'], "room-user-noready", spec, o.game.practice);
+				if(!spec) allReady = false;
+			}
+				addonNickname($bar, o);
+			}catch(err){
+				console.error("room user render failed", err, playerEntry, o);
+				$r.append($("<div>").attr('id', "room-user-"+o.id).addClass("room-user")
+					.append($("<div>").addClass("room-user-image"))
+					.append($("<div>").addClass("room-user-stat")
+						.append(setRoomUserReadyBadge($("<div>").addClass("room-user-ready"),
+							o.id == $data.room.master ? L['master'] : ((o.game.ready || o.robot) ? L['stat_ready'] : L['stat_noready']),
+							o.id == $data.room.master ? "room-user-master" : ((o.game.ready || o.robot) ? "room-user-readied" : "room-user-noready"),
+							o.game && o.game.form == "S",
+							o.game && o.game.practice
+						))
+						.append($("<div>").addClass("room-user-team team-" + (o.game.team || 0)).html(""))
+					)
+					.append($("<div>").addClass("room-user-title")
+						.append($("<div>").addClass("room-user-name").text(o.profile.title || o.profile.name || o.id))
+					)
+				);
+				if(!(o.game && o.game.form == "S") && !(o.game.ready || o.robot || o.id == $data.room.master)) allReady = false;
+			}
+		}
+		if(!$r.children().length && $data.room && $data.room.players){
+			for(i in $data.room.players){
+				appendFallbackRoomUserCard($r, $data.room.players[i]);
+			}
+		}
+		appendRoomInviteCard($r);
+		if(arAcc && $data.room.master == $data.id && allReady){
+			if(!$data._jamsu) $data._jamsu = addTimeout(onMasterSubJamsu, 5000);
+		}else{
+			clearTimeout($data._jamsu);
+			delete $data._jamsu;
+		}
+	}
+	if($stage.dialog.profile.is(':visible')){
+		requestProfile($data._profiled);
+	}
+}
+function onMasterSubJamsu(){
+	notice(L['subJamsu']);
+	$data._jamsu = addTimeout(function(){
+		send('leave');
+		alert(L['masterJamsu']);
+	}, 30000);
+}
+function updateScore(id, score){
+	var i, o, t;
+	
+	if(o = $data["_s"+id]){
+		clearTimeout(o.timer);
+		o.$obj = $("#game-user-"+id+" .game-user-score");
+		o.goal = score;
+	}else{
+		o = $data["_s"+id] = {
+			$obj: $("#game-user-"+id+" .game-user-score"),
+			goal: score,
+			now: 0
+		};
+	}
+	animateScore(o);
+	/*if(id === true){
+		// ? ?뺣낫 珥덇린??
+		$data.teams = [];
+		for(i=0; i<6; i++) $data.teams.push({ list: [], score: 0 });
+		for(i in $data.room.game.seq){
+			t = $data.room.game.seq[i];
+			o = $data.users[t] || $data.robots[t] || t;
+			if(o){
+				$data.teams[o.game.team].list.push(t.id ? t.id : t);
+				$data.teams[o.game.team].score += o.game.score;
+			}
+		}
+		for(i in $data.room.game.seq){
+			t = $data.room.game.seq[i];
+			o = $data.users[t] || $data.robots[t] || t;
+			updateScore(t.id || t, o.game.score);
+		}
+	}else{
+		o = $data.users[id] || $data.robots[id];
+		if(o.game.team){
+			t = $data.teams[o.game.team];
+			i = $data["_s"+id];
+			t.score += score - (i ? i.goal : 0);
+		}else{
+			t = { list: [ id ], score: score };
+		}
+		for(i in t.list){
+			if(o = $data["_s"+t.list[i]]){
+				clearTimeout(o.timer);
+				o.$obj = $("#game-user-"+t.list[i]+" .game-user-score");
+				o.goal = t.score;
+			}else{
+				o = $data["_s"+t.list[i]] = {
+					$obj: $("#game-user-"+t.list[i]+" .game-user-score"),
+					goal: t.score,
+					now: 0
+				};
+			}
+			animateScore(o);
+		}
+		return $("#game-user-" + id);
+	}*/
+	return $("#game-user-" + id);
+}
+function animateScore(o){
+	var v = (o.goal - o.now) * Math.min(1, TICK * 0.01);
+	
+	if(v < 0.1) v = o.goal - o.now;
+	else o.timer = addTimeout(animateScore, TICK, o);
+	
+	o.now += v;
+	drawScore(o.$obj, Math.round(o.now));
+}
+function drawScore($obj, score){
+	var i, sc = (score > 99999) ? (zeroPadding(Math.round(score * 0.001), 4) + 'k') : zeroPadding(score, 5);
+	
+	$obj.empty();
+	for(i=0; i<sc.length; i++){
+		$obj.append($("<div>").addClass("game-user-score-char").html(sc[i]));
+	}
+}
+function drawMyDress(avGroup){
+	var $view = $("#dress-view");
+	var my = $data.users[$data.id];
+	
+	renderMoremi($view, my.equip);
+	$(".dress-type.selected").removeClass("selected");
+	$("#dress-type-all").addClass("selected");
+	$("#dress-nick").val(my.profile.title || my.profile.name);
+	$("#dress-exordial").val(my.exordial);
+	drawMyGoods(avGroup || true);
+}
+function renderGoods($target, preId, filter, equip, onClick){
+	var $item;
+	var list = [];
+	var obj, q, g, equipped;
+	var isAll = filter === true;
+	var i;
+	
+	$target.empty();
+	if(!equip) equip = {};
+	for(i in equip){
+		if(!$data.box.hasOwnProperty(equip[i])) $data.box[equip[i]] = { value: 0 };
+	}
+	for(i in $data.box) list.push({ key: i, obj: iGoods(i), value: $data.box[i] });
+	list.sort(function(a, b){
+		return (a.obj.name < b.obj.name) ? -1 : 1;
+	});
+	for(i in list){
+		obj = list[i].obj;
+		q = list[i].value;
+		g = obj.group;
+		if(g.substr(0, 3) == "BDG") g = "BDG";
+		equipped = (g == "Mhand") ? (equip['Mlhand'] == list[i].key || equip['Mrhand'] == list[i].key) : (equip[g] == list[i].key);
+		
+		if(typeof q == "number") q = {
+			value: q
+		};
+		if(!q.hasOwnProperty("value") && !equipped) continue;
+		if(!isAll) if(filter.indexOf(obj.group) == -1) continue;
+		$target.append($item = $("<div>").addClass("dress-item")
+			.append(renderLocalizedItemImage(getImage(obj.image).addClass("dress-item-image").html("x" + q.value), obj))
+			.append(explainGoods(obj, equipped, q.expire))
+		);
+		$item.attr({ id: preId + "-" + obj._id, role: "button", tabindex: 0 })
+			.on('click', onClick)
+			.on('keydown', function(e){
+				if(e.which != 13 && e.which != 32) return;
+				e.preventDefault();
+				$(e.currentTarget).trigger('click');
+			});
+		if(equipped) $item.addClass("dress-equipped");
+	}
+	global.expl($target);
+}
+function drawMyGoods(avGroup){
+	var equip = $data.users[$data.id].equip || {};
+	var filter;
+	var isAll = avGroup === true;
+	
+	$data._avGroup = avGroup;
+	if(isAll) filter = true;
+	else filter = (avGroup || "").split(',');
+	
+	renderGoods($("#dress-goods"), 'dress', filter, equip, function(e){
+		var $target = $(e.currentTarget);
+		var id = $target.attr('id').slice(6);
+		var item = iGoods(id);
+		var isLeft;
+		
+		if(e.ctrlKey){
+			if($target.hasClass("dress-equipped")) return fail(426);
+			showWarningDialog(L['surePayback'] + commify(Math.round((item.cost || 0) * 0.2)) + L['ping'], function(){
+				$.post("/payback/" + id, function(res){
+					if(res.error) return fail(res.error);
+					alert(L['painback']);
+					$data.box = res.box;
+					$data.users[$data.id].money = res.money;
+					
+					drawMyDress($data._avGroup);
+					updateUI(false);
+				});
+			});
+			return;
+		}else if(AVAIL_EQUIP.indexOf(item.group) != -1){
+			if(item.group == "Mhand"){
+				isLeft = confirm(L['dressWhichHand']);
+			}
+			requestEquip(id, isLeft);
+		}else if(item.group == "CNS"){
+			if(typeof openEmblemChestExperience == "function" && openEmblemChestExperience(id, $target)) return;
+			showWarningDialog(L['sureConsume'], function(){
+				$.post("/consume/" + id, function(res){
+					if(res.error) return fail(res.error);
+					if(res.exp) notice(L['obtainExp'] + ": " + commify(res.exp));
+					if(res.money) notice(L['obtainMoney'] + ": " + commify(res.money));
+					(res.gain || []).forEach(function(item){ queueObtain(item); });
+					$data.box = res.box;
+					$data.users[$data.id].data = res.data;
+					send('refresh');
+					
+					drawMyDress($data._avGroup);
+					updateMe();
+				});
+			});
+		}
+	});
+}
+function requestEquip(id, isLeft){
+	var my = $data.users[$data.id];
+	var part = $data.shop[id].group;
+	if(part == "Mhand") part = isLeft ? "Mlhand" : "Mrhand";
+	if(part.substr(0, 3) == "BDG") part = "BDG";
+	var already = my.equip[part] == id;
+	
+	showWarningDialog(L[already ? 'sureUnequip' : 'sureEquip'] + ": " + L[id][0], function(){
+		$.post("/equip/" + id, { isLeft: isLeft }, function(res){
+			if(res.error) return fail(res.error);
+			$data.box = res.box;
+			my.equip = res.equip;
+			
+			drawMyDress($data._avGroup);
+			send('refresh');
+			updateUI(false);
+		});
+	});
+}
+function getCharFactoryErrorText(code){
+	if(code == 404 || code == 436) return L['cfNotReady'] || "Select letter pieces and wait for the merge reward to load.";
+	return L['error_' + code] || (L['error'] || "Letter merger failed.");
+}
+function showCharFactoryError(code){
+	var text = getCharFactoryErrorText(code);
+	var $panel = $("#myinfo-charfactory-inline");
+
+	if($panel.length && $panel.closest(".MyInfoBox").length){
+		$panel.find(".myinfo-inline-letter-message").remove();
+		$panel.prepend($("<div>").addClass("myinfo-inline-letter-message").text(text));
+		return;
+	}
+	alert(text);
+}
+function drawCharFactory(){
+	var $tray = $("#cf-tray");
+	var $dict = $("#cf-dict");
+	var $rew = $("#cf-reward");
+	var $goods = $("#cf-goods");
+	var $cost = $("#cf-cost");
+	
+	$data._tray = [];
+	$dict.empty();
+	$rew.empty();
+	$cost.html("");
+	$stage.dialog.cfCompose.removeClass("cf-composable");
+	
+	renderGoods($goods, 'cf', [ 'PIX', 'PIY', 'PIZ' ], null, function(e){
+		var $target = $(e.currentTarget);
+		var id = $target.attr('id').slice(3);
+		var bd = $data.box[id];
+		var i, c = 0;
+		
+		if($data._tray.length >= 6) return fail(435);
+		for(i in $data._tray) if($data._tray[i] == id) c++;
+		if(bd - c > 0){
+			$data._tray.push(id);
+			drawCFTray();
+		}else{
+			fail(434);
+		}
+	});
+	function trayEmpty(){
+		$tray.html($("<h4>").css('padding-top', "8px").width("100%").html(L['cfTray']));
+	}
+	function drawCFTray(){
+		var LEVEL = { 'WPC': 1, 'WPB': 2, 'WPA': 3 };
+		var gd, word = "";
+		var level = 0;
+		
+		$tray.empty();
+		$(".cf-tray-selected").removeClass("cf-tray-selected");
+		$data._tray.forEach(function(item){
+			gd = iGoods(item);
+			word += item.slice(4);
+			level += LEVEL[item.slice(1, 4)];
+			$tray.append($("<div>").addClass("jt-image")
+				.css('background-image', "url(" + gd.image + ")")
+				.attr('id', "cf-tray-" + item)
+				.on('click', onTrayClick)
+			);
+			$("#cf-\\" + item).addClass("cf-tray-selected");
+		});
+		$dict.html(L['searching']);
+		$rew.empty();
+		$stage.dialog.cfCompose.removeClass("cf-composable");
+		$cost.html("");
+		tryDict(word, function(res){
+			var blend = false;
+			
+			if(res.error){
+				if(word.length == 3){
+					blend = true;
+					$dict.html(L['cfBlend']);
+				}else{
+					$dict.html(L['cfFreeMerge'] || "No dictionary entry. You can still merge this word.");
+				}
+			}
+			viewReward(word, level, blend);
+			$stage.dialog.cfCompose.addClass("cf-composable");
+			if(!res.error) $dict.html(processWord(res.word, res.mean, res.theme, res.type.split(',')));
+		});
+		if(word == "") trayEmpty();
+	}
+	function viewReward(text, level, blend){
+		$.get("/cf/" + text + "?l=" + level + "&b=" + (blend ? "1" : ""), function(res){
+			if(res.error) return fail(res.error);
+			
+			$rew.empty();
+			res.data.forEach(function(item){
+				var bd = iGoods(item.key);
+				var rt = (item.rate >= 1) ? L['cfRewAlways'] : ((item.rate * 100).toFixed(1) + '%');
+				
+				$rew.append($("<div>").addClass("cf-rew-item")
+					.append($("<div>").addClass("jt-image cf-rew-image")
+						.css('background-image', "url(" + bd.image + ")")
+					)
+					.append($("<div>").width(100)
+						.append($("<div>").width(100).html(bd.name))
+						.append($("<div>").addClass("cf-rew-value").html("x" + item.value))
+					)
+					.append($("<div>").addClass("cf-rew-rate").html(rt))
+				);
+			});
+			$cost.html(L['cfCost'] + ": " + formatPing(res.cost));
+		});
+	}
+	function onTrayClick(e){
+		var id = $(e.currentTarget).attr('id').slice(8);
+		var bi = $data._tray.indexOf(id);
+		
+		if(bi == -1) return;
+		$data._tray.splice(bi, 1);
+		drawCFTray();
+	}
+	trayEmpty();
+}
+function drawLeaderboard(data){
+	var $board = $stage.dialog.lbTable;
+	var fr = data.data[0] ? data.data[0].rank : 0;
+	var page = (data.page || Math.floor(fr / 20)) + 1;
+
+	appendLeaderboardRows($board, data, {
+		idPrefix: "ranking-"
+	});
+	$stage.dialog.lbPage.html(L['page'] + " " + page);
+	$stage.dialog.lbPrev.attr('disabled', page <= 1);
+	$stage.dialog.lbNext.attr('disabled', data.data.length < 15);
+	$stage.dialog.lbMe.attr('disabled', !!$data.guest);
+	$data._lbpage = page - 1;
+}
+function getLeaderboardProfileName(item){
+	var profile = (item.name || "").toString().trim();
+	var username = (item.username || item.userName || "").toString().trim();
+	var user;
+
+	if(!profile){
+		user = $data.users[item.id];
+		profile = user ? (user.profile.title || user.profile.name) : "";
+	}
+	if(!profile){
+		profile = username;
+	}
+	if(!profile){
+		profile = L['hidden'];
+	}
+	return profile;
+}
+function appendLeaderboardRows($tbody, data, options){
+	var idPrefix;
+	var emptyText;
+
+	if(!$tbody || !$tbody.length) return;
+	options = options || {};
+	idPrefix = options.idPrefix || "ranking-";
+	emptyText = options.emptyText || "";
+	$tbody.empty();
+	if(!data || !data.data || !data.data.length){
+		if(emptyText){
+			$tbody.append($("<tr>").addClass("community-ranking-empty-row")
+				.append($("<td>").attr("colspan", 4).text(emptyText))
+			);
+		}
+		return;
+	}
+	data.data.forEach(function(item){
+		var profile = getLeaderboardProfileName(item);
+
+		item.score = Number(item.score);
+		$tbody.append($("<tr>").attr('id', idPrefix + item.id)
+			.addClass("ranking-" + (item.rank + 1))
+			.toggleClass("ranking-me", item.id == $data.id)
+			.append($("<td>").html(item.rank + 1))
+			.append($("<td>")
+				.append(getLevelImage(item.score).addClass("ranking-image"))
+				.append($("<label>").css('padding-top', 2).html(getLevel(item.score)))
+			)
+			.append($("<td>").append($("<span>").addClass("ranking-name").text(profile).on("click", function(){
+				requestProfile(item.id);
+			})))
+			.append($("<td>").html(commify(item.score)))
+		);
+	});
+}
+function getCommunityTabDefinitions(){
+	return [
+		{ key: "lobby", icon: "home", label: L['communityTabLobby'] || (L['lobby'] || "LOBBY") },
+		{ key: "friends", icon: "users", label: L['communityTabFriends'] || "FRIENDS" },
+		{ key: "ranking", icon: "trophy", label: L['communityTabRanking'] || "RANKING" },
+		{ key: "library", icon: "book", label: L['communityTabVocab'] || L['communityTabLibrary'] || "VOCAB" }
+	];
+}
+function getCommunityRankingPageNumber(data){
+	var firstRank = data && data.data && data.data[0] ? data.data[0].rank : 0;
+	var zeroBased = data && typeof data.page === "number" ? data.page : Math.floor(firstRank / 20);
+
+	return zeroBased + 1;
+}
+function appendCommunityRankingRows($tbody, data){
+	appendLeaderboardRows($tbody, data, {
+		idPrefix: "community-ranking-",
+		emptyText: L['communityRankingEmpty'] || "No ranking data yet."
+	});
+}
+function applyChatLinks($msg, msg){
+	var link;
+
+	if(!(link = msg.match(/https?:\/\/[\w\.\?\/&#%=-_\+]+/g))) return;
+	msg = $msg.html();
+	link.forEach(function(item){
+		msg = msg.replace(item, "<a href='#' style='color: #2222FF;' onclick='return confirmOpenExternalLink(" + JSON.stringify(item) + ");'>" + item + "</a>");
+	});
+	$msg.html(msg);
+}
+function appendCommunityLobbyChatRecord(entry){
+	var kind = entry && entry.kind ? entry.kind : "chat";
+	var profile = entry && entry.profile ? entry.profile : {};
+	var displayName = profile.title || profile.name || "";
+	var record;
+
+	if(!entry || entry.value == null || entry.value === "") return;
+	if(kind == "chat" && $data._shut[displayName]) return;
+	if(!$data._communityLobbyChatLog) $data._communityLobbyChatLog = [];
+	record = {
+		kind: kind,
+		profile: $.extend({}, profile || {}),
+		value: entry.value,
+		timestamp: entry.timestamp || Date.now()
+	};
+	if(entry.head) record.head = entry.head;
+	if(entry.from) record.from = entry.from;
+	$data._communityLobbyChatLog.push(record);
+	if($data._communityLobbyChatLog.length > 200){
+		$data._communityLobbyChatLog = $data._communityLobbyChatLog.slice(-200);
+	}
+	saveCommunityLobbyChatState();
+	if($data._communityOpen && $data._communityTab == "lobby"){
+		syncCommunityLobbyChat();
+	}
+}
+function syncCommunityLobbyChat(){
+	var $log = $(".community-lobby-chat-log");
+	var items = $data._communityLobbyChatLog || [];
+
+	if(!$log.length) return;
+	$log.empty();
+	if(!items.length){
+		$log.append($("<div>").addClass("community-empty").text(L['communityLobbyEmptyChat'] || "Lobby chat is empty."));
+		return;
+	}
+	items.forEach(function(entry){
+		$log.append(buildChatHistoryEntry(entry, false));
+	});
+	if($log[0]) $log.scrollTop($log[0].scrollHeight);
+}
+function submitCommunityLobbyTalk(rawValue){
+	var value = $.trim(rawValue || "");
+	var talk;
+
+	if(!value) return;
+	if(value[0] == "/"){
+		runCommand(value.split(" "));
+	}else{
+		talk = { value: value };
+		send('talk', talk);
+	}
+	if($data._whisper){
+		$data._communityLobbyTalk = "/e " + $data._whisper + " ";
+		delete $data._whisper;
+	}else{
+		$data._communityLobbyTalk = "";
+	}
+	$(".js-community-lobby-talk").val($data._communityLobbyTalk);
+}
+function requestCommunityRanking(options){
+	var query = "";
+	var seq;
+
+	if(options && typeof options.page === "number"){
+		query = "?p=" + Math.max(0, options.page);
+	}else if(options && options.id){
+		query = "?id=" + encodeURIComponent(options.id);
+	}
+	$data._communityRankingSeq = ($data._communityRankingSeq || 0) + 1;
+	seq = $data._communityRankingSeq;
+	$data._communityRankingLoading = true;
+	$data._communityRankingError = "";
+	if(shouldRenderCommunityPageTab("ranking")){
+		renderFriendsPage();
+	}
+	$.get("/ranking" + query, function(res){
+		if(seq != $data._communityRankingSeq) return;
+		$data._communityRankingLoading = false;
+		if(!res || res.error){
+			$data._communityRanking = null;
+			$data._communityRankingError = res && res.error ? String(res.error) : (L['error'] || "Failed to load ranking.");
+		}else{
+			$data._communityRanking = res;
+			$data._communityRankingError = "";
+		}
+		if(shouldRenderCommunityPageTab("ranking")){
+			renderFriendsPage();
+		}
+	}).fail(function(xhr){
+		if(seq != $data._communityRankingSeq) return;
+		$data._communityRankingLoading = false;
+		$data._communityRanking = null;
+		$data._communityRankingError = ((xhr && xhr.status) ? ("#" + xhr.status + " ") : "") + (L['error'] || "Failed to load ranking.");
+		if(shouldRenderCommunityPageTab("ranking")){
+			renderFriendsPage();
+		}
+	});
+}
+function requestCommunityLibrarySearch(query){
+	var seq;
+
+	query = $.trim(query || "");
+	$data._communityLibrarySeq = ($data._communityLibrarySeq || 0) + 1;
+	seq = $data._communityLibrarySeq;
+	$data._communityLibraryQuery = query;
+	$data._communityVocabStatus = "";
+	if(!query){
+		$data._communityLibraryLoading = false;
+		$data._communityLibraryResult = null;
+		showCommunityLibraryOutput(buildCommunityLibraryOutputView());
+		return;
+	}
+	$data._communityLibraryLoading = true;
+	showCommunityLibraryOutput(L['searching']);
+	tryDict(query, function(res){
+		var errorText;
+
+		if(seq != $data._communityLibrarySeq) return;
+		$data._communityLibraryLoading = false;
+		if(!res || res.error){
+			errorText = getDictionaryErrorText(res || { error: 500 });
+			$data._communityLibraryResult = {
+				type: "error",
+				text: errorText
+			};
+		}else{
+			$data._communityLibraryResult = {
+				type: "word",
+				word: res.word,
+				mean: res.mean,
+				theme: res.theme,
+				wcs: (res.type || "").split(',')
+			};
+		}
+		showCommunityLibraryOutput(buildCommunityLibraryOutputView());
+	});
+}
+function showCommunityLibraryOutput(content){
+	var $output = $("#community-library-output");
+
+	if(!$output.length){
+		if(shouldRenderCommunityPageTab("library")){
+			renderFriendsPage();
+			$output = $("#community-library-output");
+		}
+	}
+	if(!$output.length) return;
+	$output.empty();
+	if(content == null) return;
+	if(content.jquery || (content && content.nodeType)){
+		if(content.jquery && content.hasClass("community-library-output")) $output.append(content.contents());
+		else $output.append(content);
+	}else{
+		$output.html(content);
+	}
+}
+function getCommunityLocalizedThemeLabel(themeCode){
+	var key = String(themeCode || "").trim();
+	var lower = key.toLowerCase();
+	var numeric = lower.replace(/^[a-z]+/i, "").replace(/^0+/, "");
+
+	if(!key) return "";
+	try{
+		if(typeof isHiddenThemeCode == "function" && isHiddenThemeCode(lower)) return "";
+	}catch(e){}
+	return L["theme_" + key]
+		|| L["theme_" + lower]
+		|| (numeric ? L["theme_" + numeric] : "")
+		|| "";
+}
+function getCommunityThemeLabel(themeCode){
+	var key = String(themeCode || "").trim();
+	var label = getCommunityLocalizedThemeLabel(key);
+	var visible;
+
+	if(label) return label;
+	try{
+		visible = (typeof getVisibleThemeLabel == "function") ? getVisibleThemeLabel(key) : "";
+	}catch(e){
+		visible = "";
+	}
+	visible = $.trim(String(visible || ""));
+	if(visible && visible.toLowerCase() != key.toLowerCase()) return visible;
+	return "";
+}
+function getCommunityHiddenThemeTextMap(theme){
+	var map = {};
+
+	String(theme || "").split(",").forEach(function(raw){
+		var key = $.trim(raw || "");
+		var visible;
+
+		if(!key || getCommunityThemeLabel(key)) return;
+		try{
+			visible = (typeof getVisibleThemeLabel == "function") ? getVisibleThemeLabel(key) : key;
+		}catch(e){
+			visible = key;
+		}
+		visible = $.trim(String(visible || ""));
+		if(visible) map[visible.toLowerCase()] = true;
+	});
+	return map;
+}
+function sanitizeCommunityDictionaryView($view, theme){
+	var hiddenThemeText = getCommunityHiddenThemeTextMap(theme);
+
+	if(!$view || !$view.find) return $view;
+	$view.find(".word-theme").each(function(){
+		var text = $.trim($(this).text() || "").toLowerCase();
+
+		if(text && hiddenThemeText[text]) $(this).remove();
+	});
+	return $view;
+}
+function getCommunityThemeLabels(theme){
+	var seen = {};
+	var labels = [];
+
+	String(theme || "").split(",").forEach(function(raw){
+		var key = $.trim(raw || "");
+		var label;
+
+		if(!key) return;
+		label = $.trim(String(getCommunityThemeLabel(key) || ""));
+		if(!label || seen[label]) return;
+		seen[label] = true;
+		labels.push(label);
+	});
+	return labels;
+}
+function getCommunityThemeLabelSequence(theme){
+	return String(theme || "").split(",").map(function(raw){
+		var key = $.trim(raw || "");
+		return key ? $.trim(String(getCommunityThemeLabel(key) || "")) : "";
+	});
+}
+function normalizeCommunityDefinitionText(text){
+	return $.trim(String(text == null ? "" : text)
+		.replace(/\uFF3B[0-9]+\uFF3D/g, " ")
+		.replace(/\uFF08[0-9]+\uFF09/g, " ")
+		.replace(/\s+/g, " "));
+}
+function getCommunityDictionaryEntries(mean, theme, wcs){
+	var raw = String(mean == null ? "" : mean);
+	var labels = getCommunityThemeLabelSequence(theme);
+	var segments = [];
+	var entries = [];
+	var limit;
+	var i;
+
+	if(raw.indexOf("\uFF02") >= 0){
+		raw.split(/\uFF02[0-9]+\uFF02/g).forEach(function(part){
+			part = normalizeCommunityDefinitionText(part);
+			if(part) segments.push(part);
+		});
+	}else{
+		raw = normalizeCommunityDefinitionText(raw);
+		if(raw) segments.push(raw);
+	}
+	limit = segments.length || labels.length;
+	for(i = 0; i < limit; i++){
+		entries.push({
+			text: segments[i] || "",
+			theme: labels[i] || ""
+		});
+	}
+	return entries;
+}
+function appendCommunityDefinitionText($target, text){
+	if(typeof formatDictionaryDefinitionHtml == "function"){
+		try{
+			$target.html(formatDictionaryDefinitionHtml(text));
+			return;
+		}catch(e){}
+	}
+	$target.text(text);
+}
+function buildCommunityDictionaryFallbackView(word, mean, theme, wcs){
+	var entries = getCommunityDictionaryEntries(mean, theme, wcs);
+	var $view = $("<div>").addClass("word");
+	var $definitions = $("<div>").addClass("word-definitions");
+
+	if(!entries.length){
+		$definitions.append($("<div>").addClass("word-definition")
+			.append($("<span>").addClass("word-def-text").text(String(word || ""))));
+	}else{
+		entries.forEach(function(entry, index){
+			var $line = $("<div>").addClass("word-definition");
+			var $body = $("<span>").addClass("word-def-body");
+			var $text = $("<span>").addClass("word-def-text");
+
+			if(entries.length > 1){
+				$line.append($("<span>").addClass("word-def-index").text((index + 1) + "."));
+			}
+			if(entry.theme){
+				$body.append($("<span>").addClass("word-theme").text(entry.theme));
+			}
+			if(entry.text){
+				appendCommunityDefinitionText($text, entry.text);
+				$body.append($text);
+			}
+			$line.append($body);
+			$definitions.append($line);
+		});
+	}
+	return $view.append($definitions);
+}
+function buildCommunityDictionaryResultView(word, mean, theme, wcs){
+	var core = window.KKUTU_DICTIONARY_CORE || {};
+
+	if(typeof core.buildResultView == "function"){
+		try{
+			return sanitizeCommunityDictionaryView(core.buildResultView(word, mean, theme, wcs), theme);
+		}catch(err){
+			if(window.console && console.error) console.error("community dictionary core render failed", err);
+		}
+	}
+	return sanitizeCommunityDictionaryView(buildCommunityDictionaryFallbackView(word, mean, theme, wcs), theme);
+}
+function getCommunityDictionaryPreview(item){
+	var core = window.KKUTU_DICTIONARY_CORE || {};
+	var entries = getCommunityDictionaryEntries((item && item.mean) || "", (item && item.theme) || "", String((item && item.type) || "").split(","));
+	var entry = entries[0] || {};
+	var coreEntry;
+	var coreTheme;
+	var i;
+
+	if(typeof core.extractDefinitionEntries == "function"){
+		try{
+			entries = core.extractDefinitionEntries((item && item.mean) || "", (item && item.theme) || "", String((item && item.type) || "").split(","));
+			coreEntry = {};
+			for(i = 0; i < entries.length; i++){
+				if(entries[i] && (entries[i].text || (entries[i].themes && entries[i].themes.length))){
+					coreEntry = entries[i];
+					break;
+				}
+			}
+			coreTheme = ((coreEntry.themes || [])[0] || {}).label || "";
+			if(coreTheme && coreEntry.text) return "<" + coreTheme + "> " + coreEntry.text;
+			if(coreTheme) return "<" + coreTheme + ">";
+			if(coreEntry.text) return coreEntry.text;
+		}catch(err){
+			if(window.console && console.error) console.error("community dictionary preview core failed", err);
+		}
+	}
+
+	if(entry.theme && entry.text) return "<" + entry.theme + "> " + entry.text;
+	return entry.theme ? ("<" + entry.theme + ">") : (entry.text || "");
+}
+function buildCommunityLibraryWordResult(libraryResult){
+	var $wordResult = $("<div>").addClass("community-library-result");
+
+	try{
+		$wordResult.append(buildCommunityDictionaryResultView(
+			libraryResult.word,
+			libraryResult.mean,
+			libraryResult.theme,
+			libraryResult.wcs
+		));
+	}catch(err){
+		if(window.console && console.error) console.error("community dictionary render failed", err, libraryResult);
+		$wordResult.append($("<div>").addClass("word")
+			.append($("<div>").addClass("word-definition")
+				.append($("<span>").addClass("word-def-text").text(String(libraryResult.word || "")))));
+	}
+	try{
+		$wordResult.append(buildCommunityVocabAddPanel(libraryResult));
+	}catch(err2){
+		if(window.console && console.error) console.error("community vocab add panel failed", err2, libraryResult);
+	}
+	return $wordResult;
+}
+function buildCommunityLibraryOutputView(){
+	var libraryResult = $data._communityLibraryResult;
+	var tLibraryHint = L['communityLibraryHint'] || "Search a word to view its entry.";
+	var $libraryOutput = $("<div>").addClass("community-library-output");
+
+	if($data._communityLibraryLoading){
+		$libraryOutput.text(L['searching']);
+	}else if(libraryResult && libraryResult.type == "word"){
+		$libraryOutput.append(buildCommunityLibraryWordResult(libraryResult));
+	}else if(libraryResult && libraryResult.type == "error"){
+		$libraryOutput.text(libraryResult.text);
+	}else{
+		$libraryOutput.text(tLibraryHint);
+	}
+	return $libraryOutput;
+}
+function fillCommunityLibraryOutput($target){
+	var $content = buildCommunityLibraryOutputView().contents();
+
+	$target.empty().append($content);
+	return $target;
+}
+function renderCommunityLibraryIfOpen(){
+	var $section = $(".FriendsBox .friends-page");
+	var $existingOutput;
+
+	if(!shouldRenderCommunityPageTab("library")) return;
+	$existingOutput = $section.find("#community-library-output");
+	if($existingOutput.length){
+		fillCommunityLibraryOutput($existingOutput);
+	}else{
+		renderFriendsPage();
+	}
+}
+function getCommunityVocabLabels(){
+	return {
+		title: L['communityVocabTitle'] || "VOCABULARY",
+		dictionary: L['communityVocabDictionary'] || "DICTIONARY",
+		add: L['communityVocabAdd'] || "ADD TO LIST",
+		create: L['communityVocabCreate'] || "NEW LIST",
+		rename: L['communityVocabRename'] || "RENAME",
+		remove: L['communityVocabRemove'] || "REMOVE",
+		deleteList: L['communityVocabDelete'] || "DELETE",
+		empty: L['communityVocabEmpty'] || "Create a vocab list to save words.",
+		emptyList: L['communityVocabEmptyList'] || "No words saved yet.",
+		statusAdded: L['communityVocabAdded'] || "Word added.",
+		statusDuplicate: L['communityVocabDuplicate'] || "That word is already in this list.",
+		statusCreateFirst: L['communityVocabCreateFirst'] || "Create a list first.",
+		login: L['communityVocabLogin'] || "Log in to save vocabulary.",
+		prompt: L['communityVocabPrompt'] || "Vocab list name",
+		confirmDelete: L['communityVocabConfirmDelete'] || "Delete this vocab list?",
+		back: L['back'] || "BACK",
+		limit: L['communityVocabLimit'] || "5 lists max, 50 words per list."
+	};
+}
+function getCommunityVocabState(){
+	return $data._communityVocab || {
+		lists: [],
+		limits: { lists: 5, words: 50 }
+	};
+}
+function getCommunityVocabLists(){
+	var state = getCommunityVocabState();
+
+	return $.isArray(state.lists) ? state.lists : [];
+}
+function getCommunityVocabListById(listId){
+	var lists = getCommunityVocabLists();
+	var found = null;
+
+	lists.forEach(function(list){
+		if(String(list.id) == String(listId)) found = list;
+	});
+	return found;
+}
+function clearCommunityVocabDetail(){
+	$data._communityVocabDetail = "";
+}
+function openCommunityVocabDetail(listId){
+	var list = getCommunityVocabListById(listId);
+
+	if(!list) return false;
+	$data._communityVocabSelected = list.id;
+	$data._communityVocabDetail = list.id;
+	return true;
+}
+function getCommunityVocabLimit(name){
+	var state = getCommunityVocabState();
+	var limits = state.limits || {};
+
+	return Number(limits[name]) || (name == "lists" ? 5 : 50);
+}
+function normalizeCommunityVocabResponse(res){
+	if(!res || res.error) return null;
+	if(!$.isArray(res.lists)) res.lists = [];
+	if(!res.limits) res.limits = { lists: 5, words: 50 };
+	return res;
+}
+function syncCommunityVocabSelected(){
+	var lists = getCommunityVocabLists();
+	var selected = $data._communityVocabSelected;
+	var exists = false;
+
+	lists.forEach(function(list){
+		if(list.id == selected) exists = true;
+	});
+	if(!exists) selected = lists[0] ? lists[0].id : "";
+	$data._communityVocabSelected = selected;
+	if($data._communityVocabDetail && !getCommunityVocabListById($data._communityVocabDetail)){
+		clearCommunityVocabDetail();
+	}
+	return selected;
+}
+	function getCommunityVocabErrorText(res){
+		return (res && res.message) || (res && res.error ? String(res.error) : (L['error'] || "Error"));
+	}
+	function shouldRenderCommunityPageTab(tabKey){
+		if(($data._communityTab || "lobby") != tabKey) return false;
+		if($data._communityOpen) return true;
+		return hasCommunityPageBox();
+	}
+	function renderCommunityVocabIfOpen(){
+		if(shouldRenderCommunityPageTab("library")){
+			renderFriendsPage();
+		}
+	}
+function setCommunityVocabFromResponse(res, status){
+	var normalized = normalizeCommunityVocabResponse(res);
+
+	$data._communityVocabLoading = false;
+	if(!normalized){
+		$data._communityVocabError = getCommunityVocabErrorText(res);
+		if(status !== undefined) $data._communityVocabStatus = $data._communityVocabError;
+	}else{
+		$data._communityVocab = normalized;
+		$data._communityVocabError = "";
+		if(status !== undefined) $data._communityVocabStatus = status;
+		syncCommunityVocabSelected();
+	}
+	renderCommunityVocabIfOpen();
+}
+function requestCommunityVocab(force){
+	if($data.guest) return;
+	if($data._communityVocabLoading) return;
+	if($data._communityVocab && !force) return;
+	$data._communityVocabLoading = true;
+	$data._communityVocabError = "";
+	renderCommunityVocabIfOpen();
+	$.get("/vocab", function(res){
+		setCommunityVocabFromResponse(res);
+	}).fail(function(xhr){
+		$data._communityVocabLoading = false;
+		$data._communityVocabError = getCommunityVocabErrorText((xhr || {}).responseJSON || { error: (xhr || {}).status });
+		renderCommunityVocabIfOpen();
+	});
+}
+function createCommunityVocabList(name, callback){
+	if($data.guest) return;
+	$data._communityVocabLoading = true;
+	renderCommunityVocabIfOpen();
+	$.post("/vocab/list", { name: name }, function(res){
+		setCommunityVocabFromResponse(res, "");
+		if(callback && !res.error) callback(res);
+	}).fail(function(xhr){
+		setCommunityVocabFromResponse((xhr || {}).responseJSON || { error: (xhr || {}).status }, getCommunityVocabErrorText((xhr || {}).responseJSON));
+	});
+}
+function promptCreateCommunityVocabList(callback){
+	var labels = getCommunityVocabLabels();
+	var name = prompt(labels.prompt, "Vocabulary " + (getCommunityVocabLists().length + 1));
+
+	if(name === null) return;
+	createCommunityVocabList(name, callback);
+}
+function renameCommunityVocabList(listId){
+	var lists = getCommunityVocabLists();
+	var list = null;
+	var labels = getCommunityVocabLabels();
+
+	lists.forEach(function(item){
+		if(item.id == listId) list = item;
+	});
+	if(!list) return;
+	var name = prompt(labels.prompt, list.name);
+	if(name === null) return;
+	$data._communityVocabLoading = true;
+	renderCommunityVocabIfOpen();
+	$.post("/vocab/list/rename", { listId: listId, name: name }, function(res){
+		setCommunityVocabFromResponse(res, "");
+	}).fail(function(xhr){
+		setCommunityVocabFromResponse((xhr || {}).responseJSON || { error: (xhr || {}).status }, getCommunityVocabErrorText((xhr || {}).responseJSON));
+	});
+}
+function deleteCommunityVocabList(listId){
+	var labels = getCommunityVocabLabels();
+
+	if(!confirm(labels.confirmDelete)) return;
+	$data._communityVocabLoading = true;
+	renderCommunityVocabIfOpen();
+	$.post("/vocab/list/delete", { listId: listId }, function(res){
+		setCommunityVocabFromResponse(res, "");
+	}).fail(function(xhr){
+		setCommunityVocabFromResponse((xhr || {}).responseJSON || { error: (xhr || {}).status }, getCommunityVocabErrorText((xhr || {}).responseJSON));
+	});
+}
+function getCommunityLibraryResultLang(){
+	var result = $data._communityLibraryResult;
+	var word = result && result.word ? result.word : "";
+
+	return word.match(/[\uac00-\ud7a3]/) ? "ko" : "en";
+}
+function addCommunityVocabWord(){
+	var result = $data._communityLibraryResult;
+	var labels = getCommunityVocabLabels();
+	var listId = $data._communityVocabSelected || syncCommunityVocabSelected();
+
+	if(!result || result.type != "word") return;
+	if(!listId){
+		$data._communityVocabStatus = labels.statusCreateFirst;
+		return renderCommunityVocabIfOpen();
+	}
+	$data._communityVocabLoading = true;
+	renderCommunityVocabIfOpen();
+	$.post("/vocab/add", {
+		listId: listId,
+		word: result.word,
+		lang: getCommunityLibraryResultLang()
+	}, function(res){
+		setCommunityVocabFromResponse(res, res && res.duplicate ? labels.statusDuplicate : labels.statusAdded);
+	}).fail(function(xhr){
+		setCommunityVocabFromResponse((xhr || {}).responseJSON || { error: (xhr || {}).status }, getCommunityVocabErrorText((xhr || {}).responseJSON));
+	});
+}
+function removeCommunityVocabWord(listId, word, lang){
+	$data._communityVocabLoading = true;
+	renderCommunityVocabIfOpen();
+	$.post("/vocab/remove", { listId: listId, word: word, lang: lang }, function(res){
+		setCommunityVocabFromResponse(res, "");
+	}).fail(function(xhr){
+		setCommunityVocabFromResponse((xhr || {}).responseJSON || { error: (xhr || {}).status }, getCommunityVocabErrorText((xhr || {}).responseJSON));
+	});
+}
+function getVocabWordPreview(item){
+	return getCommunityDictionaryPreview(item);
+}
+function buildCommunityVocabAddPanel(libraryResult){
+	var labels = getCommunityVocabLabels();
+	var lists = getCommunityVocabLists();
+	var selected = syncCommunityVocabSelected();
+	var $panel = $("<div>").addClass("community-vocab-add");
+	var $select;
+
+	if($data.guest){
+		return $panel.append($("<div>").addClass("community-vocab-status").text(labels.login));
+	}
+	if(lists.length){
+		$panel.append($("<label>").addClass("community-vocab-add-title social-hub-field-label").attr("for", "community-vocab-target").text(labels.add));
+		$select = $("<select>").addClass("community-vocab-select js-community-vocab-select").attr("id", "community-vocab-target");
+		lists.forEach(function(list){
+			$select.append($("<option>").attr("value", list.id).prop("selected", list.id == selected)
+				.text(list.name + " (" + (list.words || []).length + " / " + getCommunityVocabLimit("words") + ")"));
+		});
+		$panel.append($select)
+			.append($("<button>").addClass("friends-page-btn js-community-vocab-add-word").attr("type", "button").text(labels.add));
+	}else{
+		$panel.append($("<div>").addClass("community-vocab-status").text(labels.statusCreateFirst));
+	}
+	$panel.append($("<button>").addClass("friends-page-btn js-community-vocab-create").attr("type", "button")
+		.prop("disabled", lists.length >= getCommunityVocabLimit("lists"))
+		.text(labels.create));
+	if($data._communityVocabStatus){
+		$panel.append($("<div>").addClass("community-vocab-status").text($data._communityVocabStatus));
+	}
+	return $panel;
+}
+function buildCommunityVocabWordRow(list, item){
+	return $("<div>").addClass("community-vocab-word-row")
+		.append($("<div>").addClass("community-vocab-word-main")
+			.append($("<div>").addClass("community-vocab-word-title").text(item.word))
+			.append($("<div>").addClass("community-vocab-word-preview").text(getVocabWordPreview(item)))
+		)
+		.append($("<button>").addClass("community-vocab-word-remove js-community-vocab-remove-word").attr({
+			type: "button",
+			"aria-label": (L['communityVocabRemove'] || "Remove") + " " + item.word,
+			"data-list": list.id,
+			"data-word": item.word,
+			"data-lang": item.lang
+		}).text("×"));
+}
+function buildCommunityVocabWordRows(list, labels){
+	var words = $.isArray(list.words) ? list.words : [];
+	var $words = $("<div>").addClass("community-vocab-words");
+
+	if(!words.length){
+		return $words.append($("<div>").addClass("community-vocab-empty-list").text(labels.emptyList));
+	}
+	words.forEach(function(item){
+		$words.append(buildCommunityVocabWordRow(list, item));
+	});
+	return $words;
+}
+function buildCommunityVocabPanel(){
+	var labels = getCommunityVocabLabels();
+	var lists = getCommunityVocabLists();
+	var selected = syncCommunityVocabSelected();
+	var detailList = $data._communityVocabDetail ? getCommunityVocabListById($data._communityVocabDetail) : null;
+	var $panel = $("<div>").addClass("community-panel community-vocab-panel");
+	var $body = $("<div>").addClass("community-vocab-list-body");
+	var listLimit = getCommunityVocabLimit("lists");
+	var wordLimit = getCommunityVocabLimit("words");
+
+	if($data._communityVocabDetail && !detailList) clearCommunityVocabDetail();
+	if(detailList){
+		var detailWords = $.isArray(detailList.words) ? detailList.words : [];
+
+		$panel.addClass("is-detail");
+		$panel.append($("<div>").addClass("community-panel-head community-vocab-detail-head social-hub-section-head")
+			.append($("<button>").addClass("community-vocab-back js-community-vocab-back").attr({
+				type: "button",
+				title: labels.back,
+				"aria-label": labels.back
+			}).append($("<i>").addClass("fa fa-arrow-left").attr("aria-hidden", "true")))
+			.append($("<h3>").addClass("community-panel-title ellipse social-hub-section-title").text(detailList.name))
+			.append($("<div>").addClass("community-panel-count").text(detailWords.length + " / " + wordLimit))
+			.append($("<button>").addClass("community-vocab-card-btn js-community-vocab-rename").attr({
+				type: "button",
+				"data-list": detailList.id
+			}).text(labels.rename))
+			.append($("<button>").addClass("community-vocab-card-btn js-community-vocab-delete").attr({
+				type: "button",
+				"data-list": detailList.id
+			}).text(labels.deleteList))
+		);
+		if($data._communityVocabLoading){
+			$body.append($("<div>").addClass("community-empty").text(L['searching']));
+		}else if($data._communityVocabError){
+			$body.append($("<div>").addClass("community-empty").text($data._communityVocabError));
+		}else{
+			$body.append(buildCommunityVocabWordRows(detailList, labels));
+		}
+		if($data._communityVocabStatus){
+			$body.append($("<div>").addClass("community-vocab-status").text($data._communityVocabStatus));
+		}
+		return $panel.append($body);
+	}
+
+	$panel.append($("<div>").addClass("community-panel-head social-hub-section-head")
+		.append($("<h3>").addClass("community-panel-title social-hub-section-title").text(labels.title))
+		.append($("<div>").addClass("community-panel-count").text(lists.length + " / " + listLimit))
+	);
+	if($data._communityVocabLoading){
+		$body.append($("<div>").addClass("community-empty").text(L['searching']));
+	}else if($data._communityVocabError){
+		$body.append($("<div>").addClass("community-empty").text($data._communityVocabError));
+	}else if($data.guest){
+		$body.append($("<div>").addClass("community-empty").text(labels.login));
+	}else if(!lists.length){
+		$body.append($("<div>").addClass("community-empty").text(labels.empty));
+	}else{
+		lists.forEach(function(list){
+			var words = $.isArray(list.words) ? list.words : [];
+			var preview = words.slice(0, 3).map(function(item){ return item.word; }).join(", ");
+
+			$body.append($("<div>").addClass("community-vocab-card community-vocab-overview-card js-community-vocab-open-card" + (list.id == selected ? " is-selected" : ""))
+				.attr("data-list", list.id)
+				.append($("<div>").addClass("community-vocab-card-head")
+					.append($("<button>").addClass("community-vocab-list-name js-community-vocab-select-card").attr({
+						type: "button",
+						"data-list": list.id
+					}).text(list.name))
+					.append($("<div>").addClass("community-vocab-card-count").text(words.length + " / " + wordLimit))
+					.append($("<button>").addClass("community-vocab-card-btn js-community-vocab-rename").attr({
+						type: "button",
+						"data-list": list.id
+					}).text(labels.rename))
+					.append($("<button>").addClass("community-vocab-card-btn js-community-vocab-delete").attr({
+						type: "button",
+						"data-list": list.id
+					}).text(labels.deleteList))
+				)
+				.append($("<div>").addClass("community-vocab-card-preview ellipse").text(preview || labels.emptyList))
+			);
+		});
+	}
+	$panel.append($("<div>").addClass("community-vocab-toolbar")
+		.append($("<button>").addClass("friends-page-btn js-community-vocab-create").attr("type", "button")
+			.prop("disabled", $data.guest || lists.length >= listLimit)
+			.text(labels.create))
+		.append($("<div>").addClass("community-vocab-limit").text(labels.limit))
+	).append($body);
+	return $panel;
+}
+function getCommunityOnlineUsers(){
+	var users = [];
+
+	Object.keys($data.users || {}).forEach(function(id){
+		var user = $data.users[id];
+
+		if(!user || user.robot) return;
+		user.id = user.id || id;
+		users.push(user);
+	});
+	users.sort(function(a, b){
+		var aSelf = a.id == $data.id;
+		var bSelf = b.id == $data.id;
+		var aName = ((a.profile && (a.profile.title || a.profile.name)) || a.id || "").toString();
+		var bName = ((b.profile && (b.profile.title || b.profile.name)) || b.id || "").toString();
+		var aPlace = Number(a.place || 0);
+		var bPlace = Number(b.place || 0);
+
+		if(aSelf != bSelf) return aSelf ? -1 : 1;
+		if((aPlace === 0) != (bPlace === 0)) return aPlace === 0 ? -1 : 1;
+		return aName.localeCompare(bName);
+	});
+	return users;
+}
+function getCommunityUserPlaceText(user){
+	var place = Number(user && user.place);
+
+	if(place > 0) return place + L['roomNumber'];
+	if(user && user.rank != null && !isNaN(Number(user.rank))) return formatOrdinal(Number(user.rank) + 1);
+	return L['lobby'] || "Lobby";
+}
+function buildCommunityOnlineUserRow(user){
+	var id = user.id;
+	var profile = user.profile || {};
+	var data = user.data || {};
+	var displayName = profile.title || profile.name || id || L['hidden'];
+	var placeText = getCommunityUserPlaceText(user);
+	var $avatar = $("<div>").addClass("moremi community-user-avatar");
+	var $row = $("<div>").addClass("community-user-row")
+		.toggleClass("is-self", id == $data.id)
+		.attr("data-id", id);
+
+	renderMoremi($avatar, user.equip || {});
+	$row
+		.append($("<div>").addClass("community-user-status cfi-stat-on"))
+		.append($avatar)
+		.append($("<div>").addClass("community-user-main")
+			.append($("<div>").addClass("community-user-name ellipse").text(displayName))
+			.append($("<div>").addClass("community-user-place ellipse").text(placeText))
+		)
+		.append($("<div>").addClass("community-user-tag").text(id == $data.id ? "ME" : placeText))
+		.append($("<div>").addClass("community-user-level-wrap")
+			.append(getLevelImage(Number(data.score) || 0).addClass("community-user-level"))
+		)
+		.on("click", function(){
+			requestProfile(id);
+		});
+	return $row;
+}
+function getCommunityRooms(){
+	var rooms = [];
+
+	Object.keys($data.rooms || {}).forEach(function(id){
+		var room = $data.rooms[id];
+
+		if(!room) return;
+		room.id = room.id || id;
+		rooms.push(room);
+	});
+	rooms.sort(function(a, b){
+		var ai = Number(a.id);
+		var bi = Number(b.id);
+
+		if(!isNaN(ai) && !isNaN(bi)) return ai - bi;
+		return String(a.id).localeCompare(String(b.id));
+	});
+	return rooms;
+}
+function buildCommunityRoomRow(room){
+	var players = $.isArray(room.players) ? room.players.length : 0;
+	var limit = Number(room.limit) || 0;
+	var safeLimit = Math.max(1, limit || players || 1);
+	var fillPct = Math.max(0, Math.min(100, Math.round(players / safeLimit * 100)));
+	var opts = getOptions(room.mode, room.opts || {});
+	var modeLabel = (MODE && MODE[room.mode]) ? (L['mode' + MODE[room.mode]] || MODE[room.mode]) : "";
+	var statusText = room.gaming ? "PLAYING" : "OPEN";
+	var sub = opts.join(" / ") + " | " + formatRoomRoundText(room.round) + " | " + formatRoomTimeText(room.time);
+	var $row = $("<div>").addClass("community-room-row")
+		.toggleClass("is-gaming", !!room.gaming)
+		.toggleClass("is-locked", !!room.password)
+		.attr("data-room", room.id)
+		.append($("<div>").addClass("community-room-head")
+			.append($("<div>").addClass("community-room-id").text("#" + room.id))
+			.append($("<div>").addClass("community-room-name ellipse").text(badWords(room.title || "")))
+			.append($("<div>").addClass("community-room-state").text(statusText))
+			.append($("<div>").addClass("community-room-lock").html(room.password ? "<i class='fa fa-lock'></i>" : ""))
+		)
+		.append($("<div>").addClass("community-room-meta")
+			.append($("<div>").addClass("community-room-mode ellipse").text(modeLabel))
+			.append($("<div>").addClass("community-room-players").text(players + " / " + limit))
+		)
+		.append($("<div>").addClass("community-room-meter")
+			.append($("<div>").addClass("community-room-meter-fill").css("width", fillPct + "%"))
+		)
+		.append($("<div>").addClass("community-room-sub ellipse").text(sub))
+		.on("click", function(){
+			tryJoin(room.id);
+		});
+
+	return $row;
+}
+function countCommunityOnlineFriends(friendIds){
+	var count = 0;
+
+	(friendIds || []).forEach(function(id){
+		if(($data._friends[id] || {}).server) count++;
+	});
+	return count;
+}
+function buildCommunityMetric(icon, label, value, tone){
+	return $("<div>").addClass("community-metric community-metric-" + (tone || "neutral"))
+		.append($("<i>").addClass("fa fa-" + icon).attr("aria-hidden", "true"))
+		.append($("<div>").addClass("community-metric-main")
+			.append($("<div>").addClass("community-metric-value").text(value))
+			.append($("<div>").addClass("community-metric-label").text(label))
+		);
+}
+function buildCommunityDeck(currentTab, tabLabels, onlineUsers, rooms, onlineFriends, friendCount){
+	return $("<div>").addClass("community-command-deck")
+		.append($("<div>").addClass("community-command-title")
+			.append($("<div>").addClass("community-command-kicker").text(tabLabels[currentTab] || "LOBBY"))
+			.append($("<div>").addClass("community-command-name").text(L['communityText'] || "COMMUNITY"))
+		)
+		.append($("<div>").addClass("community-command-metrics")
+			.append(buildCommunityMetric("users", L['communityLobbyUsers'] || "ONLINE USERS", onlineUsers.length, "online"))
+			.append(buildCommunityMetric("list", L['communityLobbyRooms'] || "ROOMS", rooms.length, "rooms"))
+			.append(buildCommunityMetric("address-book", L['communityLobbyFriends'] || "FRIENDS", onlineFriends + " / " + friendCount, "friends"))
+		);
+}
+function renderCommunityPageFallback(){
+	var $section = $(".FriendsBox .friends-page");
+	var $title = $(".FriendsBox .product-title");
+
+	if(!$section.length) return;
+	$title.text(L['communityText'] || "COMMUNITY");
+	$section.off(".friends").empty()
+		.append($("<div>").addClass("community-page-shell")
+			.append($("<div>").addClass("community-panel")
+				.append($("<div>").addClass("community-panel-head")
+					.append($("<div>").addClass("community-panel-title").text(L['communityText'] || "COMMUNITY"))
+				)
+				.append($("<div>").addClass("community-empty").text("Community page could not be loaded."))
+			)
+		);
+}
+function renderFriendsPage(){
+	try{
+		ensureCommunityPageBox();
+		renderFriendsPageUnsafe();
+	}catch(err){
+		if(window.console && console.error) console.error("Community page render failed", err);
+		renderCommunityPageFallback();
+	}
+}
+function renderFriendsPageUnsafe(){
+	var $section = $(".FriendsBox .friends-page");
+	var $title = $(".FriendsBox .product-title");
+	var friendIds = Object.keys($data.friends || {});
+	var currentTab = $data._communityTab || "lobby";
+	var tabLabels = {};
+	var $shell;
+	var $tabs;
+	var $content;
+	var onlineUsers;
+	var rooms;
+	var communityOnlineFriends;
+	var tCommunity = L['communityText'] || "COMMUNITY";
+	var tSearch = L['SEARCH'] || "Search";
+	var tAdd = L['friendAdd'] || "ADD FRIEND";
+	var tEmpty = L['friendListEmpty'] || "No friends yet.";
+	var tLobbyUsers = L['communityLobbyUsers'] || "ONLINE USERS";
+	var tLobbyRooms = L['communityLobbyRooms'] || "ROOMS";
+	var tLobbyNoUsers = L['communityLobbyEmptyUsers'] || "No users found.";
+	var tLobbyNoRooms = L['communityLobbyEmptyRooms'] || "No rooms right now.";
+	var tLobbyFriends = L['communityLobbyFriends'] || "FRIENDS";
+	var tLobbyChat = L['communityLobbyChat'] || "CHAT";
+	var tLobbyNoFriends = L['communityLobbyEmptyFriends'] || tEmpty;
+	var tLobbyNoChat = L['communityLobbyEmptyChat'] || "Lobby chat is empty.";
+	var tLobbyChatPlaceholder = L['communityLobbyChatPlaceholder'] || "Type a message";
+	var tLobbyChatSend = L['communityLobbyChatSend'] || "CHAT";
+	var tRankingMe = L['communityRankingMe'] || "ME";
+	var tLibraryHint = L['communityLibraryHint'] || "Search a word to view its entry.";
+
+	if(!$section.length) return;
+	getCommunityTabDefinitions().forEach(function(tab){
+		tabLabels[tab.key] = tab.label;
+	});
+	$title.text(tCommunity);
+	$section.off(".friends");
+	$section.empty();
+	onlineUsers = getCommunityOnlineUsers();
+	rooms = getCommunityRooms();
+	communityOnlineFriends = countCommunityOnlineFriends(friendIds);
+
+	$shell = $("<div>").addClass("community-page-shell");
+	$shell.append(buildSocialHubPageHeader(tCommunity, L['communityHubSubtitle'] || "Keep in touch between rounds.", "community"));
+	$tabs = $("<div>").addClass("community-page-tabs");
+	$content = $("<div>").addClass("community-page-content");
+
+	getCommunityTabDefinitions().forEach(function(tab){
+		$tabs.append($("<button>").addClass("community-page-tab js-community-tab" + (currentTab == tab.key ? " is-active" : ""))
+			.attr("type", "button")
+			.attr("data-tab", tab.key)
+			.attr("aria-pressed", currentTab == tab.key ? "true" : "false")
+			.append($("<i>").addClass("fa fa-" + tab.icon).attr("aria-hidden", "true"))
+			.append($("<span>").text(tab.label))
+		);
+	});
+
+	if(currentTab == "lobby"){
+		var onlineFriends = 0;
+		var $layout = $("<div>").addClass("community-view-layout community-lobby-layout");
+		var $chatColumn = $("<div>").addClass("community-lobby-column community-lobby-main");
+		var $friendsColumn = $("<div>").addClass("community-lobby-column community-lobby-social");
+		var $friendList = $("<div>").addClass("community-scroller community-friend-list");
+		var $chatLog = $("<div>").addClass("community-scroller community-lobby-chat-log");
+
+		friendIds.sort(function(a, b){
+			var aOnline = !!(($data._friends[a] || {}).server);
+			var bOnline = !!(($data._friends[b] || {}).server);
+			var aName = ((($data.friends || {})[a] || "") || getFriendDisplayName(a)).toString();
+			var bName = ((($data.friends || {})[b] || "") || getFriendDisplayName(b)).toString();
+
+			if(aOnline != bOnline) return aOnline ? -1 : 1;
+			return aName.localeCompare(bName);
+		}).forEach(function(id){
+			var info = $data._friends[id] || {};
+			var user = $data.users[id];
+			var online = !!info.server;
+			var displayName = (($data.friends || {})[id] || getFriendDisplayName(id) || L['hidden']).toString();
+			var $avatar = $("<div>").addClass("moremi community-friend-avatar");
+			var score = user && user.data ? Number(user.data.score) : NaN;
+			var $nameRow = $("<div>").addClass("community-friend-name-row");
+			var $main = $("<div>").addClass("community-friend-main");
+			var locationText = online
+				? ((info.server == $data.server && user)
+					? getCommunityUserPlaceText(user)
+					: (L['server_' + info.server] || ("Server " + info.server)))
+				: (L['offline'] || "Offline");
+
+			renderMoremi($avatar, (user && user.equip) || {});
+			if(!isNaN(score)){
+				$nameRow.append(getLevelImage(score).addClass("community-friend-level"));
+			}
+			$nameRow.append($("<div>").addClass("community-friend-name ellipse").text(displayName));
+			$main.append($nameRow);
+			if(locationText){
+				$main.append($("<div>").addClass("community-friend-presence ellipse").text(locationText));
+			}
+			if(online) onlineFriends++;
+			$friendList.append($("<div>").addClass("community-friend-row" + (online ? "" : " is-offline"))
+				.attr({ role: "button", tabindex: 0, "aria-label": displayName + " · " + locationText })
+				.on("click", function(){ requestProfile(id); })
+				.on("keydown", function(e){
+					if(e.which != 13 && e.which != 32) return;
+					e.preventDefault();
+					requestProfile(id);
+				})
+				.append($("<div>").addClass("community-friend-status cfi-stat-" + (online ? "on" : "off")))
+				.append($avatar)
+				.append($main)
+			);
+		});
+		if(!friendIds.length){
+			$friendList.append($("<div>").addClass("community-empty").text(tLobbyNoFriends));
+		}
+
+		$chatColumn
+			.append($("<div>").addClass("community-panel community-lobby-chat")
+				.append($("<div>").addClass("community-panel-head social-hub-section-head")
+					.append($("<h3>").addClass("community-panel-title social-hub-section-title").text(tLobbyChat))
+				)
+				.append($chatLog)
+				.append($("<div>").addClass("community-lobby-chat-compose")
+					.append($("<label>").addClass("social-hub-field community-chat-field")
+						.append($("<span>").addClass("social-hub-field-label").text(L['clanMessage'] || "Message"))
+						.append($("<input>").attr({
+							type: "text",
+							maxlength: 200,
+							autocomplete: "off",
+							placeholder: tLobbyChatPlaceholder
+						}).addClass("community-lobby-chat-input js-community-lobby-talk").val($data._communityLobbyTalk || ""))
+					)
+					.append($("<button>").addClass("friends-page-btn js-community-lobby-chat-send").attr("type", "button").text(tLobbyChatSend))
+				)
+			);
+		$friendsColumn
+			.append($("<div>").addClass("community-panel community-lobby-friends community-lobby-friends-tab")
+				.append($("<div>").addClass("community-panel-head social-hub-section-head")
+					.append($("<h3>").addClass("community-panel-title social-hub-section-title").text(tLobbyFriends))
+					.append($("<span>").addClass("community-panel-count social-hub-section-meta").text(onlineFriends + " / " + friendIds.length + " " + (L['online'] || "online")))
+				)
+				.append($friendList)
+			);
+		$layout.append($chatColumn).append($friendsColumn);
+		$content.append($layout);
+	}else if(currentTab == "ranking"){
+		var rankingData = $data._communityRanking;
+		var rankingPage = getCommunityRankingPageNumber(rankingData);
+		var $tableWrap = $("<div>").addClass("community-ranking-dialog-body");
+		var $table = $("<table>").addClass("community-ranking-dialog-table")
+			.css("text-align", "center")
+			.append($("<caption>").addClass("social-hub-visually-hidden").text(L['communityTabRanking'] || "Player ranking"))
+			.append($("<thead>").css({
+				fontWeight: "bold",
+				backgroundColor: "#DDDDDD"
+			}).append($("<tr>")
+				.append($("<th>").attr({ width: 42, scope: "col" }).text("#"))
+				.append($("<th>").attr({ width: 55, scope: "col" }).text(L['LEVEL']))
+				.append($("<th>").attr("scope", "col").text(L['nickname']))
+				.append($("<th>").attr({ width: 100, scope: "col" }).text(L['recordScore']))
+			))
+			.append($("<tbody>"));
+
+		appendCommunityRankingRows($table.find("tbody"), rankingData);
+		if($data._communityRankingLoading){
+			$tableWrap.append($("<div>").addClass("community-empty").text(L['searching']));
+		}else if($data._communityRankingError){
+			$tableWrap.append($("<div>").addClass("community-empty").text($data._communityRankingError));
+		}else{
+			$tableWrap.append($table);
+		}
+		$content.append($("<div>").addClass("community-ranking-dialog-shell")
+			.append($("<div>").addClass("community-panel-head social-hub-section-head")
+				.append($("<h3>").addClass("community-panel-title social-hub-section-title").text(L['communityTabRanking'] || "Ranking"))
+			)
+			.append($tableWrap)
+			.append($("<div>").addClass("community-ranking-dialog-page")
+				.append($("<h4>").text((L['page'] || "Page") + " " + rankingPage))
+			)
+			.append($("<div>").addClass("community-ranking-dialog-actions")
+				.append($("<button>").addClass("community-ranking-dialog-btn js-community-ranking-prev").attr("type", "button")
+					.prop('disabled', $data._communityRankingLoading || rankingPage <= 1)
+					.text(L['prevPage'] || "Prev"))
+				.append($("<button>").addClass("community-ranking-dialog-btn js-community-ranking-me").attr("type", "button")
+					.prop('disabled', $data._communityRankingLoading || !!$data.guest)
+					.text(L['myRank'] || tRankingMe))
+				.append($("<button>").addClass("community-ranking-dialog-btn js-community-ranking-next").attr("type", "button")
+					.prop('disabled', $data._communityRankingLoading || !rankingData || !rankingData.data || rankingData.data.length < 15)
+					.text(L['nextPage'] || "Next"))
+			)
+		);
+		if(!$data._communityRankingLoading && !rankingData && !$data._communityRankingError){
+			requestCommunityRanking({ page: 0 });
+		}
+	}else if(currentTab == "library"){
+		try{
+			var vocabLabels = getCommunityVocabLabels();
+			var $libraryOutput = $("<div>").attr("id", "community-library-output").addClass("community-library-output");
+			var $libraryPanel;
+
+			fillCommunityLibraryOutput($libraryOutput);
+
+			$libraryPanel = $("<div>").addClass("community-panel community-library-panel")
+				.append($("<div>").addClass("community-panel-head social-hub-section-head")
+					.append($("<h3>").addClass("community-panel-title social-hub-section-title").text(vocabLabels.dictionary))
+				)
+				.append($("<div>").addClass("community-library-search")
+					.append($("<label>").addClass("social-hub-field")
+						.append($("<span>").addClass("social-hub-field-label").text(L['communityWordLabel'] || "Word"))
+						.append($("<input>").attr({
+							type: "text",
+							maxlength: 200,
+							autocomplete: "off",
+							placeholder: L['wpInput']
+						}).addClass("community-library-input js-community-library-query").val($data._communityLibraryQuery || ""))
+					)
+					.append($("<button>").addClass("friends-page-btn js-community-library-search").attr("type", "button").text(tSearch))
+				)
+				.append($libraryOutput);
+			var detailOpen = !!($data._communityVocabDetail && getCommunityVocabListById($data._communityVocabDetail));
+			var $vocabLayout = $("<div>").addClass("community-vocab-layout" + (detailOpen ? " is-detail" : ""));
+			if(!detailOpen) $vocabLayout.append($libraryPanel);
+			$vocabLayout.append(buildCommunityVocabPanel());
+			$content.append($vocabLayout);
+			if(!$data.guest && !$data._communityVocab && !$data._communityVocabLoading){
+				requestCommunityVocab();
+			}
+		}catch(err){
+			if(window.console && console.error) console.error("community library page render failed", err);
+			$content.append($("<div>").addClass("community-panel community-library-panel")
+				.append($("<div>").addClass("community-panel-head")
+					.append($("<div>").addClass("community-panel-title").text(L['communityVocabDictionary'] || "DICTIONARY"))
+				)
+				.append($("<div>").addClass("community-empty").text(L['error'] || "Failed to load dictionary."))
+			);
+		}
+	}else{
+		var $layout = $("<div>").addClass("friends-page-layout");
+		var $searchPanel;
+		var $searchResults;
+
+		$layout = $("<div>").addClass("friends-page-layout");
+		$searchPanel = $("<div>").addClass("friends-page-panel friends-search-panel")
+			.append($("<h3>").addClass("friends-panel-title social-hub-section-title").text(tAdd))
+			.append($("<div>").addClass("friends-search-row")
+				.append($("<label>").addClass("social-hub-field")
+					.append($("<span>").addClass("social-hub-field-label").text(L['friendSearchPlaceholder'] || "Nickname or ID"))
+					.append($("<input>").attr({
+						type: "text",
+						maxlength: 30,
+						autocomplete: "off",
+						placeholder: L['friendSearchPlaceholder']
+					}).addClass("friends-page-input js-friends-query").val($data._friendSearchQuery || ""))
+				)
+				.append($("<button>").attr("type", "button").addClass("friends-page-btn js-friends-search").text(tSearch))
+			)
+			.append($searchResults = $("<div>").addClass("friends-search-results"))
+			.append($("<button>").attr("type", "button").addClass("friends-page-btn friends-add-id-btn js-friends-add-id").text(L['friendAddById'] || "Add by ID"));
+
+		if($data._friendSearchLoading){
+			renderFriendSearchMessageInto($searchResults, L['searching']);
+		}else if($.isArray($data._friendSearchResults)){
+			renderFriendSearchResultsInto($searchResults, $data._friendSearchResults);
+		}else{
+			renderFriendSearchMessageInto($searchResults, L['friendSearchHint']);
+		}
+
+		$content.append($layout.append($searchPanel));
+	}
+
+	$shell.append($tabs).append($content);
+	$section.append($shell);
+	if(currentTab == "lobby") syncCommunityLobbyChat();
+	$section.on("click.friends", ".js-community-tab", function(){
+		var tab = $(this).attr("data-tab");
+		var restoreFocus = document.activeElement === this;
+
+		if(!tab || tab == $data._communityTab) return;
+		$data._communityTab = tab;
+		renderFriendsPage();
+		if(restoreFocus) $section.find(".js-community-tab[data-tab='" + tab + "']").focus();
+	});
+	$section.on("click.friends", ".js-friends-search", function(e){
+		if(e && e.preventDefault) e.preventDefault();
+		requestFriendSearch($(this).closest(".friends-search-row").find(".js-friends-query").val());
+	});
+	$section.on("keydown.friends", ".js-friends-query", function(e){
+		if(e.which == 13){
+			e.preventDefault();
+			requestFriendSearch($(this).val());
+		}
+	});
+	$section.on("input.friends", ".js-friends-query", function(){
+		var query = $.trim($(this).val() || "");
+
+		$data._friendSearchQuery = query;
+		if(query) return;
+		if($stage && $stage.dialog && $stage.dialog.commFriendQuery && $stage.dialog.commFriendQuery.length){
+			$stage.dialog.commFriendQuery.val("");
+		}
+		$data._friendSearchLoading = false;
+		$data._friendSearchResults = null;
+		renderFriendsPage();
+	});
+	$section.on("click.friends", ".js-community-lobby-chat-send", function(e){
+		if(e && e.preventDefault) e.preventDefault();
+		submitCommunityLobbyTalk($section.find(".js-community-lobby-talk").val());
+	});
+	$section.on("keydown.friends", ".js-community-lobby-talk", function(e){
+		if(e.which == 13){
+			e.preventDefault();
+			submitCommunityLobbyTalk($(this).val());
+		}
+	});
+	$section.on("input.friends", ".js-community-lobby-talk", function(){
+		$data._communityLobbyTalk = $(this).val();
+	});
+	$section.on("click.friends", ".js-community-ranking-prev", function(){
+		var page = getCommunityRankingPageNumber($data._communityRanking);
+
+		requestCommunityRanking({ page: page - 2 });
+	});
+	$section.on("click.friends", ".js-community-ranking-next", function(){
+		var page = getCommunityRankingPageNumber($data._communityRanking);
+
+		requestCommunityRanking({ page: page });
+	});
+	$section.on("click.friends", ".js-community-ranking-me", function(){
+		requestCommunityRanking({ id: $data.id });
+	});
+	$section.on("click.friends", ".js-community-library-search", function(e){
+		if(e && e.preventDefault) e.preventDefault();
+		if(e && e.stopPropagation) e.stopPropagation();
+		requestCommunityLibrarySearch($(this).closest(".community-library-search").find(".js-community-library-query").val());
+	});
+	$section.on("keydown.friends", ".js-community-library-query", function(e){
+		if(e.which == 13){
+			e.preventDefault();
+			if(e.stopPropagation) e.stopPropagation();
+			requestCommunityLibrarySearch($(this).val());
+		}
+	});
+	$section.on("input.friends", ".js-community-library-query", function(){
+		$data._communityLibraryQuery = $(this).val();
+	});
+	$section.on("change.friends", ".js-community-vocab-select", function(){
+		$data._communityVocabSelected = $(this).val();
+		renderFriendsPage();
+	});
+	$section.on("click.friends", ".js-community-vocab-back", function(e){
+		if(e && e.preventDefault) e.preventDefault();
+		clearCommunityVocabDetail();
+		renderFriendsPage();
+	});
+	$section.on("click.friends", ".js-community-vocab-select-card", function(e){
+		if(e && e.preventDefault) e.preventDefault();
+		openCommunityVocabDetail($(this).attr("data-list"));
+		renderFriendsPage();
+	});
+	$section.on("click.friends", ".js-community-vocab-open-card", function(e){
+		if($(e.target).closest("button,input,select").length) return;
+		openCommunityVocabDetail($(this).attr("data-list"));
+		renderFriendsPage();
+	});
+	$section.on("click.friends", ".js-community-vocab-create", function(){
+		promptCreateCommunityVocabList();
+	});
+	$section.on("click.friends", ".js-community-vocab-add-word", function(){
+		addCommunityVocabWord();
+	});
+	$section.on("click.friends", ".js-community-vocab-rename", function(){
+		renameCommunityVocabList($(this).attr("data-list"));
+	});
+	$section.on("click.friends", ".js-community-vocab-delete", function(){
+		deleteCommunityVocabList($(this).attr("data-list"));
+	});
+	$section.on("click.friends", ".js-community-vocab-remove-word", function(){
+		removeCommunityVocabWord($(this).attr("data-list"), $(this).attr("data-word"), $(this).attr("data-lang"));
+	});
+	$section.on("click.friends", ".js-friends-add-id", triggerFriendAddPrompt);
+	setSocialHubButtonLabels($section);
+}
+$(document).off("click.communityLibrarySearch").on("click.communityLibrarySearch", ".FriendsBox .js-community-library-search", function(e){
+	if(e && e.preventDefault) e.preventDefault();
+	requestCommunityLibrarySearch($(this).closest(".community-library-search").find(".js-community-library-query").val());
+});
+$(document).off("keydown.communityLibrarySearch").on("keydown.communityLibrarySearch", ".FriendsBox .js-community-library-query", function(e){
+	if(e.which == 13){
+		e.preventDefault();
+		requestCommunityLibrarySearch($(this).val());
+	}
+});
+function updateCommunity(){
+	var i, o, p, memo, displayName, memoText;
+	var len = 0;
+	
+	$stage.dialog.commFriends.empty();
+	for(i in $data.friends){
+		len++;
+		memo = $data.friends[i];
+		o = $data._friends[i] || {};
+		p = ($data.users[i] || {}).profile;
+		displayName = p ? (p.title || p.name) : L['hidden'];
+		memoText = getFriendMemoText(i, displayName);
+		
+		$stage.dialog.commFriends.append($("<div>").addClass("cf-item").attr('id', "cfi-" + i)
+			.append($("<div>").addClass("cfi-status cfi-stat-" + (o.server ? 'on' : 'off')))
+			.append($("<div>").addClass("cfi-server").html(o.server ? L['server_' + o.server] : "-"))
+			.append($("<div>").addClass("cfi-name ellipse").html(displayName))
+			.append($("<div>").addClass("cfi-memo ellipse").text(memoText))
+			.append($("<div>").addClass("cfi-menu")
+				.append($("<i>").addClass("fa fa-pencil").on('click', requestEditMemo))
+				.append($("<i>").addClass("fa fa-remove").on('click', requestRemoveFriend))
+			)
+		);
+	}
+	function requestEditMemo(e){
+		requestFriendMemoEditById($(e.currentTarget).parent().parent().attr('id').slice(4));
+	}
+	function requestRemoveFriend(e){
+		requestFriendRemoveById($(e.currentTarget).parent().parent().attr('id').slice(4));
+	}
+	$("#CommunityDiag .dialog-title").html(L['communityText'] + " (" + len + " / 100)");
+	refreshFriendSearchResults();
+	renderFriendsPage();
+}
+function requestRoomInfo(id){
+	var o = $data.rooms[id];
+	var $pls = $("#ri-players").empty();
+	
+	$data._roominfo = id;
+	$("#RoomInfoDiag .dialog-title").html(id + L['sRoomInfo']);
+	$("#ri-title").html((o.password ? "<i class='fa fa-lock'></i>&nbsp;" : "") + o.title);
+	$("#ri-mode").html(L['mode' + MODE[o.mode]]);
+	$("#ri-round").html(formatRoomRoundText(o.round) + ", " + formatRoomTimeText(o.time));
+	$("#ri-limit").html(o.players.length + " / " + o.limit);
+	o.players.forEach(function(p, i){
+		var $p, $moremi;
+		var rd = o.readies[p] || {};
+		
+		if(o.players[i].robot){
+			p = o.players[i];
+			ensureAIProfile(p);
+			p.equip = { robot: true };
+			rd.t = (p.game && p.game.team) || 0;
+		}else rd.t = rd.t || 0;
+		if(!o.players[i].robot) p = $data.users[p] || NULL_USER;
+		
+		$pls.append($("<div>").addClass("ri-player")
+			.append($moremi = $("<div>").addClass("moremi rip-moremi"))
+			.append($p = $("<div>").addClass("ellipse rip-title").html(p.profile.title || p.profile.name))
+			.append($("<div>").addClass("rip-team team-" + rd.t).html($("#team-" + rd.t).html()))
+			.append($("<div>").addClass("rip-form").html(L['pform_' + rd.f]))
+		);
+		if(p.id == o.master) $p.prepend($("<label>").addClass("rip-master").html("[" + L['master'] + "]&nbsp;"));
+		$p.prepend(getLevelImage(p.data.score).addClass("profile-level rip-level"));
+		
+		renderMoremi($moremi, p.equip);
+	});
+	showDialog($stage.dialog.roomInfo);
+	$stage.dialog.roomInfo.show();
+}
+function requestProfile(id){
+	var o = $data.users[id] || $data.robots[id];
+
+	if(!o){
+		$.get("/profile?id=" + encodeURIComponent(id), function(res){
+			if(!res || res.error){
+				notice(L['error_405']);
+				return;
+			}
+			renderProfile(normalizeProfilePayload(res, id));
+		});
+		return;
+	}
+	renderProfile(o);
+
+	function normalizeProfilePayload(payload, id){
+		var data = payload || {};
+
+		data.id = data.id || id;
+		if(!data.profile || typeof data.profile != "object") data.profile = {};
+		if(!data.profile.title && !data.profile.name){
+			data.profile.title = data.name || data.username || id;
+		}
+		if(!data.profile.name && data.profile.title) data.profile.name = data.profile.title;
+		if(!data.data || typeof data.data != "object") data.data = {};
+		data.data.score = Number(data.data.score) || 0;
+		if(!data.data.record || typeof data.data.record != "object") data.data.record = {};
+		if(!data.equip || typeof data.equip != "object") data.equip = {};
+		if(typeof data.exordial != "string") data.exordial = data.exordial ? String(data.exordial) : "";
+		if(typeof data.place != "number") data.place = 0;
+		return data;
+	}
+	function renderProfile(o){
+		var $dialog = getProfileDialog(id);
+		var $rec = findProfileEl($dialog, ".js-profile-record", "#profile-record").empty();
+		var $place = findProfileEl($dialog, ".js-profile-place", "#profile-place");
+		var $kick = findProfileEl($dialog, ".js-profile-kick", "#profile-kick");
+		var $shut = findProfileEl($dialog, ".js-profile-shut", "#profile-shut");
+		var $friend = findProfileEl($dialog, ".js-profile-friend", "#profile-friend");
+		var $dress = findProfileEl($dialog, ".js-profile-dress", "#profile-dress");
+		var $whisper = findProfileEl($dialog, ".js-profile-whisper", "#profile-whisper");
+		var $handover = findProfileEl($dialog, ".js-profile-handover", "#profile-handover");
+		var $level = findProfileEl($dialog, ".js-profile-level", "#profile-level");
+		var $head = $dialog.find(".profile-head");
+		var $pi, $ex, $levelItem, $placeRow, $record;
+		var i;
+
+		bindProfileDialog($dialog);
+		if(!$dialog.data("profileBaseHeight")) $dialog.data("profileBaseHeight", $dialog.height());
+		if(!$head.length) $head = $dialog.find(".dialog-bar.profile-head");
+
+		if(!o.profile || typeof o.profile != "object") o.profile = { title: id, name: id };
+		if(!o.data || typeof o.data != "object") o.data = {};
+		if(!o.data.record || typeof o.data.record != "object") o.data.record = {};
+		if(!o.equip || typeof o.equip != "object") o.equip = {};
+		if(typeof o.exordial != "string") o.exordial = o.exordial ? String(o.exordial) : "";
+		o.data.score = Number(o.data.score) || 0;
+		if(o.robot) ensureAIProfile(o);
+
+		var displayName = o.profile.title || o.profile.name || id;
+		$placeRow = $place.closest(".dialog-bar");
+		$record = $rec.closest(".profile-record");
+		$dialog.find(".dialog-title").html(displayName + L['sProfile']);
+		$dialog.height($dialog.data("profileBaseHeight"));
+		$placeRow.css("display", "");
+		$record.css({ display: "", height: 205, minHeight: 205, overflowY: "scroll" });
+		$record.children(".profile-record-field").css("display", "");
+		$head.empty().append($pi = $("<div>").addClass("moremi profile-moremi"))
+			.append($("<div>").addClass("profile-head-item")
+				.append(getImage(o.profile.image, o.profile).addClass("profile-image"))
+				.append($("<div>").addClass("profile-title ellipse").html(displayName)
+					.append($("<label>").addClass("profile-tag").html(" #" + o.id.toString().substr(0, 5)))
+				)
+			)
+			.append($levelItem = $("<div>").addClass("profile-head-item")
+				.append(getLevelImage(o.data.score).addClass("profile-level"))
+				.append($("<div>").addClass("profile-level-text").html(L['LEVEL'] + " " + (i = getLevel(o.data.score))))
+				.append($("<div>").addClass("profile-score-text").html(commify(o.data.score) + " / " + commify(EXP[i - 1]) + L['PTS']))
+			)
+			.append($ex = $("<div>").addClass("profile-head-item profile-exordial ellipse").text(badWords(o.exordial || ""))
+				.append($("<div>").addClass("expl").css({ 'white-space': "normal", 'width': 300, 'font-size': "11px" }).text(o.exordial))
+			);
+		if(o.robot){
+			$level.show();
+			$level.prop('disabled', $data.id != $data.room.master);
+			$place.html($data.room ? ($data.room.id + L['roomNumber']) : "-");
+		}else{
+			$level.hide();
+			$place.html(getProfilePlaceText(o));
+			refreshProfileRank($place, o);
+			appendProfileRecordRows($rec, o);
+			renderMoremi($pi, o.equip);
+		}
+		$data._profiled = id;
+		$kick.hide();
+		$shut.hide();
+		$friend.hide();
+		$dress.hide();
+		$whisper.hide();
+		$handover.hide();
+
+		if($data.id == id) $dress.show();
+		else if(!o.robot){
+			if(($data.friends || {}).hasOwnProperty(id)){
+				$friend.text(L['friendUnadd'] || "UNADD").prop('disabled', false).show();
+			}else{
+				$friend.text(L['friendAddShort'] || "ADD").prop('disabled', false).show();
+			}
+			$shut.show();
+			$whisper.show();
+		}
+		if($data.room){
+			if($data.id != id && $data.id == $data.room.master){
+				$kick.show();
+				$handover.show();
+			}
+		}
+		$dialog.data("profileId", id);
+		$dialog.data("profileData", o);
+		if($dialog.is(":visible")){
+			$(".dialog-front").removeClass("dialog-front");
+			$dialog.addClass("dialog-front");
+		}else{
+			showDialog($dialog, true);
+		}
+		$dialog.show();
+		refreshCustomScrollbars();
+		global.expl($ex);
+	}
+	function getProfilePlaceText(o){
+		if(o && o.rank != null && !isNaN(Number(o.rank))) return formatOrdinal(Number(o.rank) + 1);
+		return "-";
+	}
+	function refreshProfileRank($place, o){
+		if(!o || !o.id || o.robot) return;
+		$.get("/ranking?id=" + encodeURIComponent(o.id), function(res){
+			var rank = null;
+
+			if(res && $.isArray(res.data)){
+				res.data.some(function(item){
+					if(item && item.id == o.id){
+						rank = Number(item.rank);
+						return true;
+					}
+					return false;
+				});
+			}
+			if(rank != null && !isNaN(rank)){
+				o.rank = rank;
+				if($data.users && $data.users[o.id]) $data.users[o.id].rank = rank;
+				$place.html(formatOrdinal(rank + 1));
+			}
+		});
+	}
+	function appendProfileRecordRows($rec, o){
+		var rows = collectProfileStats(o);
+
+		if(!rows.rows.length){
+			$rec.append($("<div>").addClass("profile-record-empty").text("No match record yet."));
+			return;
+		}
+		rows.rows.forEach(function(row){
+			$rec.append($("<div>").addClass("profile-record-field")
+				.append($("<div>").addClass("profile-field-name").html(row.modeName))
+				.append($("<div>").addClass("profile-field-record").html(commify(row.wins) + "W " + commify(row.losses) + "L"))
+				.append($("<div>").addClass("profile-field-rate").html(formatWinRate(row.winRate)))
+				.append($("<div>").addClass("profile-field-score").html(commify(row.exp) + L['PTS']))
+			);
+		});
+	}
+	function getProfileDialog(id){
+		var $base = $stage.dialog.profile || $("#ProfileDiag");
+
+		if(!$base.length) return $base;
+		if(!$base.data("profileDialog")) $base.data("profileDialog", true);
+
+		var $dialogs = $(".dialog").filter(function(){
+			return $(this).data("profileDialog");
+		});
+		var $existing = $dialogs.filter(function(){
+			return $(this).data("profileId") === id;
+		});
+		if($existing.length) return $existing.last();
+		if(!$base.is(":visible")) return $base;
+
+		return createProfileDialog($base);
+	}
+	function createProfileDialog($base){
+		var $dialog = $base.clone(false, false);
+
+		$dialog.data("profileDialog", true);
+		$dialog.data("profileClone", true);
+		$("#Middle").append($dialog);
+		bindProfileDialog($dialog);
+
+		return $dialog;
+	}
+	function bindProfileDialog($dialog){
+		if($dialog.data("profileBound")) return;
+
+		$dialog.data("profileBound", true);
+		if(!$dialog.data("profileClone")) return;
+
+		var $head = $dialog.children(".dialog-head");
+
+		$head.on('mousedown', function(e){
+			if(e.which && e.which !== 1) return;
+			var $pd = $(e.currentTarget).parents(".dialog");
+
+			$(".dialog-front").removeClass("dialog-front");
+			$pd.addClass("dialog-front");
+			startDialogDrag($pd, e.clientX, e.clientY);
+		});
+		if(!$head.hasClass("no-close")){
+			var $close = $head.children(".closeBtn");
+			if(!$close.length){
+				$close = $("<div>").addClass("closeBtn").appendTo($head);
+			}
+			$close.off('click').on('click', function(){
+				$dialog.remove();
+			}).hotkey(false, 27);
+		}
+		initCustomScrollbars($dialog);
+	}
+	function findProfileEl($dialog, cls, fallback){
+		var $el = $dialog.find(cls);
+
+		if(!$el.length && fallback) $el = $dialog.find(fallback);
+		return $el;
+	}
+	function startDialogDrag($diag, sx, sy){
+		stopDialogDrag();
+		var $middle = $("#Middle");
+		var middleRect = $middle.length ? $middle.get(0).getBoundingClientRect() : { left: 0, top: 0, right: 0 };
+		var scale = $middle.length ? ($middle.data("scale") || 1) : 1;
+		var midWidth = $middle.length ? $middle.outerWidth() : 0;
+		var originCss = $middle.length ? window.getComputedStyle($middle.get(0)).transformOrigin : "0px 0px";
+		var originRight = originCss.indexOf("100%") === 0 || originCss.indexOf("right") === 0;
+		var currentLeft = parseFloat($diag.css("left")) || 0;
+		var currentTop = parseFloat($diag.css("top")) || 0;
+		var startX = originRight
+			? (midWidth - (middleRect.right - sx) / scale)
+			: ((sx - middleRect.left) / scale);
+		var startY = (sy - middleRect.top) / scale;
+		var origin = {
+			left: startX - currentLeft,
+			top: startY - currentTop
+		};
+
+		$(window).on('mousemove.dialogdrag', function(e){
+			if(typeof e.buttons === "number" && (e.buttons & 1) === 0){
+				stopDialogDrag();
+				return;
+			}
+			if(typeof e.buttons === "undefined" && e.which === 0){
+				stopDialogDrag();
+				return;
+			}
+			var mx = originRight
+				? (midWidth - (middleRect.right - e.clientX) / scale)
+				: ((e.clientX - middleRect.left) / scale);
+			var my = (e.clientY - middleRect.top) / scale;
+			var left = mx - origin.left;
+			var top = my - origin.top;
+			$diag.css('left', left);
+			$diag.css('top', top);
+		});
+		$(window).on('mouseup.dialogdrag blur.dialogdrag', function(){
+			stopDialogDrag();
+		});
+		$(document).on('mouseup.dialogdrag', function(){
+			stopDialogDrag();
+		});
+	}
+	function stopDialogDrag(){
+		$(window).off('.dialogdrag');
+		$(document).off('.dialogdrag');
+	}
+}
+function requestInvite(id){
+	var nick;
+	
+	if(id != "AI"){
+		nick = $data.users[id].profile.title || $data.users[id].profile.name;
+		showWarningDialog(nick + L['sureInvite'], function(){
+			send('invite', { target: id });
+		});
+		return;
+	}
+	send('invite', { target: id });
+}
+function checkFailCombo(id){
+	if(!$data._replay && $data.lastFail == $data.id && $data.id == id){
+		$data.failCombo++;
+		if($data.failCombo == 1) notice(L['trollWarning']);
+		if($data.failCombo > 1){
+			send('leave');
+			fail(437);
+		}
+	}else{
+		$data.failCombo = 0;
+	}
+	$data.lastFail = id;
+}
+function clearGame(){
+	clearBetaLongWordDisplayState();
+	if($data._spaced) $lib.Typing.spaceOff();
+	clearInterval($data._tTime);
+	if($data._gameReadyHideRoom){
+		clearTimeout($data._gameReadyHideRoom);
+		$data._gameReadyHideRoom = null;
+	}
+	delete $data._activeGameRule;
+	$data._relay = false;
+	$data._gAnim = false;
+	$data._gaming = false;
+	$data.resulting = false;
+	$("body").removeClass("in-game in-game-chat-collapsed replay-mode");
+	if($stage && $stage.box){
+		if($stage.box.game) $stage.box.game.stop(true, true).hide();
+		if($stage.box.room) $stage.box.room.stop(true, true).show().height(ROOM_BOX_HEIGHT);
+		if($stage.box.chat) $stage.box.chat.show().css({ width: "", height: "" });
+	}
+	if($stage && $stage.chat) $stage.chat.css("height", "");
+	addTimeout(function(){
+		applyMiddleScale();
+		refreshCustomScrollbars();
+	}, 0);
+}
+function gameReady(){
+	var i, u;
+	
+	if($data._gameReadyHideRoom){
+		clearTimeout($data._gameReadyHideRoom);
+		$data._gameReadyHideRoom = null;
+	}
+	for(i in $data.room.players){
+		if($data._replay){
+			u = $rec.users[$data.room.players[i]] || $data.room.players[i];
+		}else{
+			u = $data.users[$data.room.players[i]] || $data.robots[$data.room.players[i].id];
+		}
+		u.game.score = 0;
+		delete $data["_s"+$data.room.players[i]];
+	}
+	delete $data.lastFail;
+	$data.failCombo = 0;
+	$data._spectate = $data.room.game.seq.indexOf($data.id) == -1;
+	$data._gAnim = true;
+	$stage.box.room.show().height(ROOM_BOX_HEIGHT).animate({ 'height': 1 }, 500);
+	$stage.box.game.height(1).animate({ 'height': 410 }, 500);
+	stopBGM();
+	$stage.dialog.resultSave.attr('disabled', false);
+	clearBoard();
+	$stage.game.display.html(L['soon']);
+	playSound('game_start');
+	forkChat();
+	$data._gameReadyHideRoom = addTimeout(function(){
+		$stage.box.room.height(ROOM_BOX_HEIGHT).hide();
+		$stage.chat.scrollTop(999999999);
+		$data._gameReadyHideRoom = null;
+	}, 500);
+}
+function replayPrevInit(){
+	var i;
+	
+	for(i in $data.room.game.seq){
+		if($data.room.game.seq[i].robot){
+			$data.room.game.seq[i].game.score = 0;
+		}
+	}
+	$rec.users = {};
+	for(i in $rec.players){
+		var id = $rec.players[i].id;
+		var rd = $rec.readies[id] || {};
+		var liveUser = $data.users[id] || $data.robots[id];
+		var u = liveUser;
+		var po = id;
+		
+		if($rec.players[i].robot){
+			u = $rec.users[id] = { robot: true };
+			po = $rec.players[i];
+			po.game = {};
+		}else{
+			u = $rec.users[id] = {};
+		}
+		$data.room.players.push(po);
+		u.id = po;
+		u.profile = normalizeReplayPlayerProfile($rec.players[i], liveUser);
+		u.data = u.profile.data;
+		u.equip = u.profile.equip;
+		u.game = { score: 0, team: rd.t };
+	}
+	$data._rf = 0;
+}
+function normalizeReplayPlayerProfile(player, liveUser){
+	var liveProfile = liveUser && liveUser.profile ? liveUser.profile : {};
+	var id = player && player.id;
+	var title = player && player.title;
+	var savedName = player && player.name;
+	var displayName = title;
+
+	if(!displayName || displayName == ("#" + id)){
+		displayName = liveProfile.title || liveProfile.name || savedName || (player && player.nickname) || title || id || L['hidden'];
+	}
+	player = $.extend({}, player || {});
+	player.title = displayName;
+	if(!player.name || player.name == ("#" + id)) player.name = displayName;
+	return player;
+}
+function replayReady(options){
+	var i;
+	
+	options = options || {};
+	replayStop({ silent: true });
+	closeMyInfoOverlay();
+	$data._replay = true;
+	$data._replayEnded = false;
+	$data._replayReturnToMyInfo = !!options.returnToMyInfoReplay;
+	$data.resulting = false;
+	delete $data._resultPage;
+	delete $data._resultRank;
+	$data.room = {
+		title: $rec.title,
+		players: [],
+		events: [],
+		time: $rec.roundTime,
+		round: $rec.round,
+		mode: $rec.mode,
+		limit: $rec.limit,
+		gaming: true,
+		game: $rec.game,
+		opts: $rec.opts,
+		readies: $rec.readies
+	};
+	replayPrevInit();
+	for(i in $rec.events){
+		$data.room.events.push($rec.events[i]);
+	}
+	$stage.box.userList.hide();
+	$stage.box.roomList.hide();
+	$stage.box.game.show();
+	$stage.dialog.replay.hide();
+	syncReplayDisplayMode(true);
+	gameReady();
+	updateRoom(true);
+	$data.$gp = $(".GameBox .product-title").empty()
+		.append($data.$gpt = $("<div>").addClass("game-replay-title"))
+		.append($data.$gpc = $("<div>").addClass("game-replay-controller")
+			.append($("<button>").html(L['replayNext']).on('click', replayNext))
+			.append($("<button>").html(L['replayPause']).on('click', replayPause))
+			.append($("<button>").html(L['replayPrev']).on('click', replayPrev))
+			.append($("<button>").addClass("game-replay-stop").attr("title", L['close'] || "Close").html("X").on('click', replayStop))
+		);
+	$data._gpp = L['replay'] + " - " + (new Date($rec.time)).toLocaleString(getClientLocale());
+	$data._gtt = $data.room.events[$data.room.events.length - 1].time;
+	$data._eventTime = 0;
+	$data._rt = addTimeout(replayTick, 2000);
+	$data._rprev = 0;
+	$data._rpause = false;
+	replayStatus();
+	syncReplayDisplayMode(true);
+}
+function replayPrev(e){
+	var ev = $data.room.events[--$data._rf];
+	var c;
+	var to;
+	var i;
+	
+	if(!ev) return;
+	clearTimeout($data._rt);
+	stopReplayTransientSounds();
+	c = ev.time;
+	do{
+		if(!(ev = $data.room.events[--$data._rf])) break;
+	}while(c - ev.time < 1000);
+	
+	to = $data._rf - 1;
+	replayPrevInit();
+	c = $data.muteEff;
+	$data.muteEff = true;
+	for(i=0; i<to; i++){
+		replayTick();
+	}
+	$(".deltaScore").remove();
+	$data.muteEff = c;
+	replayTick();
+	/*var pev, ev = $data.room.events[--$data._rf];
+	var c;
+	
+	if(!ev) return;
+	
+	c = ev.time;
+	clearTimeout($data._rt);
+	do{
+		if(ev.data.type == 'turnStart'){
+			$(".game-user-current").removeClass("game-user-current");
+			if((pev = $data.room.events[$data._rf - 1]).data.profile) $("#game-user-" + pev.data.profile.id).addClass("game-user-current");
+		}
+		if(ev.data.type == 'turnEnd'){
+			$stage.game.chain.html(--$data.chain);
+			if(ev.data.profile){
+				addScore(ev.data.profile.id, -(ev.data.score + ev.data.bonus));
+				updateScore(ev.data.profile.id, getScore(ev.data.profile.id));
+			}
+		}
+		if(!(ev = $data.room.events[--$data._rf])) break;
+	}while(c - ev.time < 1000);
+	if($data._rf < 0) $data._rf = 0;
+	if(ev) if(ev.data.type == 'roundReady'){
+		$(".game-user-current").removeClass("game-user-current");
+	}
+	replayTick(true);*/
+}
+function replayPause(e){
+	var p = $data._rpause = !$data._rpause;
+	
+	$(e.target).html(p ? L['replayResume'] : L['replayPause']);
+}
+function replayNext(e){
+	clearTimeout($data._rt);
+	stopReplayTransientSounds();
+	replayTick();
+}
+function replayStatus(){
+	$data.$gpt.html($data._gpp
+		+ " (" + ($data._eventTime * 0.001).toFixed(1) + L['SECOND']
+		+ " / " + ($data._gtt * 0.001).toFixed(1) + L['SECOND']
+		+ ")"
+	);
+}
+function replayTick(stay){
+	var event = $data.room.events[$data._rf];
+	var args, i;
+	
+	clearTimeout($data._rt);
+	if(!stay) $data._rf++;
+	if(!event){
+		replayStop();
+		return;
+	}
+	if($data._rpause){
+		$data._rf--;
+		return $data._rt = addTimeout(replayTick, 100);
+	}
+	args = event.data;
+	if(args.hint) args.hint = { _id: args.hint };
+	if(args.type == 'chat') args.timestamp = $rec.time + event.time;
+	
+	onMessage(args);
+	
+	$data._eventTime = event.time;
+	replayStatus();
+	if($data.room.events.length > $data._rf) $data._rt = addTimeout(replayTick,
+		$data.room.events[$data._rf].time - event.time
+	);
+	else replayComplete();
+}
+function replayComplete(){
+	clearTimeout($data._rt);
+	stopReplayTransientSounds();
+	if(!$data.resulting && !$data._resultPage){
+		replayStop();
+		return;
+	}
+	$data._replayEnded = true;
+	$stage.dialog.resultSave.hide();
+}
+function replayStop(options){
+	var shouldReturnToMyInfo;
+
+	clearBetaLongWordDisplayState();
+	options = options || {};
+	if(options.silent && !$data._replay && !$data._replayEnded) return;
+	shouldReturnToMyInfo = !!(options.returnToMyInfoReplay || $data._replayReturnToMyInfo);
+	stopReplayTransientSounds();
+	delete $data.room;
+	$data._replay = false;
+	$data._replayEnded = false;
+	delete $data._replayReturnToMyInfo;
+	$data.resulting = false;
+	$stage.dialog.result.hide();
+	delete $data._resultRank;
+	$stage.box.room.height(ROOM_BOX_HEIGHT);
+	clearTimeout($data._rt);
+	syncReplayDisplayMode(false);
+	updateUI();
+	playLobbyBGMFromGame();
+	if(shouldReturnToMyInfo) openMyInfoReplayPage();
+}
+function stopReplayTransientSounds(){
+	var key;
+	var keys = [];
+	var i;
+
+	stopTurnSound();
+	for(key in $_sound){
+		if(isBGMKey(key)) continue;
+		keys.push(key);
+	}
+	for(i=0; i<keys.length; i++) stopTrackedSound(keys[i]);
+}
+function startRecord(title){
+	var i, u;
+	
+	$rec = {
+		version: $data.version,
+		me: $data.id,
+		players: [],
+		events: [],
+		title: $data.room.title,
+		roundTime: $data.room.time,
+		round: $data.room.round,
+		mode: $data.room.mode,
+		limit: $data.room.limit,
+		game: $data.room.game,
+		opts: $data.room.opts,
+		readies: $data.room.readies,
+		time: (new Date()).getTime()
+	};
+	for(i in $data.room.players){
+		var o;
+		
+		u = $data.users[$data.room.players[i]] || $data.room.players[i];
+		o = { id: u.id, score: 0 };
+		if(u.robot){
+			o.id = u.id;
+			o.robot = true;
+			o.nickname = u.nickname || "";
+			o.data = { score: 0 };
+			u = { profile: getAIProfile(u.level, u.nickname) };
+		}else{
+			o.data = u.data;
+			o.equip = u.equip;
+		}
+		o.title = (u.profile && (u.profile.title || u.profile.name)) || u.nickname || u.id;
+		o.name = o.title;
+		// o.image = u.profile.image;
+		$rec.players.push(o);
+	}
+	$data._record = true;
+}
+function stopRecord(){
+	$data._record = false;
+}
+function recordEvent(data){
+	if($data._replay) return;
+	if(!$rec) return;
+	var i, _data = data;
+
+	if(!data.hasOwnProperty('type')) return;
+	if(data.type == "room") return;
+	if(data.type == "obtain") return;
+	data = {};
+	for(i in _data) data[i] = _data[i];
+	if(data.profile) data.profile = createReplayRecordProfile(data.profile);
+	if(data.user) data.user = { id: data.user.profile.id, profile: createReplayRecordProfile(data.user.profile), data: { score: 0 }, equip: {} };
+	
+	$rec.events.push({
+		data: data,
+		time: (new Date()).getTime() - $rec.time
+	});
+}
+function createReplayRecordProfile(profile){
+	var displayName = profile && (profile.title || profile.name);
+	var id = profile && profile.id;
+
+	displayName = displayName || id || L['hidden'];
+	return {
+		id: id,
+		title: displayName,
+		name: displayName
+	};
+}
+function clearBoard(){
+	clearBetaLongWordDisplayState();
+	$data._relay = false;
+	loading();
+	$stage.game.here.hide();
+	$stage.game.hereText.val("").prop('readonly', false).attr('type', 'text');
+	$stage.talk.attr('type', 'text');
+	setClassicChaosTime(false);
+	$stage.dialog.result.hide();
+	$stage.dialog.dress.hide();
+	$stage.dialog.charFactory.hide();
+	$(".jjoriping,.rounds,.game-body").removeClass("cw");
+	$stage.game.display.empty();
+	$stage.game.chain.hide();
+	$stage.game.hints.empty().hide();
+	$stage.game.cwcmd.hide();
+	$stage.game.bb.hide();
+	$stage.game.round.empty().removeAttr("data-round-caption");
+	$stage.game.history.empty();
+	$(".game-definition-overlay").remove();
+	$stage.game.items.removeClass("classic-rule-items").empty().show().css('opacity', 0);
+	$(".jjo-turn-time .graph-bar").width(0).css({ 'float': "", 'text-align': "", 'background-color': "" });
+	$(".jjo-round-time .graph-bar").width(0).css({ 'float': "", 'text-align': "" }).removeClass("round-extreme");
+	$(".game-user-bomb").removeClass("game-user-bomb");
+}
+function drawRound(round){
+	var i, $l;
+	var title = (($data.room.game && $data.room.game.title) ? String($data.room.game.title) : "");
+	
+	$stage.game.round.empty().attr("data-round-caption", String(((typeof L == "object" && L && L['rounds']) ? L['rounds'] : "ROUND") || "ROUND").replace(/\s*[:：]\s*$/, "").trim() || "ROUND");
+	for(i=0; i<$data.room.round; i++){
+		$stage.game.round.append($l = $("<label>").html(getRoundDisplayLabel(title, i)));
+		if((i+1) == round) $l.addClass("rounds-current");
+	}
+}
+function turnGoing(){
+	if(!$data._replay && (!$data.room || !$data.room.gaming || !$data._gaming)){
+		clearInterval($data._tTime);
+		return;
+	}
+	route("turnGoing");
+}
+function turnHint(data){
+	route("turnHint", data);
+}
+function turnError(code, text){
+	clearBetaLongWordDisplayState();
+	$stage.game.display.empty().append($("<label>").addClass("game-fail-text")
+		.text((L['turnError_'+code] ? (L['turnError_'+code] + ": ") : "") + text)
+	);
+	playSound('fail');
+	clearTimeout($data._fail);
+	$data._fail = addTimeout(function(){
+		$stage.game.display.html($data._char);
+	}, 1800);
+}
+function getScore(id){
+	if($data._replay) return $rec.users[id].game.score;
+	else return ($data.users[id] || $data.robots[id]).game.score;
+}
+function addScore(id, score){
+	if($data._replay) $rec.users[id].game.score += score;
+	else ($data.users[id] || $data.robots[id]).game.score += score;
+}
+function drawObtainedScore($uc, $sc){
+	$uc.append($sc);
+	addTimeout(function(){ $sc.remove(); }, 2000);
+	
+	return $uc;
+}
+function turnEnd(id, data){
+	route("turnEnd", id, data);
+}
+function roundEnd(result, data){
+	if(!data) data = {};
+	var i, o, r;
+	var $b = $(".result-board").empty();
+	var $o, $p;
+	var lvUp, sc;
+	var addit, addp;
+	
+	clearBetaLongWordDisplayState();
+	$data.resulting = true;
+	$(".result-me-expl").empty();
+	renderRankedResultTrophy(null);
+	$stage.game.display.html(L['roundEnd']);
+	$data._resultPage = 1;
+	$data._result = null;
+	for(i in result){
+		r = result[i];
+		if($data._replay){
+			o = $rec.users[r.id];
+		}else{
+			o = $data.users[r.id];
+		}
+		if(!o){
+			o = NULL_USER;
+		}
+		if(!o.data) continue;
+		if(!r.reward) continue;
+		
+		r.reward.score = $data._replay ? 0 : Math.round(r.reward.score);
+		lvUp = getLevel(sc = o.data.score) > getLevel(o.data.score - r.reward.score);
+		
+		$b.append($o = $("<div>").addClass("result-board-item")
+			.append($p = $("<div>").addClass("result-board-rank").html(r.rank + 1))
+			.append(getLevelImage(sc).addClass("result-board-level"))
+			.append($("<div>").addClass("result-board-name").html(o.profile.title || o.profile.name))
+			.append($("<div>").addClass("result-board-score")
+				.html(data.scores ? (L['avg'] + " " + commify(data.scores[r.id]) + "<label style='font-size: 11px;'>" + L['wpm'] + "</label>") : (commify(r.score || 0) + L['PTS']))
+			)
+			.append($("<div>").addClass("result-board-reward").html(r.reward.score ? ("+" + commify(r.reward.score)) : "-"))
+			.append($("<div>").addClass("result-board-lvup").css('display', lvUp ? "block" : "none")
+				.append($("<i>").addClass("fa fa-arrow-up"))
+				.append($("<div>").html(L['lvUp']))
+			)
+		);
+		if(o.game.team) $p.addClass("team-" + o.game.team);
+		if(r.id == $data.id){
+			r.exp = o.data.score - r.reward.score;
+			r.level = getLevel(r.exp);
+			$data._result = r;
+			$o.addClass("result-board-me");
+			$(".result-me-expl").append(explainReward(r.reward._score, r.reward._money, r.reward._blog));
+		}
+	}
+	$(".result-me").css('opacity', 0);
+	$data._coef = 0;
+	if($data._result){
+		addit = $data._result.reward.score - $data._result.reward._score;
+		addp = $data._result.reward.money - $data._result.reward._money;
+		
+		$data._result._exp = $data._result.exp;
+		$data._result._score = $data._result.reward.score;
+		$data._result._bonus = addit;
+		$data._result._boing = $data._result.reward._score;
+		$data._result._addit = addit;
+		$data._result._addp = addp;
+		
+		if(addit > 0){
+			addit = "<label class='result-me-bonus'>(+" + commify(addit) + ")</label>";
+		}else addit = "";
+		if(addp > 0){
+			addp = "<label class='result-me-bonus'>(+" + commify(addp) + ")</label>";
+		}else addp = "";
+		
+		announceSystem(L['notice'], L['scoreGain'] + ": " + commify($data._result.reward.score) + ", " + L['moneyGain'] + ": " + commify($data._result.reward.money), {
+			chat: true,
+			notify: true,
+			kind: "reward"
+		});
+		$(".result-me").css('opacity', 1);
+		$(".result-me-score").html(L['scoreGain']+" +"+commify($data._result.reward.score)+addit);
+		$(".result-me-money").html(L['moneyGain']+" +"+commify($data._result.reward.money)+addp);
+		renderRankedResultTrophy($data._result.trophy);
+	}
+	function roundEndAnimation(first){
+		var v, nl;
+		var going;
+		
+		$data._result.goal = EXP[$data._result.level - 1];
+		$data._result.before = EXP[$data._result.level - 2] || 0;
+		/*if(first){
+			$data._result._before = $data._result.before;
+		}*/
+		if($data._result.reward.score > 0){
+			v = $data._result.reward.score * $data._coef;
+			if(v < 0.05 && $data._coef) v = $data._result.reward.score;
+			
+			$data._result.reward.score -= v;
+			$data._result.exp += v;
+			nl = getLevel($data._result.exp);
+			if($data._result.level != nl){
+				$data._result._boing -= $data._result.goal - $data._result._exp;
+				$data._result._exp = $data._result.goal;
+				playSound('lvup');
+			}
+			$data._result.level = nl;
+			
+			addTimeout(roundEndAnimation, 50);
+		}
+		going = $data._result.exp - $data._result._exp;
+		draw('before', $data._result._exp, $data._result.before, $data._result.goal);
+		draw('current', Math.min(going, $data._result._boing), 0, $data._result.goal - $data._result.before);
+		draw('bonus', Math.max(0, going - $data._result._boing), 0, $data._result.goal - $data._result.before);
+		
+		$(".result-me-level-body").html($data._result.level);
+		$(".result-me-score-text").html(commify(Math.round($data._result.exp)) + " / " + commify($data._result.goal));
+	}
+	function draw(phase, val, before, goal){
+		$(".result-me-" + phase + "-bar").width((val - before) / (goal - before) * 100 + "%");
+	}
+	function explainReward(orgX, orgM, list){
+		var $sb, $mb;
+		var $R = $("<div>")
+			.append($("<h4>").html(L['scoreGain']))
+			.append($sb = $("<div>"))
+			.append($("<h4>").html(L['moneyGain']))
+			.append($mb = $("<div>"));
+		
+		row($sb, L['scoreOrigin'], orgX);
+		row($mb, L['moneyOrigin'], orgM);
+		list.forEach(function(item){
+			var from = item.charAt(0);
+			var type = item.charAt(1);
+			var target = item.slice(2, 5);
+			var value = Number(item.slice(5));
+			var $t, vtx, org;
+			
+			if(target == 'EXP') $t = $sb, org = orgX;
+			else if(target == 'MNY') $t = $mb, org = orgM;
+			
+			if(type == 'g') vtx = "+" + (org * value).toFixed(1);
+			else if(type == 'h') vtx = "+" + Math.floor(value);
+			
+			row($t, L['bonusFrom_' + from], vtx);
+		});
+		function row($t, h, b){
+			$t.append($("<h5>").addClass("result-me-blog-head").html(h))
+				.append($("<h5>").addClass("result-me-blog-body").html(b));
+		}
+		return $R;
+	}
+	addTimeout(function(){
+		showDialog($stage.dialog.result);
+		if($data._result) roundEndAnimation(true);
+		$stage.dialog.result.css('opacity', 0).animate({ opacity: 1 }, 500);
+		addTimeout(function(){
+			$data._coef = 0.05;
+		}, 500);
+	}, 2000);
+	stopRecord();
+}
+function drawRanking(ranks){
+	var $b = $(".result-board").empty();
+	var $o, $v;
+	var me;
+	
+	$data._resultPage = 2;
+	if(!ranks) return $stage.dialog.resultOK.trigger('click');
+	for(i in ranks.list){
+		r = ranks.list[i];
+		var profile = r.name;
+		if(!profile){
+			o = $data.users[r.id] || {
+				profile: { title: L['hidden'] }
+			};
+			profile = o.profile.title || o.profile.name;
+		}
+		me = r.id == $data.id;
+		
+		$b.append($o = $("<div>").addClass("result-board-item")
+			.append($("<div>").addClass("result-board-rank").html(r.rank + 1))
+			.append(getLevelImage(r.score).addClass("result-board-level"))
+			.append($("<div>").addClass("result-board-name").html(profile))
+			.append($("<div>").addClass("result-board-score").html(commify(r.score) + L['PTS']))
+			.append($("<div>").addClass("result-board-reward").html(""))
+			.append($v = $("<div>").addClass("result-board-lvup").css('display', me ? "block" : "none")
+				.append($("<i>").addClass("fa fa-arrow-up"))
+				.append($("<div>").html(ranks.prev - r.rank))
+			)
+		);
+		
+		if(me){
+			if(ranks.prev - r.rank <= 0) $v.hide();
+			$o.addClass("result-board-me");
+		}
+	}
+}
+function kickVoting(target){
+	var op = $data.users[target].profile;
+	
+	$("#kick-vote-text").html((op.title || op.name) + L['kickVoteText']);
+	$data.kickTime = 10;
+	$data._kickTime = 10;
+	$data._kickTimer = addTimeout(kickVoteTick, 1000);
+	showDialog($stage.dialog.kickVote);
+}
+function kickVoteTick(){
+	$(".kick-vote-time .graph-bar").width($data.kickTime / $data._kickTime * 300);
+	if(--$data.kickTime > 0) $data._kickTimer = addTimeout(kickVoteTick, 1000);
+	else $stage.dialog.kickVoteY.trigger('click');
+}
+function renderLocalizedItemImage($image, item){
+	var colors = { red_name: "#ff3333", orange_name: "#ffa533", green_name: "#43c227", blue_name: "#2f77d9", indigo_name: "#1c18b9", purple_name: "#a939cc", pink_name: "#f15f9a" };
+	if(item && item.group == "NIK" && /^en(?:-|$)/i.test(getClientLocale())){
+		$image.addClass("nickname-item-icon").css("background-image", "none")
+			.prepend($("<i>").addClass("fa fa-font").attr("aria-hidden", "true").css("color", colors[item._id] || "#24354b"));
+	}
+	return $image;
+}
+function loadShop(){
+	var $body = $("#shop-shelf");
+	
+	$body.html(L['LOADING']);
+	processShop(function(res){
+		$body.empty();
+		if($data.guest) res.error = 423;
+		if(res.error){
+			$stage.menu.shop.trigger('click');
+			return fail(res.error);
+		}
+		res.goods.sort(function(a, b){ return b.updatedAt - a.updatedAt; }).forEach(function(item, index, my){
+			if(item.cost < 0) return;
+			var url = iImage(false, item);
+			
+			$body.append($("<div>").attr('id', "goods_" + item._id).addClass("goods")
+				.append(renderLocalizedItemImage($("<div>").addClass("jt-image goods-image").css('background-image', "url(" + url + ")"), item))
+				.append($("<div>").addClass("goods-title").html(iName(item._id)))
+				.append($("<div>").addClass("goods-cost").html(formatPing(item.cost)))
+			.on('click', onGoods));
+		});
+		global.expl($body);
+		renderShopCartState();
+	});
+	$(".shop-type.selected").removeClass("selected");
+	$("#shop-type-all").addClass("selected");
+}
+function getShopCartIds(){
+	var seen = {};
+	var cart = [];
+
+	($data._shopCart || []).forEach(function(id){
+		if(!id || seen[id]) return;
+		if(!$data.shop || !$data.shop[id]) return;
+		if($data.shop[id].cost < 0) return;
+		seen[id] = true;
+		cart.push(id);
+	});
+	$data._shopCart = cart;
+	return cart;
+}
+function getShopCartItems(){
+	return getShopCartIds().map(function(id){
+		return $data.shop[id];
+	}).filter(Boolean);
+}
+function getShopCartTotal(){
+	return getShopCartItems().reduce(function(total, item){
+		return total + (Number(item.cost) || 0);
+	}, 0);
+}
+function buildShopPreviewEquip(){
+	var my = $data.users && $data.users[$data.id];
+	var equip = {};
+	var hands = [];
+	var key;
+
+	if(my && my.equip){
+		for(key in my.equip) equip[key] = my.equip[key];
+	}
+	getShopCartItems().forEach(function(item){
+		if(!item || !item.group) return;
+		if(item.group == "Mhand"){
+			hands.push(item._id);
+		}else if(item.group == "NIK"){
+			equip.NIK = item._id;
+		}else if(item.group.slice(0, 3) == "BDG"){
+			equip.BDG = item._id;
+		}else if(item.group.charAt(0) == "M"){
+			equip[item.group] = item._id;
+		}
+	});
+	if(hands.length == 1){
+		equip.Mrhand = hands[0];
+	}else if(hands.length > 1){
+		hands = hands.slice(-2);
+		equip.Mlhand = hands[0];
+		equip.Mrhand = hands[1];
+	}
+	return equip;
+}
+function getShopPreviewEquip(){
+	var my = $data.users && $data.users[$data.id];
+	var equip = {};
+	var key;
+
+	if($data._shopPreviewOriginal){
+		if(my && my.equip){
+			for(key in my.equip) equip[key] = my.equip[key];
+		}
+		return equip;
+	}
+	return buildShopPreviewEquip();
+}
+function syncShopPreviewToggle(){
+	var isOriginal = !!$data._shopPreviewOriginal;
+	var $toggle = $("#shop-preview-original");
+	var $wrap = $(".shop-preview-toggle-floating");
+
+	$toggle.prop('checked', isOriginal);
+	$wrap.toggleClass("is-on", isOriginal);
+}
+function syncShopGoodsState(){
+	var selected = {};
+
+	getShopCartIds().forEach(function(id){
+		selected[id] = true;
+	});
+	$("#shop-shelf .goods").each(function(i, el){
+		var id = $(el).attr("id");
+		id = id ? id.slice(6) : "";
+		$(el).toggleClass("in-cart", !!selected[id]);
+	});
+}
+function renderShopCartState(){
+	var my = $data.users && $data.users[$data.id];
+	var $preview = $("#shop-preview-moremi");
+	var $previewName = $("#shop-preview-name");
+	var $list = $("#shop-cart-list");
+	var items;
+	var total;
+	var balance;
+	var after;
+	var previewEquip;
+
+	if(!$preview.length || !$list.length || !my) return;
+	items = getShopCartItems();
+	total = getShopCartTotal();
+	balance = Number(my.money) || 0;
+	after = balance - total;
+	previewEquip = getShopPreviewEquip();
+
+	renderMoremi($preview, previewEquip);
+	renderShopPreviewNickname($previewName, my.profile || {}, previewEquip);
+	$("#shop-preview-balance").html(formatPing(balance));
+	$("#shop-preview-after").html(formatPing(after)).toggleClass("purchase-not-enough", after < 0);
+	$("#shop-cart-total").html(formatPing(total)).toggleClass("purchase-not-enough", after < 0);
+	$("#shop-cart-buy").prop('disabled', !items.length || after < 0);
+	syncShopPreviewToggle();
+
+	$list.empty();
+	if(!items.length){
+		$list.append($("<div>").attr("id", "shop-cart-empty").addClass("shop-cart-empty").text(L['shopCartEmpty'] || ""));
+	}else{
+		items.forEach(function(item){
+			var groupName = L['GROUP_' + item.group] || item.group;
+
+			if($data.box && $data.box[item._id]){
+				groupName += " - OWNED";
+			}
+			$list.append($("<div>").addClass("shop-cart-item")
+				.append(renderLocalizedItemImage($("<div>").addClass("jt-image shop-cart-item-image").css("background-image", "url(" + iImage(false, item) + ")"), item))
+				.append($("<div>").addClass("shop-cart-item-meta")
+					.append($("<div>").addClass("shop-cart-item-name").text(iName(item._id)))
+					.append($("<div>").addClass("shop-cart-item-group").text(groupName))
+				)
+				.append($("<div>").addClass("shop-cart-item-cost").html(formatPing(item.cost)))
+				.append($("<button>").addClass("shop-cart-item-remove").attr({
+					type: "button",
+					title: "Remove",
+					"data-id": item._id
+				}).text("×"))
+			);
+		});
+	}
+	syncShopGoodsState();
+}
+function filterShop(by){
+	var isAll = by === true;
+	var $o, obj;
+	var i;
+	
+	if(!isAll) by = by.split(',');
+	for(i in $data.shop){
+		obj = $data.shop[i];
+		if(obj.cost < 0) continue;
+		$o = $("#goods_" + i).show();
+		if(isAll) continue;
+		if(by.indexOf(obj.group) == -1) $o.hide();
+	}
+}
+function explainGoods(item, equipped, expire){
+	var i;
+	var $R = $("<div>").addClass("expl dress-expl")
+		.append($("<div>").addClass("dress-item-title").html(iName(item._id) + (equipped ? L['equipped'] : "")))
+		.append($("<div>").addClass("dress-item-group").html(L['GROUP_' + item.group]))
+		.append($("<div>").addClass("dress-item-expl").html(iDesc(item._id)));
+	var $opts = $("<div>").addClass("dress-item-opts");
+	var txt;
+	
+	if(item.term){
+		var days = Math.floor(item.term / 86400);
+		$R.append($("<div>").addClass("dress-item-term").html(L['itemDurationDays'] ? L['itemDurationDays'].replace("{V1}", String(days)) : days + L['DATE'] + " " + L['ITEM_TERM']));
+	}
+	if(expire){
+		var expiresAt = (new Date(expire * 1000)).toLocaleString(getClientLocale());
+		$R.append($("<div>").addClass("dress-item-term").html(L['itemExpiresAt'] ? L['itemExpiresAt'].replace("{V1}", expiresAt) : expiresAt + L['ITEM_TERMED']));
+	}
+	for(i in item.options){
+		if(i == "gif") continue;
+		var k = i.charAt(0);
+		
+		txt = item.options[i];
+		if(k == 'g') txt = "+" + (txt * 100).toFixed(1) + "%p";
+		else if(k == 'h') txt = "+" + txt;
+		
+		$opts.append($("<label>").addClass("item-opts-head").html(L['OPTS_' + i]))
+			.append($("<label>").addClass("item-opts-body").html(txt))
+			.append($("<br>"));
+	}
+	if(txt) $R.append($opts);
+	return $R;
+}
+function processShop(callback){
+	var i, finished = false;
+	
+	function finish(res){
+		if(finished) return;
+		finished = true;
+		res = res || {};
+		res.goods = res.goods || [];
+		$data.shop = {};
+		for(i in res.goods){
+			$data.shop[res.goods[i]._id] = res.goods[i];
+			if(res.goods[i].name || res.goods[i].desc){
+				L[res.goods[i]._id] = [ res.goods[i].name || res.goods[i]._id, res.goods[i].desc || "" ];
+			}
+		}
+		if(callback) callback(res);
+	}
+	$.ajax({
+		url: "/shop",
+		dataType: "json",
+		timeout: 3000
+	}).done(finish).fail(function(){
+		finish({ goods: [] });
+	});
+}
+function onGoods(e){
+	var id = $(e.currentTarget).attr('id').slice(6);
+
+	toggleShopCartItem(id);
+}
+function toggleShopCartItem(id){
+	var cart = getShopCartIds();
+	var pos = cart.indexOf(id);
+
+	if(!$data.shop || !$data.shop[id]) return;
+	if(pos == -1) cart.push(id);
+	else cart.splice(pos, 1);
+	$data._shopCart = cart;
+	renderShopCartState();
+}
+function purchaseShopCart(){
+	var my = $data.users && $data.users[$data.id];
+	var ids = getShopCartIds();
+	var total = getShopCartTotal();
+
+	if(!my || !ids.length) return;
+	if((Number(my.money) || 0) < total){
+		alert(L['notEnoughMoney']);
+		renderShopCartState();
+		return;
+	}
+	$.post("/buy", { ids: JSON.stringify(ids) }, function(res){
+		if(res.error) return fail(res.error);
+		if(res.result && res.result != 200) return fail(res.result);
+		playSound("store_item_click");
+		alert(L['purchased']);
+		my.money = res.money;
+		$data.box = res.box;
+		$data._shopCart = [];
+		updateMe();
+		renderShopCartState();
+	});
+}
+function vibrate(level){
+	if(level < 1){
+		setRoundShakeOffset(0);
+		return;
+	}
+	
+	$("#Middle").css('padding-top', level);
+	setRoundShakeOffset(level);
+	addTimeout(function(){
+		$("#Middle").css('padding-top', 0);
+		setRoundShakeOffset(0);
+		addTimeout(vibrate, 50, level * 0.7);
+	}, 50);
+}
+function setRoundShakeOffset(level){
+	var value = level ? ((-Number(level) || 0) + "px") : "0px";
+	var $round = ($stage && $stage.game && $stage.game.round && $stage.game.round.length) ? $stage.game.round : $(".rounds");
+	$round.css("--round-shake-offset", value);
+}
+function pushDisplay(text, mean, theme, wc){
+	var len;
+	var mode = MODE[$data.room.mode];
+	var isKKT = mode == "KKT";
+	var isRev = isReverseClassicMode(mode);
+	var safeText = badWords(text);
+	var beat = BEAT[len = safeText.length];
+	var ta, kkt;
+	var i, j = 0;
+	var $l;
+	var tick = $data.turnTime / 96;
+	var sg = $data.turnTime / 12;
+	var beatStartTop = isBetaTestMode() ? 0 : -6;
+	
+	syncBetaLongWordDisplayState(safeText);
+	$stage.game.display.empty();
+	if(beat){
+		ta = 'As' + $data._speed;
+		beat = beat.split("");
+	}else if(RULE[mode].lang == "en" && len < 10){
+		ta = 'As' + $data._speed;
+	}else{
+		ta = 'Al';
+		vibrate(len);
+	}
+	kkt = 'K'+$data._speed;
+	
+	if(beat){
+		for(i in beat){
+			if(beat[i] == "0") continue;
+			
+			$stage.game.display.append($l = $("<div>")
+				.addClass("display-text")
+				.css({ 'float': isRev ? "right" : "left", 'margin-top': beatStartTop, 'font-size': 36 })
+				.hide()
+				.html(isRev ? safeText.charAt(len - j - 1) : safeText.charAt(j))
+			);
+			j++;
+			addTimeout(function($l, snd){
+				var anim = { 'margin-top': 0 };
+				
+				playSound(snd);
+				if(isClassicMissionLetter($l.html())){
+					playSound('mission');
+					$l.css({ 'color': "#66FF66" });
+					anim['font-size'] = 24;
+				}else{
+					anim['font-size'] = 20;
+				}
+				$l.show().animate(anim, 100);
+			}, Number(i) * tick, $l, ta);
+		}
+		i = $stage.game.display.children("div").get(0);
+		$(i).css(isRev ? 'margin-right' : 'margin-left', ($stage.game.display.width() - 20 * len) * 0.5);
+	}else{
+		j = "";
+		if(isRev) for(i=0; i<len; i++){
+			addTimeout(function(t){
+				playSound(ta);
+				if(isClassicMissionLetter(t)){
+					playSound('mission');
+					j = "<label style='color: #66FF66;'>" + t + "</label>" + j;
+				}else{
+					j = t + j;
+				}
+				$stage.game.display.html(j);
+			}, Number(i) * sg / len, safeText[len - i - 1]);
+		}
+		else for(i=0; i<len; i++){
+			addTimeout(function(t){
+				playSound(ta);
+				if(isClassicMissionLetter(t)){
+					playSound('mission');
+					j += "<label style='color: #66FF66;'>" + t + "</label>";
+				}else{
+					j += t;
+				}
+				$stage.game.display.html(j);
+			}, Number(i) * sg / len, safeText[i]);
+		}
+	}
+	addTimeout(function(){
+		for(i=0; i<3; i++){
+			addTimeout(function(v){
+				if(isKKT){
+					if(v == 1) return;
+					else playSound('kung');
+				}
+				(beat ? $stage.game.display.children(".display-text") : $stage.game.display)
+					.css('font-size', 21)
+					.animate({ 'font-size': 20 }, tick);
+			}, i * tick * 2, i);
+		}
+		addTimeout(pushHistory, tick * 4, text, mean, theme, wc);
+		if(!isKKT) playSound(kkt);
+	}, sg);
+}
+function pushHint(hint){
+	var v = processWord("", hint);
+	var $obj;
+	
+	$stage.game.hints.append(
+		$obj = $("<div>").addClass("hint-item")
+			.append($("<label>").html(v))
+			.append($("<div>").addClass("expl").css({ 'white-space': "normal", 'width': 200 }).html(v.html()))
+	);
+	if(!mobile) $obj.width(0).animate({ width: 215 });
+	global.expl($obj);
+}
+function buildHistoryWordTypes(wc){
+	if(Array.isArray(wc)) return wc.filter(Boolean);
+	if(typeof wc == "string") return wc ? wc.split(',').filter(Boolean) : [];
+	return [];
+}
+function cleanHistoryDefinitionText(text){
+	return String(text == null ? "" : text)
+		.replace(/\uFF02[0-9]+\uFF02/g, " ")
+		.replace(/\"[0-9]+\"/g, " ")
+		.replace(/\uFF3B[0-9]+\uFF3D/g, " ")
+		.replace(/\[[0-9]+\]/g, " ")
+		.replace(/\uFF08[0-9]+\uFF09/g, " ")
+		.replace(/\([0-9]+\)/g, " ")
+		.replace(/\s+/g, " ")
+		.trim();
+}
+function formatHistoryDefinitionHtml(text){
+	return String(text || "")
+		.replace(/\$\$[^\$]+\$\$/g, function(item){
+			var txt = item.slice(2, item.length - 2)
+				.replace(/\^\{([^\}]+)\}/g, "<sup>$1</sup>")
+				.replace(/_\{([^\}]+)\}/g, "<sub>$1</sub>")
+				.replace(/\\geq/g, "&ge;");
+			return "<equ>" + txt + "</equ>";
+		})
+		.replace(/\*\*([^\*]+)\*\*/g, "<sup>$1</sup>")
+		.replace(/\*([^\*]+)\*/g, "<sub>$1</sub>");
+}
+function splitHistoryDefinitions(text, pattern){
+	return String(text == null ? "" : text)
+		.replace(pattern, "\u0000")
+		.split("\u0000")
+		.map(cleanHistoryDefinitionText)
+		.filter(Boolean);
+}
+function stripHistoryExampleText(text){
+	var value = String(text || "").trim();
+	var parts;
+
+	if(!value) return "";
+	parts = value.split(/\s*;\s*/).map(function(item){
+		return String(item || "").trim();
+	}).filter(Boolean);
+	if(parts.length) value = parts[0];
+	return value
+		.replace(/\s+/g, " ")
+		.replace(/\s+([,.;:!?])/g, "$1")
+		.trim();
+}
+function extractHistoryDefinitions(mean){
+	var rawText = String(mean == null ? "" : mean).trim();
+	var text;
+	var parts;
+
+	if(!rawText) return [];
+	parts = splitHistoryDefinitions(rawText, /\uFF02[0-9]+\uFF02|\"[0-9]+\"/g);
+	if(parts.length > 1) return parts;
+	parts = splitHistoryDefinitions(rawText, /\uFF3B[0-9]+\uFF3D|\[[0-9]+\]/g);
+	if(parts.length > 1) return parts;
+	parts = splitHistoryDefinitions(rawText, /\uFF08[0-9]+\uFF09|\([0-9]+\)/g);
+	text = cleanHistoryDefinitionText(rawText);
+	return (parts.length ? parts : (text ? [ cleanHistoryDefinitionText(text) ] : []))
+		.map(stripHistoryExampleText)
+		.filter(Boolean);
+}
+function isBroadHistoryThemeCode(themeCode){
+	var key = String(themeCode || "").trim().toLowerCase();
+	return [ "e05", "e08", "e12", "e13", "e15", "e18", "e20", "e43", "370", "530", "1001" ].indexOf(key) !== -1;
+}
+function isSpecialHistoryThemeCode(themeCode){
+	var key = String(themeCode || "").trim();
+	return !!key && !/^e\d+$/i.test(key);
+}
+function addHistoryEntryTheme(entry, themeInfo){
+	var raw = String((themeInfo && themeInfo.raw) || "").trim();
+	var label = String((themeInfo && themeInfo.label) || "").trim();
+	if(!label) return;
+	entry.themes = entry.themes || [];
+	if(entry.themes.some(function(item){
+		return String(item.raw || "") === raw || String(item.label || "") === label;
+	})) return;
+	entry.themes.push({ raw: raw, label: label });
+}
+function historyThemeDefinitionScore(text, themeInfo, type){
+	var key = String((themeInfo && themeInfo.raw) || "").trim().toUpperCase();
+	var label = String((themeInfo && themeInfo.label) || "").trim().toLowerCase();
+	var typeCode = String(type || "").trim().toLowerCase();
+	var value = String(text || "").toLowerCase();
+	if(key == "E18" && /^v/.test(typeCode)) return 0;
+	if(key == "530" && /\bmathematical element\b/.test(value)) return 0;
+	var tests = {
+		"490": [ /\bcomputer\b/, /\bsoftware\b/, /\bprogramming language\b/, /\bmarkup language\b/, /\bprotocol\b/, /\bhypertext\b/, /\bserver\b/, /\bbrowser\b/, /\bdatabase\b/, /\balgorithm\b/, /\binternet\b/, /\btcp\b/ ],
+		"CRL": [ /\bclash royale\b/, /\bcrown towers?\b/, /\belixir\b/, /\barena\b/ ],
+		"ANIME": [ /\banime\b/, /\bjapanese anime\b/, /\banimated\b/, /\banimation\b/ ],
+		"BRAWL": [ /\bbrawl stars\b/ ],
+		"MINC": [ /\bminecraft\b/ ],
+		"FORT": [ /\bfortnite\b/ ],
+		"VALO": [ /\bvalorant\b/ ],
+		"PUBG": [ /\bpubg\b/, /\bplayerunknown\b/ ],
+		"APEX": [ /\bapex legends\b/ ],
+		"OVW": [ /\boverwatch\b/ ],
+		"COD": [ /\bcall of duty\b/ ],
+		"LOL": [ /\bleague of legends\b/ ],
+		"NBAP": [ /\bbasketball\b/ ],
+		"SOCP": [ /\bfootball\b/, /\bsoccer\b/ ],
+		"VOLL": [ /\bvolleyball\b/ ],
+		"BASE": [ /\bbaseball\b/ ],
+		"AMFB": [ /\bamerican football\b/, /\bgridiron football\b/ ],
+		"e05": [ /\banimal\b/, /\bspecies\b/, /\bboas?\b/ ],
+		"e08": [ /\bbody\b/, /\bbone\b/, /\borgan\b/, /\bskin\b/, /\bmuscle\b/ ],
+		"e12": [ /\bemotion\b/, /\bfeeling\b/ ],
+		"e13": [ /\bfood\b/, /\bbeverage\b/, /\bdrink\b/, /\beat\b/, /\bcrop\b/, /\bsalad\b/, /\bcoffee\b/ ],
+		"e15": [ /\bisland\b/, /\bcity\b/, /\btown\b/, /\bcountry\b/, /\bregion\b/, /\bplace\b/, /\blocation\b/ ],
+		"e18": [ /\bperson\b/, /\bbeing\b/, /\bhuman\b/, /\bman\b/, /\bwoman\b/, /\bfemale\b/, /\bsorcerer\b/, /\bmagician\b/, /\bbeliever\b/, /\bplayer\b/, /\bmember\b/, /\bpractices\b/ ],
+		"e20": [ /\bplant\b/, /\btree\b/, /\bcrop\b/, /\bflower\b/ ],
+		"e43": [ /\bweather\b/, /\brain\b/, /\bsnow\b/, /\bwind\b/ ],
+		"370": [ /\bmedical\b/, /\bmedicine\b/, /\bdisease\b/, /\bdoctor\b/, /\bhospital\b/, /\bsurgery\b/, /\bsurgical\b/, /\btherapy\b/, /\banatomy\b/, /\bphysiology\b/, /\bsymptom\b/, /\bdiagnosis\b/, /\btreatment\b/, /\bclinical\b/, /\bpathology\b/, /\boncology\b/, /\bcardiology\b/ ],
+		"530": [ /\bchemical\b/, /\bchemistry\b/, /\bmolecule\b/, /\bmolecular\b/, /\batoms?\b/, /\batomic\b/, /\belement\b/, /\bcompound\b/, /\bacid\b/, /\boxide\b/, /\balkali\b/, /\bsolvent\b/, /\bcatalyst\b/, /\bionic\b/, /\bcovalent\b/, /\bmetallic\b/, /\ballotropic\b/, /\barsenic\b/, /\bisotope\b/, /\bperiodic table\b/, /\bherbicide\b/, /\binsecticide\b/ ],
+		"1001": [ /\bsovereign country\b/, /\brepublic\b/, /\bcountry\b/, /\bnation\b/ ],
+		"350": [ /\bsport\b/, /\bplayer\b/, /\bcricket\b/, /\bteam\b/, /\bmatch\b/ ]
+	};
+	var list = tests[key] || tests[String((themeInfo && themeInfo.raw) || "").trim()] || [];
+	var i;
+	for(i = 0; i < list.length; i++){
+		if(list[i].test(value)) return 100 - i;
+	}
+	if(label && value.indexOf(label) !== -1) return 40;
+	if(label){
+		var parts = label.split(/\s+/).filter(function(part){ return part.length > 3; });
+		if(parts.length && parts.every(function(part){ return value.indexOf(part) !== -1; })) return 20;
+	}
+	return 0;
+}
+function normalizeHistoryDefinitionEntries(entries, themeInfos){
+	var normalized = (entries || []).map(function(entry){
+		return {
+			text: String((entry && entry.text) || "").trim(),
+			type: String((entry && entry.type) || "").trim(),
+			themes: []
+		};
+	});
+	var infos = (themeInfos || []).filter(function(themeInfo){
+		return !!String((themeInfo || {}).label || "").trim();
+	});
+	var used = [];
+	var i, j, bestIndex, bestScore, score, info;
+
+	function isUsed(index){ return used.indexOf(index) !== -1; }
+	function markUsed(index){ if(!isUsed(index)) used.push(index); }
+	function hasExplicitTheme(entry){
+		return (entry.themes || []).some(function(themeInfo){
+			return isSpecialHistoryThemeCode(themeInfo.raw);
+		});
+	}
+
+	infos.forEach(function(themeInfo, themeIndex){
+		bestIndex = -1;
+		bestScore = 0;
+		for(i = 0; i < normalized.length; i++){
+			score = historyThemeDefinitionScore(normalized[i].text, themeInfo, normalized[i].type);
+			if(isBroadHistoryThemeCode(themeInfo.raw) && score > 0){
+				addHistoryEntryTheme(normalized[i], themeInfo);
+				bestScore = Math.max(bestScore, score);
+				bestIndex = i;
+				continue;
+			}
+			if(score > bestScore){
+				bestScore = score;
+				bestIndex = i;
+			}
+		}
+		if(bestIndex >= 0 && bestScore > 0){
+			if(!isBroadHistoryThemeCode(themeInfo.raw)) addHistoryEntryTheme(normalized[bestIndex], themeInfo);
+			markUsed(themeIndex);
+		}
+	});
+	for(i = 0; i < infos.length; i++){
+		if(isUsed(i)) continue;
+		info = infos[i];
+		if(!isSpecialHistoryThemeCode(info.raw) || !/^[A-Z]+$/.test(String(info.raw || ""))) continue;
+		for(j = 0; j < normalized.length; j++){
+			if(String(normalized[j].type || "").toUpperCase() !== "INJEONG") continue;
+			if(hasExplicitTheme(normalized[j])) continue;
+			addHistoryEntryTheme(normalized[j], info);
+			markUsed(i);
+			break;
+		}
+	}
+	if(normalized.length === 1){
+		for(i = 0; i < infos.length; i++){
+			if(isUsed(i)) continue;
+			addHistoryEntryTheme(normalized[0], infos[i]);
+			markUsed(i);
+		}
+	}
+	return normalized.filter(function(entry){
+		return !!(entry.text || (entry.themes && entry.themes.length));
+	});
+}
+function extractHistoryDefinitionEntries(mean, theme, wcs){
+	var rawText = String(mean == null ? "" : mean).trim();
+	var themeQueue = (theme ? theme.split(",") : []).map(function(item){
+		var raw = String(item || "").trim();
+		return {
+			raw: raw,
+			label: String(getVisibleThemeLabel(raw) || "").trim()
+		};
+	});
+	var allThemeInfos = themeQueue.slice();
+	var typeQueue = (wcs || []).slice();
+	var entries = [];
+	var means;
+	var remainingThemes;
+	var typeCode;
+
+	if(!rawText) return normalizeHistoryDefinitionEntries(themeQueue.map(function(themeInfo){
+		return {
+			text: "",
+			theme: String(themeInfo.label || "").trim(),
+			rawTheme: String(themeInfo.raw || "").trim(),
+			type: ""
+		};
+	}), allThemeInfos);
+	if(rawText.indexOf("\uFF02") === -1){
+		entries = extractHistoryDefinitions(rawText).map(function(definition, index){
+			var themeInfo = themeQueue[index] || {};
+			return {
+				text: definition,
+				theme: String(themeInfo.label || "").trim(),
+				rawTheme: String(themeInfo.raw || "").trim(),
+				type: String(typeQueue[0] || "").trim()
+			};
+		});
+		return normalizeHistoryDefinitionEntries(entries, allThemeInfos);
+	}
+	means = rawText.split(/\uFF02[0-9]+\uFF02/).slice(1).map(function(m1){
+		return (m1.indexOf("\uFF3B") == -1) ? [[ m1 ]] : m1.split(/\uFF3B[0-9]+\uFF3D/).slice(1).map(function(m2){
+			return m2.split(/\uFF08[0-9]+\uFF09/).slice(1);
+		});
+	});
+	means.forEach(function(m1){
+		m1.forEach(function(m2){
+			typeCode = String(typeQueue.shift() || "").trim();
+			var localThemes = themeQueue.splice(0, m2.length);
+			m2.forEach(function(m3){
+				var themeInfo = localThemes.shift() || {};
+				var themeLabel = String(themeInfo.label || "").trim();
+				var definition = stripHistoryExampleText(cleanHistoryDefinitionText(m3));
+				if(!definition && !themeLabel) return;
+				entries.push({
+					text: definition,
+					theme: themeLabel,
+					rawTheme: String(themeInfo.raw || "").trim(),
+					type: typeCode
+				});
+			});
+		});
+	});
+	themeQueue.filter(function(item){
+		return !!String((item || {}).label || "").trim();
+	}).forEach(function(themeInfo){
+		entries.push({
+			text: "",
+			theme: String(themeInfo.label || "").trim(),
+			rawTheme: String(themeInfo.raw || "").trim(),
+			type: ""
+		});
+	});
+	return normalizeHistoryDefinitionEntries(entries, allThemeInfos);
+}
+function buildHistoryDefinitionResultView(word, mean, theme, wcs){
+	var $view = $("<div>").addClass("word history-definition-view");
+	var entries = extractHistoryDefinitionEntries(mean, theme, wcs);
+	var $definitions = $("<div>").addClass("word-definitions");
+	if(!entries.length) return $view.append($("<div>").addClass("history-mean-empty").text("No definition found."));
+	entries.forEach(function(entry, index){
+		var $line = $("<div>").addClass("word-definition");
+		var $body = $("<span>").addClass("word-def-body");
+
+	$line.append($("<span>").addClass("word-def-index").text((index + 1) + "."));
+	(entry.themes || []).forEach(function(themeInfo){
+		$body.append($("<span>").addClass("word-theme").text(themeInfo.label));
+	});
+	if(entry.text){
+		$body.append($("<span>").addClass("word-def-text").html(formatHistoryDefinitionHtml(entry.text)));
+	}
+		$line.append($body);
+		$definitions.append($line);
+	});
+	$view.append($definitions);
+	return $view;
+}
+function styleHistoryOverlay($card){
+	var $holder = $stage.game.history.parent();
+
+	$holder.css({
+		position: "absolute",
+		right: "var(--game-history-column-right, 46px)",
+		top: "var(--game-history-column-top, 132px)",
+		left: "auto",
+		width: "var(--game-history-column-width, 224px)",
+		height: "auto",
+		display: "block",
+		overflow: "visible",
+		"z-index": 30,
+		float: "none",
+		visibility: "visible",
+		opacity: 1
+	});
+	$stage.game.history.css({
+		width: "100%",
+		height: "auto",
+		display: "flex",
+		"flex-direction": "column",
+		gap: "4px",
+		overflow: "visible",
+		float: "none",
+		visibility: "visible",
+		opacity: 1
+	});
+	syncChainSignToDefinitions();
+	requestAnimationFrameCompat(syncChainSignToDefinitions);
+}
+function animateHistoryCardEntry($card){
+	var previousLayout = arguments.length > 1 ? arguments[1] : [];
+	var duration = 380;
+	var easing = "transform " + duration + "ms cubic-bezier(0.22, 1, 0.36, 1), opacity 220ms ease-out";
+
+	if(!$card || !$card.length) return;
+	(previousLayout || []).forEach(function(item){
+		var node = item && item.node;
+		var $item;
+		var deltaY;
+		var timer;
+		
+		if(!node || node == $card[0] || !$.contains(document.documentElement, node)) return;
+		deltaY = item.top - node.getBoundingClientRect().top;
+		if(Math.abs(deltaY) < 1) return;
+		
+		$item = $(node);
+		timer = $item.data("historyShiftTimer");
+		if(timer) clearTimeout(timer);
+		
+		$item.removeClass("history-layout-shift");
+		node.style.transition = "none";
+		node.style.transform = "translate3d(0, " + deltaY + "px, 0)";
+		node.offsetHeight;
+		$item.addClass("history-layout-shift");
+		requestAnimationFrameCompat(function(){
+			node.style.transition = easing;
+			node.style.transform = "translate3d(0, 0, 0)";
+			$item.data("historyShiftTimer", setTimeout(function(){
+				$item.removeClass("history-layout-shift").removeData("historyShiftTimer");
+				node.style.transition = "";
+				node.style.transform = "";
+			}, duration + 80));
+		});
+	});
+	$card.removeClass("history-enter");
+	if($card.data("historyEnterTimer")) clearTimeout($card.data("historyEnterTimer"));
+	requestAnimationFrameCompat(function(){
+		$card.addClass("history-enter");
+		$card.data("historyEnterTimer", setTimeout(function(){
+			$card.removeClass("history-enter").removeData("historyEnterTimer");
+		}, duration + 120));
+	});
+}
+function captureHistoryCardLayout(){
+	var snapshot = [];
+	
+	if(!$stage || !$stage.game || !$stage.game.history || !$stage.game.history.length) return snapshot;
+	$stage.game.history.children(".history-item").each(function(){
+		snapshot.push({ node: this, top: this.getBoundingClientRect().top });
+	});
+	return snapshot;
+}
+function requestAnimationFrameCompat(callback){
+	if(window.requestAnimationFrame) return window.requestAnimationFrame(callback);
+	return setTimeout(callback, 16);
+}
+function getHistoryPreviewText(mean){
+	var definitions = extractHistoryDefinitions(mean);
+	return String(definitions[0] || cleanHistoryDefinitionText(mean) || "").trim();
+}
+function formatHistoryPreviewText(mean){
+	var preview = String(getHistoryPreviewText(mean) || "").replace(/\s+/g, " ").trim();
+	var maxLength = 104;
+	if(!preview) return "";
+	if(preview.length <= maxLength) return preview;
+	return preview.slice(0, maxLength - 3).trim().replace(/[.,;:!?-]+$/, "") + "...";
+}
+function buildHistoryDefinitionPreviewText(mean, theme, wc){
+	var preview = formatHistoryPreviewText(mean);
+	var themeLabel = String((theme ? theme.split(",") : []).map(getVisibleThemeLabel).filter(Boolean)[0] || "").trim();
+	var subject = themeLabel;
+	return subject ? ("<" + subject + "> " + (preview || "No definition found.")) : (preview || "No definition found.");
+}
+function setHistoryCardVisual($card, word){
+	if(!$card || !$card.length) return;
+	$card.contents().filter(function(){
+		return this.nodeType === 3;
+	}).remove();
+	$card.prepend(document.createTextNode(String(word || "").trim()));
+}
+function renderHistoryDefinition($card, word, mean, theme, wc){
+	var types = buildHistoryWordTypes(wc);
+	var $meanBody = $card.children(".history-mean");
+	var $expl = $card.children(".expl");
+	var $explBody = $expl.find(".history-expl-body");
+	var previewNode = buildHistoryDefinitionResultView(word, mean, theme, types);
+	var explNode = buildHistoryDefinitionResultView(word, mean, theme, types);
+
+	setHistoryCardVisual($card, word);
+	if(!$meanBody.length){
+		$meanBody = $("<div>").addClass("history-mean ellipse").appendTo($card);
+	}
+	if(!$expl.length){
+		$expl = $("<div>").addClass("expl history-expl").css({ 'width': 240, 'white-space': "normal" })
+			.append($("<div>").addClass("history-expl-body"))
+			.appendTo($card);
+		$explBody = $expl.find(".history-expl-body");
+	}
+	if($meanBody.length){
+		$meanBody.empty().append(previewNode);
+	}
+	if($explBody.length){
+		$explBody.empty().append(explNode);
+	}
+	$card.removeClass("history-loading");
+	global.expl($card);
+}
+function hydrateHistoryDefinition($card, word){
+	var cache;
+	var key = String(word || "").trim().toLowerCase();
+	var setFallback = function(text){
+		var $fallback = $("<div>").addClass("history-mean-empty").text(text);
+		setHistoryCardVisual($card, word);
+		$card.children(".history-mean").empty().append($fallback.clone());
+		$card.children(".expl").find(".history-expl-body").empty().append($fallback.clone());
+		$card.removeClass("history-loading");
+	};
+
+	if(!key) return;
+	cache = $data._historyDictCache = $data._historyDictCache || {};
+	if(cache[key]){
+		if(!cache[key].error && cache[key].mean){
+			renderHistoryDefinition($card, cache[key].word || word, cache[key].mean, cache[key].theme, cache[key].type);
+		}else{
+			setFallback("No definition found.");
+		}
+		return;
+	}
+	$card.addClass("history-loading");
+	setHistoryCardVisual($card, word);
+	tryDict(word, function(res){
+		cache[key] = res || { error: 500 };
+		if(!$card.closest("body").length) return;
+		if(!res || res.error || !res.mean){
+			setFallback("No definition found.");
+			return;
+		}
+		renderHistoryDefinition($card, res.word || word, res.mean, res.theme, res.type);
+	});
+}
+var DEFINITION_CARD_ACCENTS = [
+	{ accent: "#f7b8b5", edge: "#9a6966" },
+	{ accent: "#f8d29a", edge: "#9f7a45" },
+	{ accent: "#e9df9f", edge: "#8d854d" },
+	{ accent: "#b8dfad", edge: "#6f965f" },
+	{ accent: "#a7dccf", edge: "#5e9187" },
+	{ accent: "#a9cfef", edge: "#5f84a3" },
+	{ accent: "#c9b8f0", edge: "#7b6a9f" },
+	{ accent: "#efb5d2", edge: "#9d6a82" }
+];
+function nextDefinitionCardAccent(){
+	var index = ($data && typeof $data._definitionAccentIndex == "number") ? $data._definitionAccentIndex : 0;
+	var picked = DEFINITION_CARD_ACCENTS[index % DEFINITION_CARD_ACCENTS.length] || DEFINITION_CARD_ACCENTS[0];
+	if($data) $data._definitionAccentIndex = (index + 1) % DEFINITION_CARD_ACCENTS.length;
+	return picked;
+}
+function applyDefinitionCardAccent($card){
+	var picked;
+	var node;
+
+	if(!$card || !$card.length) return;
+	picked = nextDefinitionCardAccent();
+	node = $card[0];
+	if(node && node.style && node.style.setProperty){
+		node.style.setProperty("--definition-accent", picked.accent);
+		node.style.setProperty("--definition-edge", picked.edge);
+	}else{
+		$card.css({ borderColor: picked.edge });
+	}
+}
+function pushHistory(text, mean, theme, wc){
+	var $v, $w, $x, $explBody, $meanBody;
+	var wcs = wc ? wc.split(',') : [];
+	var hasMean = !!String(mean || "").trim();
+	var previousLayout = captureHistoryCardLayout();
+
+	$stage.game.history.prepend($v = $("<div>")
+		.addClass("ellipse history-item")
+		.text(text)
+	);
+	applyDefinitionCardAccent($v);
+	$w = $stage.game.history.children();
+	if($w.length > 5){
+		$w.last().remove();
+	}
+	$v.append($meanBody = $("<div>").addClass("history-mean ellipse"));
+	$v.append($x = $("<div>").addClass("expl history-expl").css({ 'width': 240, 'white-space': "normal" })
+		.append($explBody = $("<div>").addClass("history-expl-body"))
+	);
+	if(hasMean){
+		renderHistoryDefinition($v, text, mean, theme, wcs);
+	}else{
+		setHistoryCardVisual($v, text);
+		$meanBody.text("Looking up definition...");
+		$explBody.append($("<div>").addClass("history-mean-empty").text("Looking up definition..."));
+	}
+	styleHistoryOverlay($v);
+	global.expl($v);
+	animateHistoryCardEntry($v, previousLayout);
+	if(!hasMean){
+		hydrateHistoryDefinition($v, text);
+	}
+}
+function processNormal(word, mean){
+	return $("<label>").addClass("word").html(mean);
+}
+function processWord(word, _mean, _theme, _wcs){
+	if(!_mean || _mean.indexOf("\uFF02") == -1) return processNormal(word, _mean);
+	var $R = $("<label>").addClass("word");
+	var means = _mean.split(/\uFF02[0-9]+\uFF02/).slice(1).map(function(m1){
+		return (m1.indexOf("\uFF3B") == -1) ? [[ m1 ]] : m1.split(/\uFF3B[0-9]+\uFF3D/).slice(1).map(function(m2){
+			return m2.split(/\uFF08[0-9]+\uFF09/).slice(1);
+		});
+	});
+	var types = _wcs ? _wcs.map(function(_wc){
+		return L['class_' + _wc];
+	}) : [];
+	var themes = _theme ? _theme.split(',').map(function(_t){
+		return getVisibleThemeLabel(_t);
+	}) : [];
+	var ms = means.length > 1;
+
+	means.forEach(function(m1, x1){
+		var $m1 = $("<label>").addClass("word-m1");
+		var m1s = m1.length > 1;
+
+		if(ms) $m1.append($("<label>").addClass("word-head word-m1-head").html(x1 + 1));
+		m1.forEach(function(m2, x2){
+			var $m2 = $("<label>").addClass("word-m2");
+			var m2l = m2.length;
+			var m2s = m2l > 1;
+			var tl = themes.splice(0, m2l);
+
+			if(m1s) $m2.append($("<label>").addClass("word-head word-m2-head").html(x2 + 1));
+			m2.forEach(function(m3, x3){
+				var $m3 = $("<label>").addClass("word-m3");
+				var _t = tl.shift();
+
+				if(m2s) $m3.append($("<label>").addClass("word-head word-m3-head").html(x3 + 1));
+				if(_t) $m3.append($("<label>").addClass("word-theme").html(_t));
+				$m3.append($("<label>").addClass("word-m3-body").html(formMean(m3)));
+				$m2.append($m3);
+			});
+			$m1.append($m2);
+		});
+		$R.append($m1);
+	});
+
+	function formMean(v){
+		return String(v || "")
+			.replace(/\$\$[^\$]+\$\$/g, function(item){
+				var txt = item.slice(2, item.length - 2)
+					.replace(/\^\{([^\}]+)\}/g, "<sup>$1</sup>")
+					.replace(/_\{([^\}]+)\}/g, "<sub>$1</sub>")
+					.replace(/\\geq/g, "&ge;");
+				return "<equ>" + txt + "</equ>";
+			})
+			.replace(/\*\*([^\*]+)\*\*/g, "<sup>$1</sup>")
+			.replace(/\*([^\*]+)\*/g, "<sub>$1</sub>");
+	}
+	return $R;
+}
+function getCharText(char, subChar, wordLength){
+	var res = char + (subChar ? ("("+subChar+")") : "");
+	
+	if(wordLength) res += "<label class='jjo-display-word-length'>(" + wordLength + ")</label>";
+	
+	return res;
+}
+function getRequiredScore(lv){
+	return Math.round(
+		(!(lv%5)*0.3 + 1) * (!(lv%15)*0.4 + 1) * (!(lv%45)*0.5 + 1) * (
+			120 + Math.floor(lv/5)*60 + Math.floor(lv*lv/225)*120 + Math.floor(lv*lv/2025)*180
+		)
+	);
+}
+function getLevel(score){
+	var i, l = EXP.length;
+	
+	for(i=0; i<l; i++) if(score < EXP[i]) break;
+	return i+1;
+}
+function getLevelImage(score){
+	var lv = getLevel(score) - 1;
+	var lX = (lv % 25) * -100;
+	var lY = Math.floor(lv * 0.04) * -100;
+	
+	// return getImage("/img/kkutu/lv/lv" + zeroPadding(lv+1, 4) + ".png");
+	return $("<div>").css({
+		'float': "left",
+		'background-image': "url('/img/kkutu/lv/newlv.png')",
+		'background-position': lX + "% " + lY + "%",
+		'background-size': "2560%"
+	});
+}
+function getImage(url, profile){
+	if(profile === undefined){
+		return $("<div>").addClass("jt-image").css('background-image', url ? "url('" + url + "')" : "");
+	}
+	return setProfileBackground($("<div>").addClass("jt-image"), url, profile);
+}
+function getGoogleProfileFallbackUrl(profile){
+	var authType = "";
+	var pid = "";
+	if(!profile || typeof profile != "object") return "";
+	authType = String(profile.authType || profile.type || "").toLowerCase();
+	pid = String(profile.id || "").trim();
+	if(authType != "google" && !/^\d{16,}$/.test(pid)) return "";
+	pid = String(profile.id || "").trim();
+	if(!pid || /^https?:\/\//i.test(pid) || pid.indexOf("/") != -1) return "";
+	return "https://profiles.google.com/s2/photos/profile/" + encodeURIComponent(pid) + "?sz=256";
+}
+function normalizeProfileImageUrl(url){
+	var value = (typeof url == "string") ? url.trim() : "";
+	var host;
+	if(!value || value == "[object Object]" || value == "undefined" || value == "null"){
+		return "";
+	}
+	if(value.indexOf("//") === 0) value = "https:" + value;
+	if(/^http:\/\//i.test(value)) value = "https://" + value.slice(7);
+	if(/^https?:\/\//i.test(value)){
+		try{
+			host = new URL(value).hostname.toLowerCase();
+			if(/(^|\.)googleusercontent\.com$/.test(host) || /(^|\.)ggpht\.com$/.test(host) || /(^|\.)googleapis\.com$/.test(host) || /(^|\.)google\.com$/.test(host) || /(^|\.)gstatic\.com$/.test(host)){
+				return "/profile-image?u=" + encodeURIComponent(value);
+			}
+		}catch(e){}
+	}
+	return value;
+}
+function getResolvedProfileImageUrl(url, profile){
+	var imageUrl = normalizeProfileImageUrl(url);
+	if(!imageUrl){
+		imageUrl = normalizeProfileImageUrl(getGoogleProfileFallbackUrl(profile));
+	}
+	if(!imageUrl){
+		imageUrl = isGuestProfile(profile) ? "/img/kkutu/guest.png" : "/img/kkutu/moremi/body_fla.png";
+	}
+	return imageUrl;
+}
+function isGuestProfile(profile){
+	var name = String(profile && (profile.title || profile.name || profile.id) || "").trim();
+	return !!(profile && profile.guest) || /^guest/i.test(name);
+}
+function setProfileBackground($obj, url, profile){
+	var imageUrl = getResolvedProfileImageUrl(url, profile);
+	var fallback = isGuestProfile(profile) ? "/img/kkutu/guest.png" : "/img/kkutu/moremi/body_fla.png";
+	return $obj.css('background-image', "url('" + imageUrl + "'), url('" + fallback + "')");
+}
+function getOptions(mode, opts, hash){
+	var R = [ L["mode"+MODE[mode]] ];
+	var i, k;
+	opts = opts || {};
+	
+	for(i in OPTIONS){
+		k = OPTIONS[i].name.toLowerCase();
+		if(opts[k]) R.push(L['opt' + OPTIONS[i].name]);
+	}
+	if(hash && Array.isArray(opts.injpick) && opts.injpick.length) R.push(opts.injpick.join('|'));
+	
+	return hash ? R.toString() : R;
+}
+function buildRoomHeadInfo(className, iconName, content, html){
+	var $field = $("<h5>").addClass(className + " room-head-info")
+		.append($("<i>").addClass("fa fa-" + iconName + " room-head-info-icon").attr("aria-hidden", "true"));
+	var $text = $("<span>").addClass("room-head-info-text");
+	
+	if(html) $text.html(content);
+	else $text.text(content);
+	return $field.append($text);
+}
+function setRoomHead($obj, room){
+	var opts = getOptions(room.mode, room.opts);
+	var rule = RULE[MODE[room.mode]];
+	var $rm;
+	var injpickLabels;
+	var $roomNumber;
+	
+	$roomNumber = $("<h5>").addClass("room-head-number");
+	if(room.practice){
+		$roomNumber.text("[" + L['practice'] + "]");
+	}else{
+		$roomNumber.append($("<span>").addClass("room-head-id").text(room.id));
+	}
+	$obj.toggleClass("room-head-practice", !!room.practice).empty()
+		.append($roomNumber)
+		.append($("<h5>").addClass("room-head-title").text(badWords(room.title)))
+		.append($rm = buildRoomHeadInfo("room-head-mode", "gamepad", opts.join(" / "), true))
+		.append(buildRoomHeadInfo("room-head-limit", "users", (mobile ? "" : (L['players'] + " ")) + room.players.length + " / " + room.limit, false))
+		.append(buildRoomHeadInfo("room-head-round", "repeat", formatRoomRoundText(room.round), false))
+		.append($("<h5>").addClass("room-head-time").html(formatRoomTimeText(room.time)));
+		
+	if(rule.opts.indexOf("ijp") != -1){
+		try{
+			injpickLabels = (room.opts.injpick || []).map(function(item){
+				return getVisibleThemeLabel(item);
+			}).filter(Boolean);
+			if(injpickLabels.length){
+				$rm.find(".expl").remove();
+				$rm.append($("<div>").addClass("expl").append(
+					$("<h5>").text(injpickLabels.join(" / "))
+				));
+				global.expl($obj);
+			}
+		}catch(err){
+			console.error("setRoomHead injpick render failed", err);
+		}
+	}
+}
+function loadSounds(list, callback){
+	$data._lsRemain = list.length;
+	
+	list.forEach(function(v){
+		getAudio(v.key, v.value, callback);
+	});
+}
+function getAudio(k, url, cb){
+	var req = new XMLHttpRequest();
+	var settled = false;
+	var fallbackTimer;
+	
+	$soundURL[k] = url;
+	req.open("GET", /*($data.PUBLIC ? "http://jjo.kr" : "") +*/ url);
+	req.responseType = "arraybuffer";
+	req.timeout = 2500;
+	req.onload = function(e){
+		if(req.status && (req.status < 200 || req.status >= 300)) return onErr();
+		if(audioContext && e.target.response){
+			try{
+				audioContext.decodeAudioData(e.target.response, function(buf){
+					if(settled) return;
+					$sound[k] = buf;
+					done();
+				}, onErr);
+			}catch(err){
+				onErr(err);
+			}
+		}else onErr();
+	};
+	req.onerror = req.onabort = req.ontimeout = onErr;
+	fallbackTimer = setTimeout(onErr, 3000);
+	function onErr(err){
+		if(settled) return;
+		$sound[k] = new AudioSound(url);
+		done();
+	}
+	function done(){
+		if(settled) return;
+		settled = true;
+		clearTimeout(fallbackTimer);
+		if($data.bgm && $data.bgm.pending && $data.bgm.key == k){
+			playBGM(k, true);
+		}
+		if(--$data._lsRemain == 0){
+			if(cb) cb();
+		}
+	}
+	function AudioSound(url){
+		var my = this;
+		
+		this.audio = new Audio(url);
+	this.audio.load();
+	this.start = function(){
+		my.audio.play();
+	};
+	this.stop = function(){
+		try{
+			my.audio.pause();
+			my.audio.currentTime = 0;
+		}catch(e){
+			try{ my.audio.pause(); }catch(ignore){}
+		}
+	};
+}
+	req.send();
+}
+function stopAudioSource(src){
+	if(!src) return;
+	try{
+		if(src.stop) src.stop();
+		else if(src.audio){
+			src.audio.pause();
+			src.audio.currentTime = 0;
+		}
+	}catch(e){
+		try{
+			if(src.audio){
+				src.audio.pause();
+				src.audio.currentTime = 0;
+			}
+		}catch(ignore){}
+	}
+}
+function stopTrackedSound(key){
+	if(!$_sound[key]) return;
+	stopAudioSource($_sound[key]);
+	delete $_sound[key];
+}
+function createSilentSound(key, pending){
+	return {
+		key: key,
+		pending: !!pending,
+		audio: { currentTime: 0 },
+		startedAt: audioContext ? audioContext.currentTime : 0,
+		currentTime: 0,
+		duration: 1,
+		paused: true,
+		volume: 0,
+		start: function(){},
+		stop: function(){}
+	};
+}
+function stopTurnSound(){
+	if(!$data._turnSound) return;
+	stopAudioSource($data._turnSound);
+	delete $data._turnSound;
+}
+function normalizeBGMKey(key){
+	if((key == "jaqwi" || key == "jaqwiF") && typeof getOnly == "function" && getOnly() == "for-lobby") return "lobby";
+	return key;
+}
+function isBGMKey(key){
+	return key == "lobby" || key == "jaqwi" || key == "jaqwiF";
+}
+function playBGM(key, force){
+	key = normalizeBGMKey(key);
+	stopBGM();
+	return $data.bgm = playSound(key, true);
+}
+function stopBGM(){
+	var key;
+	var bgmKeys = { lobby: true, jaqwi: true, jaqwiF: true };
+
+	if($data.bgm){
+		key = $data.bgm.key;
+		stopAudioSource($data.bgm);
+		if(key && $_sound[key] === $data.bgm) delete $_sound[key];
+		delete $data.bgm;
+	}
+	for(key in bgmKeys) stopTrackedSound(key);
+}
+function playSound(key, loop){
+	var src, sound;
+	var mute = (loop && $data.muteBGM) || (!loop && $data.muteEff);
+	
+	sound = $sound[key];
+	if(!sound){
+		if(loop || isBGMKey(key)) return createSilentSound(key, true);
+		sound = $sound.missing;
+	}
+	if(!sound) return createSilentSound(key);
+	if(window.hasOwnProperty("AudioBuffer") && sound instanceof AudioBuffer){
+		src = audioContext.createBufferSource();
+		src.startedAt = audioContext.currentTime;
+		src.loop = loop;
+		if(mute){
+			src.buffer = audioContext.createBuffer(2, sound.length, audioContext.sampleRate);
+		}else{
+			src.buffer = sound;
+		}
+		src.connect(audioContext.destination);
+	}else{
+		if(sound.readyState) sound.audio.currentTime = 0;
+		sound.audio.loop = loop || false;
+		sound.audio.volume = mute ? 0 : 1;
+		src = sound;
+	}
+	if($_sound[key]) stopTrackedSound(key);
+	$_sound[key] = src;
+	src.key = key;
+	src.start();
+	/*if(sound.readyState) sound.currentTime = 0;
+	sound.loop = loop || false;
+	sound.volume = ((loop && $data.muteBGM) || (!loop && $data.muteEff)) ? 0 : 1;
+	sound.play();*/
+	
+	return src;
+}
+function stopAllSounds(){
+	var i, keys = [];
+	
+	for(i in $_sound) keys.push(i);
+	for(i in keys) stopTrackedSound(keys[i]);
+	if($data.bgm) stopAudioSource($data.bgm);
+	delete $data.bgm;
+	delete $data._turnSound;
+}
+function haltGameAudio(){
+	stopAllSounds();
+}
+function playLobbyBGMFromGame(){
+	clearInterval($data._tTime);
+	haltGameAudio();
+	playBGM('lobby');
+}
+function tryJoin(id){
+	var pw;
+	
+	if(!$data.rooms[id]) return;
+	if($data.rooms[id].password){
+		pw = prompt(L['putPassword']);
+		if(!pw) return;
+	}
+	$data._pw = pw;
+	send('enter', { id: id, password: pw });
+}
+function clearChat(){
+	if(isCommunityLobbyChatContext()){
+		$data._communityLobbyChatLog = [];
+		clearCommunityLobbyChatState();
+		syncCommunityLobbyChat();
+	}
+	$data._chatHistory = [];
+	saveChatHistoryState();
+	$("#Chat").empty();
+	$("#chat-log-board").empty();
+}
+function forkChat(){
+	var history = $data._chatHistory || [];
+	var last = history.length ? history[history.length - 1] : null;
+
+	if(last && last.kind == "divider") return;
+	appendChatHistoryEntry({ kind: "divider", timestamp: Date.now() });
+}
+function normalizeProfanityCore(text){
+	return (text || "").toLowerCase()
+		.replace(/[@4]/g, "a")
+		.replace(/[1!|]/g, "i")
+		.replace(/3/g, "e")
+		.replace(/[5$]/g, "s")
+		.replace(/[7+]/g, "t")
+		.replace(/0/g, "o")
+		.replace(/8/g, "b")
+		.replace(/[^a-z0-9가-힣]+/g, "");
+}
+function maskAllVisibleChars(text){
+	return (text || "").replace(/[A-Za-z0-9가-힣]/g, "*");
+}
+function partiallyMaskProfanity(text){
+	var maskCount;
+	var start;
+
+	if(!text || text.length <= 2) return text;
+	maskCount = Math.max(1, Math.round(text.length * 0.4));
+	maskCount = Math.min(text.length - 2, maskCount);
+	if(maskCount <= 0) return text;
+	start = Math.max(1, Math.round((text.length - maskCount) * 0.6));
+	if(start + maskCount > text.length - 1){
+		start = text.length - 1 - maskCount;
+	}
+	return text.slice(0, start) + new Array(maskCount + 1).join("*") + text.slice(start + maskCount);
+}
+function censorProfanityToken(token){
+	var parts;
+	var core;
+	var compact;
+	var normalized;
+	var i;
+
+	if(!token) return token;
+	parts = token.match(/^([^A-Za-z0-9가-힣]*)(.*?)([^A-Za-z0-9가-힣]*)$/);
+	if(!parts) return token;
+	core = parts[2];
+	if(!core) return token;
+	compact = core.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "");
+	normalized = normalizeProfanityCore(core);
+	for(i=0; i<BAD_WORDS.length; i++){
+		if(normalized != BAD_WORDS[i]) continue;
+		return parts[1] + (
+			normalized != compact || /[^A-Za-z0-9가-힣]/.test(core)
+				? maskAllVisibleChars(core)
+				: partiallyMaskProfanity(core)
+		) + parts[3];
+	}
+	return token.replace(BAD, function(match){
+		return partiallyMaskProfanity(match);
+	});
+}
+function badWords(text){
+	var source = text == null ? "" : String(text);
+	var trimmed = $.trim(source);
+	var compactWhole;
+	var normalizedWhole;
+
+	if(!source) return source;
+	if(trimmed){
+		compactWhole = trimmed.toLowerCase().replace(/[^a-z0-9가-힣]+/g, "");
+		normalizedWhole = normalizeProfanityCore(trimmed);
+		if(BAD_WORDS.indexOf(normalizedWhole) != -1
+			&& (normalizedWhole != compactWhole || /[^A-Za-z0-9가-힣]/.test(trimmed))){
+			return maskAllVisibleChars(source);
+		}
+	}
+	return source.split(/(\s+)/).map(censorProfanityToken).join("");
+}
+function chatBalloon(text, id, flag){
+	$("#cb-" + id).remove();
+	var offset = ((flag & 2) ? $("#game-user-" + id) : $("#room-user-" + id)).offset();
+	var img = (flag == 2) ? "chat-balloon-bot" : "chat-balloon-tip";
+	var $obj = $("<div>").addClass("chat-balloon")
+		.attr('id', "cb-" + id)
+		.append($("<div>").addClass("jt-image " + img))
+		[(flag == 2) ? 'prepend' : 'append']($("<h4>").text(text));
+	var ot, ol;
+	
+	if(!offset) return;
+	$stage.balloons.append($obj);
+	if(flag == 1) ot = 0, ol = 220;
+	else if(flag == 2) ot = 35 - $obj.height(), ol = -2;
+	else if(flag == 3) ot = 5, ol = 210;
+	else ot = 40, ol = 110;
+	$obj.css({ top: offset.top + ot, left: offset.left + ol });
+	addTimeout(function(){
+		$obj.animate({ 'opacity': 0 }, 500, function(){ $obj.remove(); });
+	}, 2500);
+}
+function chat(profile, msg, from, timestamp){
+	var time = timestamp ? new Date(timestamp) : new Date();
+	var profileSnapshot;
+	var entry;
+	
+	if($data._shut[profile.title || profile.name]) return;
+	if(from){
+		if($data.opts.dw) return;
+		if($data._wblock[from]) return;
+	}
+	msg = badWords(msg);
+	playSound('k');
+	stackChat();
+	if(!mobile && $data.room){
+		var balloonFlag = ($data.room.gaming ? 2 : 0) + ($(".jjoriping").hasClass("cw") ? 1 : 0);
+		chatBalloon(msg, profile.id, balloonFlag);
+	}
+	if(from){
+		if(from !== true) $data._recentFrom = from;
+	}
+	profileSnapshot = {
+		id: profile.id,
+		title: profile.title,
+		name: profile.name
+	};
+	if(profile.equip){
+		profileSnapshot.equip = $.extend({}, profile.equip);
+	}else if($data.users[profile.id] && $data.users[profile.id].equip){
+		profileSnapshot.equip = $.extend({}, $data.users[profile.id].equip);
+	}
+	entry = {
+		kind: "chat",
+		profile: profileSnapshot,
+		value: msg,
+		from: from,
+		timestamp: time.getTime()
+	};
+	appendChatHistoryEntry(entry);
+	if(isCommunityLobbyChatContext()) appendCommunityLobbyChatRecord(entry);
+}
+function notice(msg, head){
+	var time = new Date();
+	var entry;
+	
+	playSound('k');
+	stackChat();
+	entry = {
+		kind: "notice",
+		head: head || L['notice'],
+		value: msg,
+		timestamp: time.getTime()
+	};
+	appendChatHistoryEntry(entry);
+	if(isCommunityLobbyChatContext()) appendCommunityLobbyChatRecord(entry);
+	if(head == "tail") console.warn(time.toLocaleString(), msg);
+}
+function stackChat(){
+	if($data._chatHistory && $data._chatHistory.length > 200){
+		$data._chatHistory = $data._chatHistory.slice(-200);
+	}
+}
+function iGoods(key){
+	var obj;
+	
+	if(key.charAt() == "$"){
+		obj = $data.shop[key.slice(0, 4)];
+	}else{
+		obj = $data.shop[key];
+	}
+	return {
+		_id: key,
+		group: obj.group,
+		term: obj.term,
+		name: iName(key),
+		cost: obj.cost,
+		image: iImage(key, obj),
+		desc: iDesc(key),
+		options: obj.options
+	};
+}
+function iName(key){
+	if(key.charAt() == "$") return L[key.slice(0, 4)][0] + ' - ' + key.slice(4);
+	else return L[key] ? L[key][0] : key;
+}
+function iDesc(key){
+	if(key.charAt() == "$") return L[key.slice(0, 4)][1];
+	else return L[key] ? L[key][1] : "";
+}
+function iImage(key, sObj){
+	var obj;
+	var gif;
+	
+	if(key){
+		if(key.charAt() == "$"){
+			return iDynImage(key.slice(1, 4), key.slice(4));
+		}
+	}else if(typeof sObj == "string") sObj = { _id: "def", group: sObj, options: {} };
+	obj = $data.shop[key] || sObj;
+	if(obj._id == "boxB2" || obj._id == "boxB3" || obj._id == "boxB4"){
+		return "/img/kkutu/shop/" + obj._id + ".svg?v=item-box-vector1";
+	}
+	gif = obj.options.hasOwnProperty('gif') ? ".gif" : ".png";
+	if(obj.group.slice(0, 3) == "BDG") return "/img/kkutu/moremi/badge/" + obj._id + gif;
+	return (obj.group.charAt(0) == 'M')
+		? "/img/kkutu/moremi/" + obj.group.slice(1) + "/" + obj._id + gif
+		: "/img/kkutu/shop/" + obj._id + gif;
+}
+function iDynImage(group, data){
+	var canvas = document.createElement("canvas");
+	var ctx = canvas.getContext('2d');
+	var i;
+	
+	canvas.width = canvas.height = 50;
+	ctx.font = "24px NBGothic";
+	ctx.textAlign = "center";
+	ctx.textBaseline = "middle";
+	switch(group){
+		case 'WPC':
+		case 'WPB':
+		case 'WPA':
+			i = [ 'WPC', 'WPB', 'WPA' ].indexOf(group);
+			ctx.beginPath();
+			ctx.arc(25, 25, 25, 0, 2 * Math.PI);
+			ctx.fillStyle = [ "#DDDDDD", "#A6C5FF", "#FFEF31" ][i];
+			ctx.fill();
+			ctx.fillStyle = [ "#000000", "#4465C3", "#E69D12" ][i];
+			ctx.fillText(data, 25, 25);
+			break;
+		default:
+	}
+	return canvas.toDataURL();
+}
+function queueObtain(data){
+	if($stage.dialog.obtain.is(':visible')){
+		$data._obtain.push(data);
+	}else{
+		drawObtain(data);
+		showDialog($stage.dialog.obtain, true);
+	}
+}
+function drawObtain(data){
+	playSound('success');
+	$("#obtain-image").css('background-image', "url(" + iImage(data.key) + ")");
+	$("#obtain-name").html(iName(data.key));
+}
+function getMoremiLayerTransform(key){
+	return "";
+}
+function renderMoremi(target, equip){
+	var $obj = $(target).empty();
+	var LR = { 'Mlhand': "Mhand", 'Mrhand': "Mhand" };
+	var i, key;
+	
+	if(!equip) equip = {};
+	for(i in MOREMI_PART){
+		key = 'M' + MOREMI_PART[i];
+		if(key == "Mshoes" && !equip[key]) continue;
+		
+		$obj.append($("<img>")
+			.addClass("moremies moremi-" + key.slice(1))
+			.attr('src', iImage(equip[key], LR[key] || key))
+			.css({ 'width': "100%", 'height': "100%", 'transform': getMoremiLayerTransform(key) })
+		);
+	}
+	if(key = equip['BDG']){
+		$obj.append($("<img>")
+			.addClass("moremies moremi-badge")
+			.attr('src', iImage(key))
+			.css({ 'width': "100%", 'height': "100%" })
+		);
+	}
+	$obj.children(".moremi-back").after($("<img>").addClass("moremies moremi-body")
+		.attr('src', equip.robot ? "/img/kkutu/moremi/robot.png" : "/img/kkutu/moremi/body_fla.png")
+		.css({ 'width': "100%", 'height': "100%", 'transform': "" })
+	);
+	$obj.children(".moremi-rhand").css('transform', "scaleX(-1)");
+}
+function commify(val){
+	var tester = /(^[+-]?\d+)(\d{3})/;
+	
+	if(val === null) return "?";
+	
+	val = val.toString();
+	while(tester.test(val)) val = val.replace(tester, "$1,$2");
+	
+	return val;
+}
+function formatPing(val){
+	return "<strong class='currency-amount'>" + commify(val) + "</strong><i class='currency-icon' aria-hidden='true'></i>";
+}
+function setLocation(place){
+	if(place) location.hash = "#"+place;
+	else location.hash = "";
+}
+function fail(code){
+	return alert(L['error_' + code]);
+}
+function formatRoomRoundText(round){
+	return (L['numRound'] || "# Rounds").replace("#", round);
+}
+function formatRoomTimeText(time){
+	return (L['numSecond'] || "# seconds").replace("#", time);
+}
+function yell(msg){
+	$stage.yell.show().css('opacity', 1).html(msg);
+	addTimeout(function(){
+		$stage.yell.animate({ 'opacity': 0 }, 3000);
+		addTimeout(function(){
+			$stage.yell.hide();
+		}, 3000);
+	}, 1000);
+}

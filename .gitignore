@@ -1,0 +1,41 @@
+# Installed dependencies and generated npm launchers
+node_modules/
+/Server/run.bat
+/Server/lib/*.cmd
+/Server/lib/*.ps1
+/Server/lib/grunt
+/Server/lib/babylon
+/Server/lib/mkdirp
+/Server/lib/sshpk-conv
+/Server/lib/sshpk-sign
+/Server/lib/sshpk-verify
+/Server/lib/uuid
+
+# Private configuration, credentials, and runtime data
+/Server/lib/sub/auth.json
+/Server/lib/sub/global.json
+/Server/lib/data/clans.json
+/Server/lib/data/dict_requests.json
+/data/kkutuhot.json
+.env
+.env.*
+!.env.example
+*.pem
+*.key
+*.pfx
+*.p12
+*.log
+logs/
+
+# Local history and editor/agent state
+/tmp/
+/original file/
+/file_list.txt
+/design-qa.md
+.agents/
+.codex/
+.vscode/
+.DS_Store
+Thumbs.db
+
+# Served JS is tracked, including chest/admin source scripts.

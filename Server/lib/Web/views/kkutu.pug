@@ -1,0 +1,670 @@
+//-
+	Rule the words! KKuTu Online
+	Copyright (C) 2017 JJoriping(op@jjo.kr)
+	
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
+extends layout
+
+mixin Dialog(id, w, h, t, nocls)
+	div.dialog(id=id, style=`width: ${w}px; height: ${h}px;`)
+		div(class=nocls ? 'no-close dialog-head' : 'dialog-head')
+			div.dialog-title(style=`width: ${w - 20}px;`)!= t || ''
+		div.dialog-body(style='font-size: 13px;')
+			block
+	
+mixin GameOption(key, prefix)
+	- var name = locals.OPTIONS[key].name;
+	- var sid = name.toLowerCase();
+	div.dialog-opt(id=`${prefix}-${sid}-panel`)
+		input.game-option(id=`${prefix}-${sid}`, type='checkbox', style='margin-top: 5px; width: auto;')
+		label(for=`${prefix}-${sid}`)= L(`opt${name}`)
+		+Expl(true)
+			div!= L(`expl${name}`)
+
+mixin SettingOption(id, text, st)
+	div.dialog-opt(style=st || "")
+		input(id=id, type='checkbox', style='margin-top: 5px; width: auto;')
+		label(for=id)= text
+
+block Subject
+	title= L('title')
+
+block JS
+	script(type='text/javascript', src='/js/in_game_kkutu.js?v=emblem-chest-reveal1-clan-banner-rollback1-item-box-vector1-main-word-original2-beta-vfx1-client-review1-social-hub1-game-ui1-native-ui-restore1')
+	script(type='text/javascript', src='/js/emblem_chest.js?v=emblem-chest-reveal1-item-box-vector1-frame-stable1')
+	script(src='https://www.google.com/recaptcha/api.js')
+	script(type='text/javascript').
+		$(function(){
+			var $toggle = $("#userlist-toggle");
+			var $title = $(".UserListBox .product-title");
+			function toggleUserList(){
+				$("body").toggleClass("userlist-collapsed");
+			}
+			if($toggle.length){
+				$toggle.on("click", toggleUserList);
+				$title.on("click", toggleUserList);
+			}
+		});
+
+block CSS
+	link(rel='stylesheet', href='/css/in_game_kkutu_shop.css?v=shop-card-shadow1-game-ui1')
+	link(rel='stylesheet', href='/css/emblem_chest.css?v=emblem-chest-reveal1-item-box-vector1-frame-stable1')
+	link(rel='stylesheet', href='/css/supercell_magic_shadow.css?v=supercell-shadow2-profile-restore1-side-black1-gameplay-scope1')
+	link(rel='stylesheet', href='/css/beta_longword.css?v=beta-longword-effects1')
+	link(rel='stylesheet', href='/css/social_hub.css?v=social-hub1')
+	link(rel='stylesheet', href='/css/game_ui.css?v=game-ui1-native-ui-restore1')
+	
+block Top
+	- var topProfile = SESSION.profile || {};
+	- var topName = topProfile.title || topProfile.name || L('guest');
+	- var topImage = (typeof topProfile.image === "string") ? topProfile.image.trim() : "";
+	- var topIsGuest = !!SESSION.guest || /^guest/i.test(String(topName || ""));
+	- var topFallbackImage = topIsGuest ? "/img/kkutu/guest.png" : "/img/kkutu/moremi/body_fla.png";
+	- if(!topImage && (String(topProfile.authType || topProfile.type || "").toLowerCase() === "google" || /^\d{16,}$/.test(String(topProfile.id || ""))) && topProfile.id){
+	- 	topImage = "https://profiles.google.com/s2/photos/profile/" + encodeURIComponent(topProfile.id) + "?sz=256";
+	- }
+	- if(topImage && topImage.indexOf("//") === 0) topImage = "https:" + topImage;
+	- if(topImage && /^http:\/\//i.test(topImage)) topImage = "https://" + topImage.slice(7);
+	- if(topImage && /^https?:\/\//i.test(topImage)){
+	- 	var hostMatch = topImage.match(/^https?:\/\/([^\/?#]+)/i);
+	- 	var topHost = hostMatch ? hostMatch[1].toLowerCase() : "";
+	- 	if(/(^|\.)googleusercontent\.com$/.test(topHost) || /(^|\.)ggpht\.com$/.test(topHost) || /(^|\.)googleapis\.com$/.test(topHost) || /(^|\.)google\.com$/.test(topHost) || /(^|\.)gstatic\.com$/.test(topHost)){
+	- 		topImage = "/profile-image?u=" + encodeURIComponent(topImage);
+	- 	}
+	- }
+	- if(!topImage || topImage === "[object Object]" || topImage === "undefined" || topImage === "null") topImage = topFallbackImage;
+	div#top-profile-card
+		div.top-profile-myinfo-deco(aria-hidden='true')
+		div.top-profile-main(role='button', aria-label=L('Me'))
+			div.top-profile-avatar.jt-image(style=`background-image: url('${topImage}'), url('${topFallbackImage}');`)
+			div.top-profile-meta
+				div.top-profile-title
+					div.top-profile-level-img
+					div.top-profile-name= topName
+					button#top-login-btn.top-profile-login(type='button', style='display: none;')= L('LOGIN')
+				div.top-profile-level-row
+					div.top-profile-level-text LV 1
+					div.top-profile-level-bar.graph
+						div.graph-bar(style='width: 0%;')
+		div.top-profile-spacer
+		div.top-profile-gems
+		button#top-help-btn.top-profile-settings(type='button')
+			+FA('question')
+		button#top-notice-btn.top-profile-settings(type='button')
+			+FA('bell')
+			span.top-notice-count(style='display: none;') 0
+		button#top-settings-btn.top-profile-settings(type='button')
+			+FA('cog')
+
+block Jungle
+	span#LANG= locals.lang
+	span#PUBLIC= PUBLIC ? "true" : undefined
+	// span#PORT= locals.PORT
+	span#URL= `${locals.PROTOCOL}://${locals.HOST}:${locals.PORT}/${locals._id}`
+	span#MOREMI_PART= locals.MOREMI_PART.join(',')
+	span#AVAIL_EQUIP= locals.AVAIL_EQUIP.join(',')
+	span#RULE= JSON.stringify(locals.RULE)
+	span#OPTIONS= JSON.stringify(locals.OPTIONS)
+	span#PROFILE_IMAGE= topImage
+	div#Yell
+	div#Loading
+	div#Balloons(style='position: absolute;')
+	div.kkutu-menu
+		button#HelpBtn.tiny-menu(style='display: none; background-color: #BBBBBB;')
+			!= L('help')
+		button#SettingBtn.tiny-menu(style='display: none; background-color: #CCCCCC;')
+			!= L('settings')
+		button#LeaderboardBtn.for-lobby(style='display: none; background-color: #FFADD3;')
+			!= L('leaderboard')
+		button#NewRoomBtn.for-lobby(type='button', style='display: none; background-color: #D9FF82;')
+			+FA('plus')
+			= L('newRoom')
+		button#Match1v1Btn.for-lobby(style='display: none; background-color: #FFDB6E;')
+			+FA('shield')
+			= L('match1v1')
+		button#DictionaryBtn.for-lobby.for-master.for-normal.for-gaming(style='display: none; background-color: #73D07A;')
+			+FA('book')
+			= L('dict')
+		button#ShopBtn.for-lobby(style='display: none; background-color: #93E8C2;')
+			+FA('shopping-bag')
+			= L('shop')
+		button#ClansBtn.for-lobby(style='display: none; background-color: #9EDBFF;')
+			span.clan-menu-icon(aria-hidden='true')
+				span.shield-shape
+				span.sword-down
+			| CLANS
+		button#CommunityBtn.for-lobby(style='display: none; background-color: #DAA9FF;')
+			+FA('comments')
+			= L('communityText')
+		button#SpectateBtn.for-master.for-normal(style='display: none; background-color: #D19DFF;')
+			+FA('eye')
+			= L('spectate')
+		button#SetRoomBtn.for-master(style='display: none; background-color: #B0D2F3;')
+			+FA('cog')
+			= L('setRoom')
+		// button#WordPlusBtn.for-lobby.for-master.for-normal.for-gaming(style='display: none; background-color: #73D07A;')= L('wordPlus')
+		button#InviteBtn.for-master(style='display: none; background-color: #9FE669;')
+			+FA('envelope')
+			= L('invite')
+		button#PracticeBtn.for-master.for-normal(style='display: none; background-color: #FCF5A9;')
+			+FA('plane')
+			= L('practice')
+		button#ReadyBtn.for-normal(style='display: none; background-color: #FFC67F;')
+			+FA('play')
+			= L('ready')
+		button#StartBtn.for-master(style='display: none; background-color: #FFB576;')
+			+FA('play-circle')
+			= L('start')
+		button#ExitBtn.for-master.for-normal.for-gaming(style='display: none; background-color: #FFADAD;')
+			+FA('sign-out')
+			= L('exit')
+		button#ReplayBtn(style='display: none; background-color: #D9FF82;')
+			+FA('video-camera')
+			= L('replay')
+		div#facebook-menu.fb-like.for-lobby.for-master.for-normal.for-gaming(data-href='http://kkutu.kr', data-width='300', data-layout='button_count', data-action='like', data-show-faces='true', data-share='true')
+	-
+		LANG['explInjeong'] = `<h5>${L('explInjeong')}</h5>\
+			<h5 style='margin-top: 2px; border-top: 1px dashed #444444; padding-top: 2px; color: #BBBBBB;'>${L('explInjeongListTitle')}</h5>\
+			<h5>${locals.KO_INJEONG.filter(function(item){ return LANG['theme_' + item]; }).map(function(item){ return L('theme_' + item); })}</h5>\
+			<h5 style='margin-top: 2px; border-top: 1px dashed #444444; padding-top: 2px; color: #BBBBBB;'>${L('explInjeongListTitle')} (${L('modeEKT')}, ${L('modeESH')})</h5>\
+			<h5>${locals.EN_INJEONG.filter(function(item){ return LANG['theme_' + item]; }).map(function(item){ return L('theme_' + item); })}</h5>`;
+
+block Middle
+	- var VERSION = L('version');
+	- var nick = SESSION.profile ? (SESSION.profile.title || SESSION.profile.name) : null;
+	div#Intro
+		img#intro(src='/img/kkutu/intro.png')
+		// img#intro-start(src='/img/kkutu/intro_start.gif')
+		div#version= VERSION
+		div#intro-text
+	+Dialog('SettingDiag', 300, 260, L('settingsText'))
+		div.dialog-bar
+			h4= L('mute')
+			+SettingOption('mute-bgm', L('bgm'))
+			+SettingOption('mute-effect', L('effect'))
+		div.dialog-bar
+			h4= L('denyReq')
+			+SettingOption('deny-invite', L('denyInvite'))
+			+SettingOption('deny-whisper', L('whisper'))
+			h4
+			+SettingOption('deny-friend', L('friendAdd'))
+		div.dialog-bar
+			h4= L('ingames')
+			+SettingOption('auto-ready', L('autoReady'))
+		div.dialog-bar
+			h4= L('etc')
+			+SettingOption('sort-user', L('sortUser'), "width: 200px;")
+			h4
+			+SettingOption('only-waiting', L('onlyWaiting'), "width: 200px;")
+			h4
+			+SettingOption('only-unlock', L('onlyUnlock'), "width: 200px;")
+			h4
+			+SettingOption('dark-mode', L('darkMode'), "width: 200px;")
+		div.dialog-bar.tail-button
+			button#setting-ok= L('save')
+			button#setting-server= L('changeServer')
+	+Dialog('CommunityDiag', 300, 300)
+		div.dialog-bar.community-search-row
+			input#comm-friend-query(type='text', maxlength=30, autocomplete='off', placeholder=L('friendSearchPlaceholder'))
+			button#comm-friend-search= L('SEARCH')
+		div.dialog-bar.community-search-board(style='height: 72px; overflow-y: auto;')
+			div#comm-friend-results= L('friendSearchHint')
+		div.dialog-bar(style='height: 146px; overflow-y: scroll;')
+			div#comm-friends
+		div.dialog-bar.tail-button
+			button#comm-friend-add= L('friendAdd')
+	+Dialog('NoticeDiag', 360, 340, L('notice'))
+		div#notice-empty.notice-empty-state
+			div.notice-empty-graphic
+				i.fa.fa-bell-slash-o(aria-hidden='true')
+			div.notice-empty-text= L('noNotification')
+		div#notice-list.notice-list
+	div#WarningOverlay.warning-overlay
+	+Dialog('WarningDiag', 390, 210, '', true)
+		div#warning-message.warning-message
+		div.dialog-bar.tail-button.warning-actions
+			button#warning-cancel= L('cancel')
+			button#warning-ok= L('OK')
+	+Dialog('LeaderboardDiag', 300, 450, L('leaderboard'))
+		div.dialog-bar(style='height: 350px;'): table#ranking(style='text-align: center;')
+			thead(style='font-weight: bold; background-color: #DDDDDD;'): tr
+				td(width=30) #
+				td(width=55)= L('LEVEL')
+				td(width=115)= L('nickname')
+				td(width=100)= L('recordScore')
+			tbody
+		div.dialog-bar: h4(style='width: 100%;')#lb-page
+		div.dialog-bar.tail-button
+			button#lb-next(style='margin-right: 6px;')= L('nextPage')
+			button#lb-me= L('myRank')
+			button#lb-prev= L('prevPage')
+	+Dialog('QuickDiag', 300, 345, L('quickRoom'))
+		div.dialog-bar
+			h4= L('gameMode')
+			select#quick-mode
+				- for(var i in locals.MODE)
+					option(value=Number(i))= L('mode' + locals.MODE[i])
+		div.dialog-bar(style='height: 165px; overflow-y: auto;')
+			h4(style='height: 45px;')= L('misc')
+			- for(var i in locals.OPTIONS)
+				+GameOption(i, 'quick')
+		div.dialog-bar
+			h4(style='width: 100%; height: 20px;')#quick-status
+		div.dialog-bar
+			h4(style='width: 100%; height: 20px;')#quick-queue
+		div.dialog-bar.tail-button
+			button#quick-ok= L('OK')
+	+Dialog('RoomDiag', 300, 510)
+		div.dialog-bar
+			h4= L('roomTitle')
+			input#room-title(placeholder=(nick || L('guest'))+L('roomDefault'), maxlength=20)
+		div.dialog-bar
+			h4= L('password')
+			input#room-pw(type='password', placeholder=L('password'), maxlength=20)
+		div.dialog-bar
+			h4= L('userLimit')
+			input#room-limit(type='number', min=2, max=12, step=1, value=12)
+		div.dialog-bar
+			h4= L('gameMode')
+			select#room-mode
+				optgroup(label=L('mcEnglish'))
+					option(value=1)= L('modeESH')
+					option(value=14)= L('modeEAP')
+					option(value=15)= L('modeEBT')
+					option(value=0)= L('modeEKT')
+					option(value=7)= L('modeETY')
+					option(value=11)= L('modeEDA')
+					option(value=13)= L('modeESS')
+		div.dialog-bar(style='margin-top: -5px; height: 50px;')
+			h4
+			h4#game-mode-expl.dialog-bar-value(style='width: 100%; font-size: 11px;')
+		div.dialog-bar
+			h4= L('numRound')
+			input#room-round(type='number', min=1, max=10, step=1, value=5)
+		div.dialog-bar
+			h4= L('roundTime')
+			select#room-time
+				option(value=10, style='color: #FF4444')
+				option(value=30)
+				option(value=60, selected)
+				option(value=90)
+				option(value=120)
+				option(value=150)
+		div.dialog-bar(style='height: 165px; overflow-y: auto;')
+			h4(style='height: 45px;')= L('misc')
+			- for(var i in locals.OPTIONS)
+				+GameOption(i, 'room')
+			div.dialog-opt#room-injpick-panel
+				button#room-injeong-pick(style='font-size: 11px;')= L('pickInjeong')
+		div.dialog-bar.tail-button
+			button#room-ok= L('OK')
+	+Dialog('InjPickDiag', 200, 400, L('pickInjeong'))
+		h4= L('explInjPick')
+		div.dialog-bar
+			button#injpick-all= L('injpickAll')
+			button#injpick-no= L('injpickNo')
+		div.dialog-bar#injpick-list(style='height: 280px; overflow-y: scroll;')
+			div.dialog-opt#ko-pick-list(style='width: 100%;')
+				- locals.KO_THEME.concat(locals.KO_INJEONG).forEach(function(item){
+					- var name = "ko-pick-" + item;
+					- if(locals.IJP_EXCEPT.indexOf(item) != -1) return;
+					- var label = LANG['theme_' + item];
+					- if(!label) return;
+					div(style='float: left; width: 100%;')
+						input(id=name, type='checkbox', style='width: auto;')
+						label(for=name)= label
+				- });
+			div.dialog-opt#en-pick-list(style='width: 100%;')
+				- locals.EN_THEME.concat(locals.EN_INJEONG).forEach(function(item){
+					- var name = "en-pick-" + item;
+					- if(locals.IJP_EXCEPT.indexOf(item) != -1) return;
+					- var label = LANG['theme_' + item];
+					- if(!label) return;
+					div(style='float: left; width: 100%;')
+						input(id=name, type='checkbox', style='width: auto;')
+						label(for=name)= label
+				- });
+		div.dialog-bar.tail-button
+			button#injpick-ok= L('OK')
+	+Dialog('PracticeDiag', 300, 170)
+		div.dialog-bar#ai-nickname-row(style='display: none;')
+			h4= L('myNickname')
+			input#ai-nickname(type='textfield', maxlength=20, placeholder=L('myNicknameX'))
+		div.dialog-bar
+			h4= L('selectLevel')
+			select#practice-level
+				option(value=0)= L('aiLevel0')
+				option(value=1)= L('aiLevel1')
+				option(value=2, selected)= L('aiLevel2')
+				option(value=3)= L('aiLevel3')
+				option(value=4)= L('aiLevel4')
+		div.dialog-bar
+			h4= L('team')
+			select#ai-team
+				option(value=0, selected)= L('teamSolo')
+				option(value=1) A
+				option(value=2) B
+				option(value=3) C
+				option(value=4) D
+		div.dialog-bar.tail-button
+			button#practice-ok= L('OK')
+	+Dialog('ResultDiag', 400, 420, L('gameResult'), true)
+		div.result-board
+		div.result-me
+			div.result-me-score
+			div.result-me-money
+			div.result-me-ranked(style='display: none;')
+			div.result-me-level
+				div.result-me-level-head= L('LEVEL')
+				div.result-me-level-body
+			+GraphBar('result-me-gauge')
+			div.result-me-score-text
+			div.expl.result-me-expl
+		div.dialog-bar.tail-button
+			button#result-ok= L('OK')
+			button#result-save= L('saveReplay')
+	+Dialog('DictionaryDiag', 400, 300, '')
+		div.dialog-bar
+			i#dict-search-label.fa.fa-search(aria-hidden='true')
+			input#dict-input(style='width: 283px;', placeholder=L('wpInput'), maxlength=200)
+		div.dialog-bar#dict-output
+		div.dialog-bar.tail-button
+			button#dict-search= L('SEARCH')
+			button#dict-injeong= L('injeongReq')
+	+Dialog('InviteDiag', 300, 420, L('invite'))
+		div.invite-board(style='height: 355px; overflow-y: scroll;')
+		div.dialog-bar.tail-button
+			button#invite-robot= L('inviteRobot')
+	+Dialog('RoomInfoDiag', 300, 365)
+		div.dialog-bar.room-info-head
+			h4= L('roomTitle')
+			h4.dialog-bar-value.ellipse#ri-title
+			h4= L('gameMode')
+			h4.dialog-bar-value#ri-mode
+			h4= L('rounds')
+			h4.dialog-bar-value#ri-round
+		div.dialog-bar(style='padding: 2px 0px; border-top: 1px dashed #CCC; margin: 2px 0px;')
+			h4= L('players')
+			h4.dialog-bar-value#ri-limit
+		div.dialog-bar(style='height: 190px; overflow-y: scroll;')
+			div#ri-players(style='width: 100%;')
+		div.dialog-bar.tail-button
+			button#room-info-join= L('join')
+	+Dialog('ProfileDiag', 360, 395)
+		div.dialog-bar.profile-head
+		div.dialog-bar.profile-place-row
+			h4(style='width: 83px;')= L('place')
+			h4.dialog-bar-value#profile-place.js-profile-place
+		div.dialog-bar.profile-record(style='padding: 4px 0px; border-top: 1px dashed #CCC; margin: 4px 0px; height: 205px; overflow-y: scroll;')
+			div.profile-record-field(style='font-weight: bold; text-align: center;')
+				div.profile-field-name= L('gameMode')
+				div.profile-field-record= L('record')
+				div.profile-field-rate WIN RATE
+				div.profile-field-score= L('recordScore')
+			div#profile-record.js-profile-record
+		div.dialog-bar.tail-button
+			button#profile-friend.js-profile-friend= L('friendAdd')
+			button#profile-whisper.js-profile-whisper= L('whisper')
+			button#profile-shut.js-profile-shut= L('shut')
+			button#profile-kick.js-profile-kick= L('kick')
+			button#profile-level.js-profile-level= L('aiSetting')
+			button#profile-dress.js-profile-dress= L('dress')
+			button#profile-handover.js-profile-handover= L('handover')
+	+Dialog('KickVoteDiag', 300, 160, L('kickVote'))
+		div.dialog-bar#kick-vote-text(style='text-align: center;')
+		div.dialog-bar(style='text-align: center;')= L('kickVoteNotice')
+		div.dialog-bar
+			+GraphBar('kick-vote-time')
+		div.dialog-bar.tail-button
+			button#kick-vote-no= L('disagree')
+			button#kick-vote-yes= L('agree')
+	+Dialog('PurchaseDiag', 300, 310, L('purchase'))
+		div.dialog-bar.purchase-summary
+			div.purchase-summary-main
+				div.purchase-summary-title#purchase-item-note
+				h4#purchase-item-name
+				div.purchase-summary-cost#purchase-ping-cost
+				div#purchase-item-desc
+			div.moremi#moremi-after(style='float: left; width: 100px; height: 100px;')
+		div.dialog-bar.tail-button
+			button#purchase-no= L('cancel')
+			button#purchase-ok= L('purchaseConfirm')
+	+Dialog('ReplayDiag', 300, 300, L('replay'))
+		input#replay-file(type='file', style='width: 288px;', accept=".kkt")
+		div.dialog-bar
+			h4= L('replayDate')
+			h4.dialog-bar-value#replay-date -
+			h4= L('VERSION')
+			h4.dialog-bar-value#replay-version -
+		div.dialog-bar
+			h4= L('replayPlayers')
+			h4.dialog-bar-value#replay-players -
+		div.dialog-bar.tail-button
+			button#replay-view= L('replayView')
+	+Dialog('DressDiag', 600, 320, L('dress'))
+		div.dialog-bar
+			h4(style='width: 150px;')= L('myNickname')
+			input#dress-nick(type='textfield', placeholder=L('myNicknameX'), style='width: 435px;', maxlength=20)
+		div.dialog-bar
+			h4(style='width: 150px;')= L('myExordial')
+			input#dress-exordial(type='textfield', placeholder=L('myExordialX'), style='width: 435px;', maxlength=100)
+		div.dialog-bar(style='width: 150px;')
+			div.moremi#dress-view(style='float: left; width: 150px; height: 150px;')
+			h4(style='width: 100%; font-weight: bold;')= L('myMoremi')
+		div.dialog-bar(style='padding: 5px; width: 440px;')
+			div(style='border-bottom: 1px solid #CCCCCC; height: 20px;')
+				- for(var i in locals.CATEGORIES)
+					- var v = locals.GROUPS[locals.CATEGORIES[i]] || [];
+					div.category-filter.dress-type(id="dress-type-" + locals.CATEGORIES[i], value=v.join(','))= L('category_' + locals.CATEGORIES[i])
+			div#dress-goods.goods-box
+		div.dialog-bar.tail-button
+			button#dress-ok= L('OK')
+			button#dress-cf(type='button')= L('charFactory')
+			button(onclick=`alert("${L("paybackHelp")}");`)= L('payback')
+	+Dialog('CharFactoryDiag', 500, 410, L('charFactory'))
+		div.dialog-bar(style='width: 300px;')
+			div#cf-tray
+			div#cf-dict
+		div.dialog-bar(style='width: 200px;')
+			h4(style='border-bottom: 1px solid #CCCCCC; width: 100%; height: 24px;')= L('cfReward')
+			div#cf-reward
+		div.dialog-bar(style='width: 200px;')
+			div#cf-cost
+		div.dialog-bar
+			div#cf-goods.goods-box
+		div.dialog-bar.tail-button
+			button#cf-compose(type='button')= L('cfCompose')
+	+Dialog('ChatLogDiag', 350, 500, L('chatLog'))
+		div#chat-log-board(style='height: 475px; font-size: 11px; overflow-y: scroll;')
+	+Dialog('ObtainDiag', 300, 200, L('notice'), true)
+		div.dialog-bar
+			h4(style='width: 100%;')= L('obtained') + '!'
+		div.jt-image#obtain-image(style='margin-left: 110px; width: 80px; height: 80px;')
+		div.dialog-bar#obtain-name(style='text-align: center;')
+		div.dialog-bar.tail-button
+			button#obtain-ok= L('OK')
+	+Dialog('HelpDiag', 550, 400, L('helpText'))
+		iframe#help-board(width=550, height=375)
+	+Product('UserList')
+		div= L('LOADING')
+	+Product('RoomList')
+		div= L('LOADING')
+	div.Match1v1Box
+		div.match1v1-stage
+			div.match1v1-panel
+				div.match1v1-title-block
+					div.match1v1-kicker RANKED MATCH
+					div.match1v1-title RANKED
+					div.match1v1-rules
+						span WORD CHAIN
+						span BAN LETTER
+						span MISSION
+						span 5 ROUNDS
+						span 50 SEC
+				div.match1v1-arena
+					div.match1v1-slot.match1v1-player-slot
+						div.match1v1-slot-head YOU
+						div.match1v1-avatar-shell
+							div.match1v1-avatar.moremi
+						div#Match1v1PlayerName.match1v1-player-name -
+						div#Match1v1PlayerLevel.match1v1-player-level LV 1
+						div#Match1v1PlayerTrophy.match1v1-player-trophy
+							i.fa.fa-trophy(aria-hidden='true')
+							span 0 TROPHIES
+					div.match1v1-versus
+						div.match1v1-emblem(aria-hidden='true')
+							span.match1v1-emblem-shield
+							span.match1v1-emblem-sword.match1v1-emblem-sword-a
+							span.match1v1-emblem-sword.match1v1-emblem-sword-b
+						div.match1v1-vs-text VS
+					div.match1v1-slot.match1v1-opponent-slot
+						div.match1v1-slot-head OPPONENT
+						div.match1v1-opponent-ghost
+						div.match1v1-opponent-name MATCHING
+						div.match1v1-player-level FAIR LEVEL
+				div.match1v1-queue
+					button#Match1v1BattleBtn.match1v1-battle(type='button') BATTLE
+					div#Match1v1Status.match1v1-status
+	+Product('Shop')
+		div.shop-layout
+			div.shop-sidebar
+				div.shop-preview-card
+					div.shop-panel-head
+						span= L('shopPreview')
+					label.shop-preview-toggle.shop-preview-toggle-floating(for='shop-preview-original', title=L('shopOriginalSkin'))
+						input#shop-preview-original(type='checkbox', aria-label=L('shopOriginalSkin'))
+						span.shop-preview-toggle-icon(aria-hidden='true')
+							svg.shop-preview-hanger(viewBox='0 0 64 48')
+								path(d='M32 19.2v-5.7c0-1.7 .7-3.1 2-4.2l2.6-2c.9-.7 1.3-1.5 1.3-2.6V3.9c0-1.5-.9-2.4-2.2-2.4c-1.5 0-2.3 .9-2.3 2.4v3.5')
+								path(d='M32 19.2L16.4 31c-1.3 1-2 2-2 3.1c0 1.1 .8 1.8 2.1 1.8h31c1.3 0 2.1-.7 2.1-1.8c0-1.1-.7-2.1-2-3.1L32 19.2z')
+							svg.shop-preview-shirt(viewBox='0 0 24 24')
+								path(d='M8.2 5.2L9.7 4h4.6l1.5 1.2l2.6 1.2l1 2.4l-1.8 1.2L16.4 9v9.8H7.6V9l-1.2 1l-1.8-1.2l1-2.4z')
+					div.moremi#shop-preview-moremi
+					div#shop-preview-name.shop-preview-name -
+					div.shop-preview-balance-row
+						span= L('pingBefore')
+						span#shop-preview-balance.shop-preview-value 0
+					div.shop-preview-balance-row
+						span= L('pingAfter')
+						span#shop-preview-after.shop-preview-value 0
+				div.shop-cart-card
+					div.shop-panel-head
+						span= L('shopCart')
+					div#shop-cart-list.shop-cart-list
+						div#shop-cart-empty.shop-cart-empty= L('shopCartEmpty')
+					div.shop-cart-footer
+						div.shop-cart-total-row
+							span= L('shopTotal')
+							span#shop-cart-total.shop-preview-value 0
+						button#shop-cart-buy(type='button', disabled)= L('shopBuySelected')
+			div.shop-main
+				div.shop-categories
+					- for(var i in locals.CATEGORIES)
+						- var v = locals.GROUPS[locals.CATEGORIES[i]] || [];
+						div.category-filter.shop-type(id="shop-type-" + locals.CATEGORIES[i], value=v.join(','))= L('category_' + locals.CATEGORIES[i])
+				div#shop-shelf
+	+Product('Friends', true)
+		div.friends-page
+	div.ClanBox.Product(style='display: none;')
+		h5.product-title CLANS
+		div.product-body
+			div.clan-page
+	+Product('MyInfo')
+		div.myinfo-sidebar
+			button.myinfo-tab.active(data-section="profile") PROFILE
+			button.myinfo-tab(data-section="inventory") INVENTORY
+			button.myinfo-tab(data-section="letter-merger") LETTER MERGER
+			button.myinfo-tab(data-section="replay") REPLAY
+			button.myinfo-tab(data-section="settings") SETTINGS
+		div.myinfo-content
+			div.myinfo-section.myinfo-profile.is-active(data-section="profile")
+				div.myinfo-profile-shell
+			div.myinfo-section.myinfo-inventory(data-section="inventory")
+				div.myinfo-inventory-shell
+			div.myinfo-section.myinfo-letter(data-section="letter-merger")
+				div.myinfo-letter-shell
+			div.myinfo-section.myinfo-replay(data-section="replay")
+				div.myinfo-replay-shell
+					div.myinfo-replay-uploader
+						input#myinfo-replay-file(type='file', accept='.kkt')
+					div.myinfo-replay-meta
+						div.myinfo-replay-meta-row
+							span.myinfo-replay-meta-key= L('replayDate')
+							span#myinfo-replay-date.myinfo-replay-meta-value -
+						div.myinfo-replay-meta-row
+							span.myinfo-replay-meta-key= L('VERSION')
+							span#myinfo-replay-version.myinfo-replay-meta-value -
+						div.myinfo-replay-meta-row
+							span.myinfo-replay-meta-key= L('replayPlayers')
+							div#myinfo-replay-players.myinfo-replay-players -
+					div.myinfo-replay-actions
+						button#myinfo-replay-view(disabled)= L('replayView')
+			div.myinfo-section.myinfo-settings(data-section="settings")
+				div.myinfo-settings-shell
+	+Product('Room')
+		div.team-selector
+			div.team-button#team-0.team-0(data-team-label='Solo', aria-label='Solo')= L('teamSolo')
+			div.team-button#team-1.team-1(data-team-label='Red Team', aria-label='Red Team') A
+			div.team-button#team-2.team-2(data-team-label='Yellow Team', aria-label='Yellow Team') B
+			div.team-button#team-3.team-3(data-team-label='Green Team', aria-label='Green Team') C
+			div.team-button#team-4.team-4(data-team-label='Blue Team', aria-label='Blue Team') D
+			div.team-button#team-5.team-5(data-team-label='Purple Team', aria-label='Purple Team') E
+		div.room-users
+	+Product('Game')
+		div.game-head
+			div.items
+			div.hints(style='display: none;')
+			div.b-left.cwcmd(style='display: none;')
+				div.cw-q-head
+				input#cw-q-input(placeholder=L('inputHere'), style='width: 313px; height: 20px; font-size: 15px;')
+				div.cw-q-body
+			div.b-left.bb(style='display: none;')
+			div.jjoriping
+				img.jjoObj.jjoEyeL(src='/img/jjoeyeL.png')
+				img.jjoObj.jjoNose(src='/img/jjonose.png')
+				img.jjoObj.jjoEyeR(src='/img/jjoeyeR.png')
+				div.jjoDisplayBar
+					div.jjo-display.ellipse
+					+GraphBar('jjo-turn-time')
+					+GraphBar('jjo-round-time')
+			div.chain
+			div.rounds
+			div.history-holder
+				div.history
+		div.game-body
+		div.game-input
+			input#game-input(placeholder=L('yourTurn')+' '+L('inputChat'), readonly)
+	+Product('Me')
+		div.moremi.my-image
+		div.my-stat
+			div.jt-image.my-stat-level
+			div.my-stat-name.ellipse
+			div.my-stat-record
+			div.my-stat-ping
+			div
+				+GraphBar('my-okg')
+				div.bar-text.my-okg-text
+				+Expl(true)
+					div(style='color: #CCCCCC;')!= L('okgExpl')
+		div.my-level
+		+GraphBar('my-gauge')
+		div.bar-text.my-gauge-text
+	+Product('Chat')
+		div#Chat
+		input#Talk(maxlength=200, placeholder="Tell 'em what's up...")
+		button#ChatBtn= L('send')
+
+block Bottom
+	div.bottom-legal!= L('dictionarySupport')
+	div.bottom-legal!= L('etcSupport')

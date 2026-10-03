@@ -1,0 +1,62 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 188 267" preserveAspectRatio="none" aria-hidden="true">
+  <defs>
+    <linearGradient id="goldOuter" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#050505"/>
+      <stop offset="0.45" stop-color="#141414"/>
+      <stop offset="1" stop-color="#2a2a2a"/>
+    </linearGradient>
+    <linearGradient id="goldInner" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#202020"/>
+      <stop offset="1" stop-color="#0a0a0a"/>
+    </linearGradient>
+    <linearGradient id="blueCore" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#f7fafd"/>
+      <stop offset="1" stop-color="#d4dde8"/>
+    </linearGradient>
+    <linearGradient id="blueGloss" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffffff" stop-opacity="0.46"/>
+      <stop offset="1" stop-color="#ffffff" stop-opacity="0"/>
+    </linearGradient>
+    <linearGradient id="personWhite" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#e0e6ef"/>
+    </linearGradient>
+    <linearGradient id="personBlue" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#edf3f9"/>
+      <stop offset="1" stop-color="#d1dbe7"/>
+    </linearGradient>
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="170%">
+      <feDropShadow dx="0" dy="2" stdDeviation="2.2" flood-color="#000000" flood-opacity="0.35"/>
+      <feDropShadow dx="0" dy="6" stdDeviation="4.2" flood-color="#000000" flood-opacity="0.2"/>
+    </filter>
+    <clipPath id="coreClip">
+      <path d="M37 70H58c4 0 7-1 10-4l18-15c5-4 11-4 16 0l18 15c3 3 6 4 10 4h21c3 0 5 2 5 5v96c0 4-1 6-4 9l-50 41c-5 4-11 4-16 0l-50-41c-3-3-4-5-4-9V75c0-3 2-5 5-5z"/>
+    </clipPath>
+  </defs>
+
+  <g filter="url(#softShadow)">
+    <path d="M28 60H48c5 0 8-1 12-5l26-22c5-4 11-4 16 0l26 22c4 4 7 5 12 5h20c6 0 10 4 10 10v108c0 5-2 9-6 12l-61 50c-6 5-12 5-18 0l-61-50c-4-3-6-7-6-12V70c0-6 4-10 10-10z"
+          fill="url(#goldOuter)"/>
+    <path d="M28 60H48c5 0 8-1 12-5l26-22c5-4 11-4 16 0l26 22c4 4 7 5 12 5h20c6 0 10 4 10 10v108c0 5-2 9-6 12l-61 50c-6 5-12 5-18 0l-61-50c-4-3-6-7-6-12V70c0-6 4-10 10-10z"
+          fill="none" stroke="#111111" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round" vector-effect="non-scaling-stroke"/>
+
+    <path d="M34 66H55c4 0 7-1 10-4l21-18c5-4 11-4 16 0l21 18c3 3 6 4 10 4h21c5 0 8 3 8 8v101c0 4-2 7-5 10l-55 45c-5 4-11 4-16 0l-55-45c-3-3-5-6-5-10V74c0-5 3-8 8-8z"
+          fill="url(#blueCore)" stroke="none"/>
+
+    <path d="M37 70H58c4 0 7-1 10-4l18-15c5-4 11-4 16 0l18 15c3 3 6 4 10 4h21c3 0 5 2 5 5v96c0 4-1 6-4 9l-50 41c-5 4-11 4-16 0l-50-41c-3-3-4-5-4-9V75c0-3 2-5 5-5z"
+          fill="url(#blueCore)"/>
+
+    <g clip-path="url(#coreClip)">
+      <polygon points="20,96 102,36 168,108 86,168" fill="url(#blueGloss)"/>
+      <polygon points="72,234 156,172 156,234" fill="#9ba7b6" opacity="0.26"/>
+    </g>
+
+    <g transform="translate(0,3)" fill="#111111" stroke="#111111" stroke-width="2.2" stroke-linejoin="round" stroke-linecap="round">
+      <circle cx="72" cy="116" r="14"/>
+      <path d="M48 178c0-17 11-27 24-27s24 10 24 27v10H48z"/>
+
+      <circle cx="116" cy="116" r="14"/>
+      <path d="M92 178c0-17 11-27 24-27s24 10 24 27v10H92z"/>
+    </g>
+  </g>
+</svg>

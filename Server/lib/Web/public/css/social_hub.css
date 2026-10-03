@@ -1,0 +1,585 @@
+/* Social pages share a game-board frame. Page state and reserved widths remain
+   owned by the lobby layout; these rules only style the panel contents. */
+body:not(.in-game) :is(.ClanBox, .FriendsBox){
+	--hub-frame: #172638;
+	--hub-shell: #e6ebef;
+	--hub-surface: #f8f6ef;
+	--hub-inset: #fffefa;
+	--hub-soft: #edf1f4;
+	--hub-line: #cbd3dc;
+	--hub-ink: #233246;
+	--hub-muted: #606e80;
+	--hub-button: #edf1f4;
+	--hub-button-hover: #e1e8ee;
+	--hub-button-edge: #a5b3c1;
+	--hub-type-edge: rgba(35, 50, 70, 0.18);
+	--hub-online: #2b6e4d;
+	--hub-online-soft: #e4f1e8;
+	--hub-rank-gold: #f0e2bf;
+	--hub-rank-silver: #e6ebf0;
+	--hub-rank-bronze: #eddccd;
+	--hub-offline: #97a1ad;
+	--hub-danger: #a44c4c;
+	--hub-header-ink: #fff9e9;
+	--hub-header-muted: #b8c9d8;
+	--clan-ink: var(--hub-ink);
+	--clan-muted: var(--hub-muted);
+	--clan-theme-ink: var(--hub-ink);
+	--community-ink: var(--hub-ink);
+	--community-muted: var(--hub-muted);
+	--community-line: var(--hub-line);
+	--community-panel: var(--hub-surface);
+	--vocab-ink: var(--hub-ink);
+	--vocab-muted: var(--hub-muted);
+	box-sizing: border-box !important;
+	padding: 0 !important;
+	border: 2px solid var(--hub-frame) !important;
+	border-radius: 12px !important;
+	background: var(--hub-shell) !important;
+	box-shadow: 0 3px 0 #0e1b2b, 0 10px 24px rgba(15, 29, 45, 0.14) !important;
+	overflow: hidden !important;
+	container-type: inline-size;
+	container-name: social-hub;
+}
+body:not(.in-game) .ClanBox{
+	--hub-accent: #8fcbea;
+	--hub-accent-soft: #dfedf5;
+	--hub-accent-ink: #256383;
+	--hub-primary: #31799e;
+	--hub-primary-hover: #286b8e;
+	--hub-primary-edge: #194b68;
+}
+body:not(.in-game) .FriendsBox{
+	--hub-accent: #c3a3df;
+	--hub-accent-soft: #ede4f4;
+	--hub-accent-ink: #71518d;
+	--hub-primary: #79589a;
+	--hub-primary-hover: #694787;
+	--hub-primary-edge: #4f3268;
+}
+body.dark-mode:not(.in-game) :is(.ClanBox, .FriendsBox){
+	--hub-shell: #121e2b;
+	--hub-surface: #1b2938;
+	--hub-inset: #152331;
+	--hub-soft: #223344;
+	--hub-line: #3b4d60;
+	--hub-ink: #edf2f7;
+	--hub-muted: #a7b8c9;
+	--hub-button: #293b4e;
+	--hub-button-hover: #344b62;
+	--hub-button-edge: #0c1723;
+	--hub-type-edge: rgba(0, 0, 0, 0.25);
+	--hub-online: #80caa2;
+	--hub-online-soft: #213d33;
+	--hub-rank-gold: #4a3d26;
+	--hub-rank-silver: #334557;
+	--hub-rank-bronze: #483327;
+	--hub-offline: #6f8295;
+	--hub-danger: #e6a3a3;
+}
+body.dark-mode:not(.in-game) .ClanBox{
+	--hub-accent-soft: #243f52;
+	--hub-accent-ink: #add7ec;
+}
+body.dark-mode:not(.in-game) .FriendsBox{
+	--hub-accent-soft: #3a2f4c;
+	--hub-accent-ink: #d7bee9;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox)::before,
+body:not(.in-game) :is(.ClanBox, .FriendsBox) > .product-title{
+	display: none !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) > .product-body{
+	display: flex !important;
+	flex-direction: column !important;
+	width: 100% !important;
+	height: 100% !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+	background: transparent !important;
+	box-sizing: border-box !important;
+}
+body:not(.in-game) :is(.ClanBox .clan-page, .FriendsBox .friends-page, .FriendsBox .community-page-shell){
+	display: flex !important;
+	flex-direction: column !important;
+	gap: 0 !important;
+	width: 100% !important;
+	height: 100% !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	padding: 0 !important;
+	color: var(--hub-ink) !important;
+	font: 14px/1.45 NBGothic, Arial, sans-serif !important;
+	overflow: hidden !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-page-header{
+	position: relative;
+	display: flex !important;
+	flex: 0 0 auto !important;
+	align-items: center !important;
+	gap: 12px !important;
+	min-height: 76px !important;
+	padding: 14px 18px !important;
+	border: 0 !important;
+	border-bottom: 3px solid var(--hub-accent) !important;
+	border-radius: 0 !important;
+	background: var(--hub-frame) !important;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12) !important;
+	color: var(--hub-header-ink) !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-page-icon{
+	flex: 0 0 32px !important;
+	width: 32px !important;
+	height: 44px !important;
+	object-fit: contain !important;
+	color: var(--hub-accent);
+	font-size: 32px;
+	line-height: 44px;
+	text-align: center;
+	-webkit-text-stroke: 0 transparent !important;
+	text-shadow: none !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-heading{
+	flex: 1 1 auto;
+	min-width: 0;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-title{
+	float: none !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	color: var(--hub-header-ink) !important;
+	font: 400 24px/1.16 'SupercellMagic', NBGothic, sans-serif !important;
+	letter-spacing: 0 !important;
+	-webkit-text-stroke: 0.8px #0e1a29 !important;
+	paint-order: stroke fill;
+	text-shadow: 0 2px 0 #0c1825 !important;
+	overflow-wrap: anywhere;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.social-hub-subtitle, .social-hub-meta){
+	margin: 5px 0 0 !important;
+	color: var(--hub-header-muted) !important;
+	font: 13px/1.4 NBGothic, Arial, sans-serif !important;
+	-webkit-text-stroke: 0 transparent !important;
+	text-shadow: none !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-meta{
+	flex: 0 0 auto;
+	margin: 0 !important;
+}
+/* The game bootstrap hides spans globally. Reveal only social text hooks. */
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.social-hub-field-label, .social-hub-section-meta, .social-hub-meta),
+body:not(.in-game) .ClanBox :is(.clan-member-meta, .clan-row-statline, .myinfo-clan-mission-text) > span,
+body:not(.in-game) .ClanBox .myinfo-clan-member > span,
+body:not(.in-game) .FriendsBox .community-page-tab > span{
+	display: inline !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-visually-hidden{
+	position: absolute !important;
+	width: 1px !important;
+	height: 1px !important;
+	padding: 0 !important;
+	margin: -1px !important;
+	overflow: hidden !important;
+	clip: rect(0, 0, 0, 0) !important;
+	clip-path: inset(50%) !important;
+	white-space: nowrap !important;
+	border: 0 !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.social-hub-section-head, .clan-panel-head, .community-panel-head, .friends-panel-title){
+	display: flex !important;
+	flex: 0 0 auto !important;
+	align-items: center !important;
+	justify-content: space-between !important;
+	gap: 10px !important;
+	min-height: 30px !important;
+	height: auto !important;
+	margin: 0 0 10px !important;
+	padding: 0 0 9px !important;
+	border: 0 !important;
+	border-bottom: 1px solid var(--hub-line) !important;
+	background: transparent !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.social-hub-section-title, .myinfo-clan-title, .community-panel-title, .friends-panel-title){
+	float: none !important;
+	min-width: 0;
+	margin: 0 !important;
+	padding: 0 !important;
+	color: var(--hub-ink) !important;
+	font: 400 16px/1.3 'SupercellMagic', NBGothic, sans-serif !important;
+	letter-spacing: 0 !important;
+	-webkit-text-stroke: 0.25px var(--hub-type-edge) !important;
+	paint-order: stroke fill;
+	text-shadow: 0 1px 0 var(--hub-type-edge) !important;
+	writing-mode: horizontal-tb !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.social-hub-section-meta, .community-panel-count, .clan-create-cost){
+	flex: 0 0 auto;
+	min-width: 0 !important;
+	margin: 0 !important;
+	padding: 0 !important;
+	border: 0 !important;
+	border-radius: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+	color: var(--hub-muted) !important;
+	font: 600 12px/1.4 NBGothic, Arial, sans-serif !important;
+	text-shadow: none !important;
+	-webkit-text-stroke: 0 transparent !important;
+	writing-mode: horizontal-tb !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.clan-command-deck, .community-command-deck){ display: none !important; }
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.clan-panel-head, .community-panel-head, .friends-panel-title)::before,
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.clan-create-panel, .clan-list-panel, .myinfo-clan-header, .myinfo-clan-mission, .myinfo-clan-members, .myinfo-clan-chat, .community-panel, .friends-page-panel, .community-library-panel, .community-vocab-panel)::after,
+body:not(.in-game) .FriendsBox :is(.community-panel, .community-library-panel, .community-vocab-panel)::before{
+	content: none !important;
+	display: none !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.clan-create-panel, .clan-list-panel, .myinfo-clan-members, .myinfo-clan-chat, .community-panel, .friends-page-panel, .community-ranking-dialog-shell, .community-library-panel, .community-vocab-panel){
+	display: flex !important;
+	flex-direction: column !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	padding: 14px !important;
+	border: 1px solid var(--hub-line) !important;
+	border-radius: 8px !important;
+	background: var(--hub-surface) !important;
+	box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+	color: var(--hub-ink) !important;
+	overflow: hidden !important;
+}
+/* Controls keep a shallow lower edge; text and icons remain easy to read. */
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(button, input, select, textarea){
+	box-sizing: border-box !important;
+	font-family: NBGothic, Arial, sans-serif !important;
+	font-size: 13px !important;
+	-webkit-text-stroke: 0 transparent !important;
+	text-shadow: none !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) button,
+body:not(.in-game) :is(.ClanBox, .FriendsBox) button > span{
+	-webkit-text-stroke: 0 transparent !important;
+	text-shadow: none !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(button, .myinfo-clan-btn){
+	display: inline-flex !important;
+	flex: 0 0 auto;
+	align-items: center;
+	justify-content: center;
+	gap: 6px;
+	min-height: 34px;
+	height: 34px !important;
+	padding: 0 12px !important;
+	border: 1px solid var(--hub-button-edge) !important;
+	border-radius: 6px !important;
+	background: var(--hub-button) !important;
+	color: var(--hub-ink) !important;
+	font-weight: 700 !important;
+	box-shadow: 0 2px 0 var(--hub-button-edge), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+	transform: none !important;
+	filter: none !important;
+	cursor: pointer;
+	transition: background-color 120ms ease, border-color 120ms ease, transform 120ms ease !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(button, .myinfo-clan-btn):hover:not(:disabled){
+	background: var(--hub-button-hover) !important;
+	border-color: var(--hub-accent-ink) !important;
+	box-shadow: 0 2px 0 var(--hub-button-edge), inset 0 1px 0 rgba(255, 255, 255, 0.45) !important;
+	transform: translateY(-1px) !important;
+	filter: none !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(button, .myinfo-clan-btn):active:not(:disabled){
+	background: var(--hub-button-hover) !important;
+	transform: translateY(1px) !important;
+	box-shadow: 0 1px 0 var(--hub-button-edge) !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.js-clan-create, .js-clan-join, .js-clan-send, .js-community-lobby-chat-send, .js-community-vocab-create, .js-community-library-search, .js-friends-search){
+	border-color: var(--hub-primary-edge) !important;
+	background: var(--hub-primary) !important;
+	color: #fff9ee !important;
+	box-shadow: 0 2px 0 var(--hub-primary-edge), inset 0 1px 0 rgba(255, 255, 255, 0.2) !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.js-clan-create, .js-clan-join, .js-clan-send, .js-community-lobby-chat-send, .js-community-vocab-create, .js-community-library-search, .js-friends-search):hover:not(:disabled){
+	border-color: var(--hub-primary-edge) !important;
+	background: var(--hub-primary-hover) !important;
+	color: #fff9ee !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(button, .myinfo-clan-btn):disabled{
+	opacity: 0.55 !important;
+	background: var(--hub-soft) !important;
+	color: var(--hub-muted) !important;
+	box-shadow: none !important;
+	transform: none !important;
+	cursor: not-allowed;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(input, select, textarea){
+	min-width: 0 !important;
+	width: 100%;
+	height: 36px !important;
+	margin: 0 !important;
+	padding: 0 10px !important;
+	border: 1px solid var(--hub-line) !important;
+	border-radius: 6px !important;
+	background: var(--hub-inset) !important;
+	color: var(--hub-ink) !important;
+	font-weight: 400 !important;
+	box-shadow: inset 0 1px 2px rgba(17, 33, 51, 0.05) !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) textarea{
+	min-height: 62px;
+	height: 62px !important;
+	padding: 8px 10px !important;
+	line-height: 1.4;
+	resize: vertical;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(input, textarea)::placeholder{ color: var(--hub-muted); opacity: 0.85; }
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(button, input, select, textarea, [tabindex], .community-friend-row):focus-visible{
+	outline: 2px solid var(--hub-accent-ink) !important;
+	outline-offset: 3px !important;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-field{
+	display: flex;
+	flex-direction: column;
+	gap: 5px;
+	min-width: 0;
+	margin: 0;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-field-label{
+	color: var(--hub-muted);
+	font-size: 12px;
+	line-height: 1.4;
+	font-weight: 700;
+}
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.social-hub-field, .clan-banner-controls label)::before{ content: none !important; }
+/* Directory and chat get the first, wider column. */
+body:not(.in-game) .ClanBox :is(.clan-page-layout, .myinfo-clan-body){
+	display: grid !important;
+	flex: 1 1 auto !important;
+	grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) !important;
+	gap: 14px !important;
+	min-width: 0 !important;
+	min-height: 0 !important;
+	height: auto !important;
+	margin: 14px !important;
+}
+body:not(.in-game) .ClanBox .clan-create-panel{
+	gap: 10px;
+	overflow: hidden !important;
+	container-type: inline-size;
+	container-name: clan-creator;
+}
+body:not(.in-game) .ClanBox .clan-create-fields{
+	display: flex;
+	flex: 1 1 auto;
+	flex-direction: column;
+	gap: 10px;
+	min-width: 0;
+	min-height: 0;
+	padding: 0 4px 3px 0;
+	overflow-y: auto;
+	overflow-x: hidden;
+}
+body:not(.in-game) .ClanBox .clan-create-panel .social-hub-section-head{ margin-bottom: 0 !important; }
+body:not(.in-game) .ClanBox .clan-create-cost{ color: var(--hub-accent-ink) !important; white-space: nowrap; }
+body:not(.in-game) .ClanBox .js-clan-create{ align-self: stretch; width: 100%; min-height: 36px; }
+body:not(.in-game) .ClanBox .clan-search-wrap{ flex: 0 0 auto; margin: 0 0 10px !important; }
+body:not(.in-game) .ClanBox .clan-search-wrap .myinfo-clan-input{ padding-left: 32px !important; }
+body:not(.in-game) .ClanBox .clan-search-wrap i{ top: auto !important; bottom: 11px !important; left: 11px; color: var(--hub-muted); }
+body:not(.in-game) .ClanBox .clan-list-scroll{
+	flex: 1 1 auto !important;
+	min-height: 0 !important;
+	padding: 0 4px 0 0 !important;
+	overflow-y: auto !important;
+	overflow-x: hidden !important;
+}
+body:not(.in-game) .ClanBox .clan-list-row{
+	display: grid !important;
+	grid-template-columns: 48px minmax(0, 1fr) auto !important;
+	gap: 12px !important;
+	align-items: center;
+	min-height: 88px !important;
+	margin: 0 !important;
+	padding: 12px 2px !important;
+	border: 0 !important;
+	border-bottom: 1px solid var(--hub-line) !important;
+	border-radius: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+}
+body:not(.in-game) .ClanBox .clan-list-row::before{ display: none !important; }
+body:not(.in-game) .ClanBox .clan-list-row:hover{ background: var(--hub-soft) !important; box-shadow: none !important; }
+body:not(.in-game) .ClanBox .clan-list-row .clan-banner.is-small{ width: 44px !important; height: auto !important; --clan-banner-border-thickness: 3px; }
+body:not(.in-game) .ClanBox .myinfo-clan-row-main{ min-width: 0; }
+body:not(.in-game) .ClanBox :is(.myinfo-clan-row-name, .myinfo-clan-member-name){ color: var(--hub-ink) !important; font: 700 14px/1.4 NBGothic, Arial, sans-serif !important; }
+body:not(.in-game) .ClanBox :is(.myinfo-clan-row-about, .myinfo-clan-about-text, .myinfo-clan-meta, .clan-row-statline, .clan-member-meta){ color: var(--hub-muted) !important; font: 12px/1.4 NBGothic, Arial, sans-serif !important; }
+body:not(.in-game) .ClanBox .myinfo-clan-row-about{ margin: 3px 0 !important; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+body:not(.in-game) .ClanBox .clan-row-statline{ display: flex; flex-wrap: wrap; gap: 10px; margin: 4px 0 0; text-transform: none !important; }
+body:not(.in-game) .ClanBox .clan-row-statline span{ padding: 0 !important; background: transparent !important; color: inherit !important; }
+body:not(.in-game) .ClanBox :is(.clan-row-mission-bar, .myinfo-clan-mission-bar){ height: 5px !important; border: 0 !important; border-radius: 3px !important; background: var(--hub-line) !important; box-shadow: none !important; overflow: hidden; }
+body:not(.in-game) .ClanBox :is(.clan-row-mission-fill, .myinfo-clan-mission-bar-inner){ height: 100%; border-radius: inherit !important; background: var(--hub-primary) !important; }
+body:not(.in-game) .ClanBox .clan-banner-builder{
+	display: grid !important;
+	flex: 0 0 auto !important;
+	grid-template-columns: 84px minmax(0, 1fr) !important;
+	align-items: start;
+	gap: 12px !important;
+	margin: 0 !important;
+	padding: 10px 0 !important;
+	border: 0 !important;
+	border-top: 1px solid var(--hub-line) !important;
+	border-bottom: 1px solid var(--hub-line) !important;
+	border-radius: 0 !important;
+	background: transparent !important;
+	box-shadow: none !important;
+}
+body:not(.in-game) .ClanBox .clan-banner-preview-wrap{ display: flex; flex-direction: column; align-items: center; gap: 8px; min-width: 0; }
+body:not(.in-game) .ClanBox .clan-banner-preview{ display: flex; align-items: center; justify-content: center; width: 84px; min-height: 112px; padding: 7px !important; border: 1px solid var(--hub-line) !important; border-radius: 6px; background: var(--hub-soft) !important; box-shadow: none !important; }
+body:not(.in-game) .ClanBox .clan-banner-preview .clan-banner{ width: 68px !important; height: auto !important; }
+body:not(.in-game) .ClanBox .clan-banner-controls{ display: grid !important; grid-template-columns: repeat(2, minmax(0, 1fr)) !important; gap: 8px !important; min-width: 0; }
+body:not(.in-game) .ClanBox .clan-banner-controls label{ display: flex; flex-direction: column; gap: 4px; min-width: 0; margin: 0; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; color: var(--hub-muted) !important; font-size: 12px; }
+body:not(.in-game) .ClanBox .clan-banner-controls label::before{ content: none !important; display: none !important; }
+body:not(.in-game) .ClanBox .clan-banner-controls :is(input, select){ width: 100% !important; height: 32px !important; padding: 0 6px !important; font-size: 12px !important; }
+body:not(.in-game) .ClanBox .clan-banner-controls input[type="color"]{ padding: 3px !important; }
+body:not(.in-game) .ClanBox .clan-member-hero{
+	display: grid !important;
+	grid-template-columns: 62px minmax(0, 1fr) auto !important;
+	gap: 14px !important;
+	min-height: 98px !important;
+	margin: 0 !important;
+}
+body:not(.in-game) .ClanBox .clan-member-hero .clan-banner{ width: 58px !important; height: auto !important; --clan-banner-border-thickness: 4px; }
+body:not(.in-game) .ClanBox .myinfo-clan-header-main{ min-width: 0; }
+body:not(.in-game) .ClanBox .clan-member-hero .myinfo-clan-about-text{ margin: 5px 0; color: var(--hub-header-muted) !important; }
+body:not(.in-game) .ClanBox .clan-member-meta{ display: flex; flex-wrap: wrap; gap: 12px; color: var(--hub-header-muted) !important; }
+body:not(.in-game) .ClanBox .js-clan-leave{ justify-self: end !important; grid-column: auto !important; color: var(--hub-danger) !important; }
+body:not(.in-game) .ClanBox .clan-mission-strip{ flex: 0 0 auto; margin: 12px 14px 0 !important; padding: 10px 12px !important; border: 1px solid var(--hub-line) !important; border-radius: 7px !important; background: var(--hub-surface) !important; box-shadow: none !important; }
+body:not(.in-game) .ClanBox .clan-mission-strip .social-hub-section-head{ margin: 0 0 6px !important; padding: 0 !important; border: 0 !important; min-height: 24px !important; }
+body:not(.in-game) .ClanBox .myinfo-clan-mission-text{ display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 14px; margin: 0 0 7px; color: var(--hub-muted) !important; font-size: 12px; }
+body:not(.in-game) .ClanBox .clan-mission-progress{ flex: 0 0 auto; white-space: nowrap; }
+body:not(.in-game) .ClanBox .myinfo-clan-members{ overflow-y: auto !important; }
+body:not(.in-game) .ClanBox .myinfo-clan-member{ display: grid; grid-template-columns: 8px minmax(0, 1fr) auto auto; gap: 8px; align-items: center; min-height: 43px !important; border-bottom: 1px solid var(--hub-line); }
+body:not(.in-game) .ClanBox .myinfo-clan-member-status{ width: 7px !important; height: 7px !important; border: 0 !important; border-radius: 50%; background: var(--hub-online); box-shadow: none !important; }
+body:not(.in-game) .ClanBox .is-offline .myinfo-clan-member-status{ background: var(--hub-offline); }
+body:not(.in-game) .ClanBox .myinfo-clan-member-role{ padding: 0 !important; background: none !important; color: var(--hub-muted) !important; font-size: 11px !important; }
+body:not(.in-game) .ClanBox .myinfo-clan-member-online{ padding: 2px 5px !important; border-radius: 4px !important; background: var(--hub-online-soft) !important; color: var(--hub-online) !important; font: 11px/1.4 NBGothic, Arial, sans-serif !important; }
+body:not(.in-game) .ClanBox .is-offline .myinfo-clan-member-online{ background: var(--hub-soft) !important; color: var(--hub-muted) !important; }
+body:not(.in-game) .ClanBox .myinfo-clan-chat-list{ flex: 1 1 auto; min-height: 0; padding: 8px 10px !important; border: 1px solid var(--hub-line) !important; border-radius: 6px; background: var(--hub-inset) !important; box-shadow: none !important; overflow-y: auto; }
+body:not(.in-game) .ClanBox .myinfo-clan-chat-item{ margin: 0 !important; padding: 8px 0 !important; border: 0 !important; border-bottom: 1px solid var(--hub-line) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+body:not(.in-game) .ClanBox .myinfo-clan-chat-head{ margin-bottom: 3px; color: var(--hub-accent-ink) !important; font-size: 12px; font-weight: 700; }
+body:not(.in-game) .ClanBox .myinfo-clan-chat-text{ color: var(--hub-ink) !important; font: 14px/1.45 NBGothic, Arial, sans-serif !important; overflow-wrap: anywhere; }
+body:not(.in-game) .ClanBox .is-system .myinfo-clan-chat-head{ color: var(--hub-muted) !important; }
+body:not(.in-game) .ClanBox .myinfo-clan-chat-input{ display: flex; align-items: flex-end !important; gap: 8px; margin-top: 10px !important; }
+body:not(.in-game) .ClanBox .myinfo-clan-chat-input .social-hub-field{ flex: 1 1 auto; }
+/* Community tabs and panels use the same surfaces, with one purple selection. */
+body:not(.in-game) .FriendsBox .community-page-tabs{ display: flex !important; flex: 0 0 auto !important; gap: 6px !important; margin: 12px 14px 0 !important; padding: 0 0 3px !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; overflow: visible !important; }
+body:not(.in-game) .FriendsBox .community-page-tab{ flex: 1 1 0 !important; min-width: 0; height: 37px !important; padding: 0 10px !important; font-size: 13px !important; font-weight: 700 !important; }
+body:not(.in-game) .FriendsBox .community-page-tab > span{ -webkit-text-stroke: 0 transparent !important; text-shadow: none !important; }
+body:not(.in-game) .FriendsBox .community-page-tab.is-active,
+body:not(.in-game) .FriendsBox .community-page-tab.is-active:hover:not(:disabled){ border-color: var(--hub-accent-ink) !important; background: var(--hub-accent-soft) !important; color: var(--hub-accent-ink) !important; box-shadow: 0 2px 0 var(--hub-accent-ink), inset 0 1px 0 rgba(255, 255, 255, 0.4) !important; }
+body:not(.in-game) .FriendsBox .community-page-content{ flex: 1 1 auto !important; min-height: 0 !important; margin: 12px 14px 14px !important; overflow: hidden !important; }
+body:not(.in-game) .FriendsBox :is(.community-view-layout, .friends-page-layout, .community-vocab-layout){ display: grid !important; grid-template-columns: minmax(0, 1.6fr) minmax(0, 1fr) !important; gap: 14px !important; width: 100% !important; height: 100% !important; min-width: 0 !important; min-height: 0 !important; }
+body:not(.in-game) .FriendsBox .friends-page-layout{ grid-template-columns: minmax(0, 1fr) !important; }
+body:not(.in-game) .FriendsBox .community-vocab-layout{ grid-template-columns: minmax(0, 0.9fr) minmax(0, 1.2fr) !important; }
+body:not(.in-game) .FriendsBox .community-vocab-layout.is-detail{ grid-template-columns: minmax(0, 1fr) !important; }
+body:not(.in-game) .FriendsBox .community-lobby-column{ display: flex !important; flex-direction: column !important; min-width: 0 !important; min-height: 0 !important; }
+body:not(.in-game) .FriendsBox :is(.community-lobby-chat, .community-lobby-friends-tab){ flex: 1 1 auto; height: 100% !important; }
+body:not(.in-game) .FriendsBox .community-lobby-friends-tab{ flex-direction: column !important; padding: 14px !important; }
+body:not(.in-game) .FriendsBox .community-lobby-friends-tab .community-panel-head{ flex: 0 0 auto !important; flex-direction: row !important; width: 100% !important; height: auto !important; padding: 0 0 9px !important; margin: 0 0 10px !important; border: 0 !important; border-bottom: 1px solid var(--hub-line) !important; background: transparent !important; }
+body:not(.in-game) .FriendsBox .community-lobby-friends-tab :is(.community-panel-title, .community-panel-count){ writing-mode: horizontal-tb !important; text-orientation: mixed !important; }
+body:not(.in-game) .FriendsBox :is(.community-scroller, .friends-search-results, .community-library-output, .community-vocab-list-body, .community-ranking-dialog-body){ flex: 1 1 auto !important; min-height: 0 !important; padding: 8px !important; border: 1px solid var(--hub-line) !important; border-radius: 6px !important; background: var(--hub-inset) !important; box-shadow: none !important; color: var(--hub-ink) !important; overflow-y: auto !important; overflow-x: hidden !important; }
+body:not(.in-game) .FriendsBox .community-friend-list{ padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; }
+body:not(.in-game) .FriendsBox :is(.friends-search-row, .community-library-search, .community-lobby-chat-compose, .community-vocab-toolbar, .community-vocab-add){ display: flex !important; flex: 0 0 auto !important; align-items: flex-end !important; gap: 8px !important; margin: 0 0 10px !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+body:not(.in-game) .FriendsBox .community-lobby-chat-compose{ margin: 10px 0 0 !important; }
+body:not(.in-game) .FriendsBox :is(.friends-search-row, .community-library-search, .community-lobby-chat-compose) .social-hub-field{ flex: 1 1 auto; }
+body:not(.in-game) .FriendsBox .friends-add-id-btn{ align-self: flex-end; width: auto !important; margin-top: 10px !important; }
+body:not(.in-game) .FriendsBox .community-lobby-chat-log{ font: 13px/1.5 NBGothic, Arial, sans-serif; }
+body:not(.in-game) .FriendsBox .community-lobby-chat-log :is(.chat-head, .chat-body, .chat-stamp){ -webkit-text-stroke: 0 transparent !important; text-shadow: none !important; }
+body:not(.in-game) .FriendsBox .community-lobby-chat-log .chat-body{ color: var(--hub-ink) !important; }
+body:not(.in-game) .FriendsBox .community-lobby-chat-log .chat-stamp{ color: var(--hub-muted) !important; }
+body:not(.in-game) .FriendsBox :is(.community-friend-row, .community-user-row, .friends-page-row, .community-vocab-word-row){ min-width: 0; margin: 0 !important; padding: 9px 2px !important; border: 0 !important; border-bottom: 1px solid var(--hub-line) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; }
+body:not(.in-game) .FriendsBox :is(.community-friend-row, .community-user-row, .friends-page-row):hover{ background: var(--hub-soft) !important; }
+body:not(.in-game) .FriendsBox .community-friend-row.is-offline{ opacity: 1 !important; }
+body:not(.in-game) .FriendsBox .community-friend-row.is-offline .community-friend-avatar{ opacity: 0.65; }
+body:not(.in-game) .FriendsBox :is(.community-friend-avatar, .community-user-avatar){ flex: 0 0 42px; width: 42px; height: 42px; background: transparent !important; box-shadow: none !important; }
+body:not(.in-game) .FriendsBox :is(.community-friend-name, .community-user-name, .friends-page-name, .community-vocab-list-name, .community-vocab-word-title){ color: var(--hub-ink) !important; font: 700 14px/1.4 NBGothic, Arial, sans-serif !important; -webkit-text-stroke: 0 transparent !important; text-shadow: none !important; }
+body:not(.in-game) .FriendsBox :is(.community-friend-presence, .community-user-place, .community-room-sub, .community-vocab-limit, .community-vocab-word-preview, .community-vocab-status, .community-vocab-card-preview){ color: var(--hub-muted) !important; font: 12px/1.4 NBGothic, Arial, sans-serif !important; }
+body:not(.in-game) .FriendsBox :is(.community-friend-status, .community-user-status){ width: 7px; height: 7px; border: 0; box-shadow: none; }
+body:not(.in-game) .FriendsBox .cfi-stat-on{ background: var(--hub-online) !important; }
+body:not(.in-game) .FriendsBox .cfi-stat-off{ background: var(--hub-offline) !important; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-shell{ height: 100%; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table{ width: 100%; color: var(--hub-ink); border-collapse: collapse; font: 13px/1.4 NBGothic, Arial, sans-serif; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table :is(thead, th){ background: var(--hub-soft) !important; color: var(--hub-muted) !important; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table :is(th, td){ padding: 8px !important; border-bottom: 1px solid var(--hub-line); color: var(--hub-ink) !important; font: 13px/20px NBGothic, Arial, sans-serif !important; vertical-align: middle; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table :is(th, td):nth-child(2){ width: 72px !important; white-space: nowrap; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table .ranking-image{ display: inline-block !important; float: none !important; width: 20px !important; height: 20px !important; margin: 0 6px 0 0 !important; vertical-align: middle; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table td:nth-child(2) > label{ display: inline-block !important; padding: 0 !important; vertical-align: middle; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table .ranking-me{ background: var(--hub-accent-soft) !important; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table .ranking-1 > td:first-child{ background: var(--hub-rank-gold) !important; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table .ranking-2 > td:first-child{ background: var(--hub-rank-silver) !important; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-table .ranking-3 > td:first-child{ background: var(--hub-rank-bronze) !important; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-page{ flex: 0 0 auto; margin: 6px 0 !important; padding: 0 !important; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-page h4{ height: 20px; margin: 0 !important; padding: 0 !important; color: var(--hub-muted) !important; font: 13px/20px NBGothic, Arial, sans-serif !important; }
+body:not(.in-game) .FriendsBox .community-ranking-dialog-actions{ display: flex; justify-content: center; gap: 8px; }
+body:not(.in-game) .FriendsBox .community-vocab-toolbar{ justify-content: space-between; flex-wrap: wrap; }
+body:not(.in-game) .FriendsBox .community-vocab-add{ flex-wrap: wrap; }
+body:not(.in-game) .FriendsBox .community-vocab-add > :is(input, select){ flex: 1 1 140px; }
+body:not(.in-game) .FriendsBox :is(.community-vocab-card, .community-vocab-overview-card){ margin: 0 !important; padding: 12px 4px !important; border: 0 !important; border-bottom: 1px solid var(--hub-line) !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; color: var(--hub-ink) !important; }
+body:not(.in-game) .FriendsBox :is(.community-vocab-card, .community-vocab-overview-card)::before{ content: none !important; display: none !important; }
+body:not(.in-game) .FriendsBox :is(.community-vocab-card.is-selected, .community-vocab-overview-card:hover){ border-color: var(--hub-accent-ink) !important; background: var(--hub-accent-soft) !important; }
+body:not(.in-game) .FriendsBox :is(.community-vocab-card-head, .community-vocab-detail-head){ display: flex !important; flex-wrap: wrap; align-items: center; gap: 8px !important; }
+body:not(.in-game) .FriendsBox .community-vocab-list-name,
+body:not(.in-game) .FriendsBox .community-vocab-list-name:is(:hover, :active):not(:disabled){ flex: 1 1 100px; justify-content: flex-start !important; min-width: 0; min-height: 24px !important; height: auto !important; padding: 0 !important; border: 0 !important; border-radius: 0 !important; background: transparent !important; box-shadow: none !important; color: var(--hub-ink) !important; font: 700 14px/1.4 NBGothic, Arial, sans-serif !important; text-align: left; white-space: normal; overflow-wrap: anywhere; transform: none !important; }
+body:not(.in-game) .FriendsBox .community-vocab-list-name:hover:not(:disabled){ color: var(--hub-accent-ink) !important; text-decoration: underline; }
+body:not(.in-game) .FriendsBox .community-vocab-card-btn{ min-height: 28px !important; height: 28px !important; padding: 0 6px !important; border-color: transparent !important; background: transparent !important; box-shadow: none !important; color: var(--hub-muted) !important; font-size: 12px !important; }
+body:not(.in-game) .FriendsBox .community-vocab-card-btn:is(:hover, :active):not(:disabled){ border-color: transparent !important; background: var(--hub-accent-soft) !important; box-shadow: none !important; color: var(--hub-accent-ink) !important; transform: none !important; }
+body:not(.in-game) .FriendsBox .community-vocab-card-count{ padding: 3px 6px; border-radius: 4px; background: var(--hub-soft) !important; color: var(--hub-muted) !important; font: 12px/1.4 NBGothic, Arial, sans-serif; }
+body:not(.in-game) .FriendsBox .community-vocab-back{ width: 34px !important; padding: 0 !important; }
+body:not(.in-game) .FriendsBox .community-library-result .word{ padding: 10px; border: 0; border-bottom: 1px solid var(--hub-line); border-radius: 0; background: transparent !important; color: var(--hub-ink); box-shadow: none !important; }
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.myinfo-clan-empty, .community-empty, .community-vocab-empty-list){ min-height: 76px !important; padding: 16px !important; color: var(--hub-muted) !important; font: 13px/1.5 NBGothic, Arial, sans-serif !important; text-align: center; }
+body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(.clan-list-scroll, .clan-create-fields, .myinfo-clan-members, .myinfo-clan-chat-list, .community-scroller, .community-vocab-list-body, .community-library-output, .community-ranking-dialog-body){ scrollbar-width: thin; scrollbar-color: var(--hub-button-edge) transparent; }
+@container social-hub (max-width: 760px){
+	body:not(.in-game) .ClanBox .clan-page{ overflow-y: auto !important; }
+	body:not(.in-game) .ClanBox :is(.clan-page-layout, .myinfo-clan-body){ flex: 0 0 auto !important; grid-template-columns: minmax(0, 1fr) !important; }
+	body:not(.in-game) .ClanBox :is(.clan-list-panel, .myinfo-clan-chat){ min-height: 320px !important; max-height: 460px; }
+	body:not(.in-game) .ClanBox .myinfo-clan-members{ min-height: 180px !important; max-height: 320px; }
+	body:not(.in-game) .FriendsBox .community-page-content{ overflow-y: auto !important; }
+	body:not(.in-game) .FriendsBox :is(.community-view-layout, .friends-page-layout, .community-vocab-layout){ grid-template-columns: minmax(0, 1fr) !important; height: auto !important; }
+	body:not(.in-game) .FriendsBox :is(.community-lobby-chat, .community-library-panel, .community-vocab-panel, .friends-page-panel){ min-height: 320px !important; max-height: 460px; }
+	body:not(.in-game) .FriendsBox .community-lobby-friends-tab{ min-height: 220px !important; max-height: 340px; }
+}
+@container social-hub (max-width: 460px){
+	body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-page-header{ padding: 12px 14px !important; gap: 9px !important; }
+	body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-title{ font-size: 21px !important; }
+	body:not(.in-game) :is(.ClanBox, .FriendsBox) .social-hub-meta{ display: none !important; }
+	body:not(.in-game) .ClanBox .clan-member-hero{ grid-template-columns: 46px minmax(0, 1fr) !important; }
+	body:not(.in-game) .ClanBox .clan-member-hero .clan-banner{ width: 42px !important; }
+	body:not(.in-game) .ClanBox .js-clan-leave{ grid-column: 2 !important; }
+	body:not(.in-game) .FriendsBox .community-page-tabs{ flex-wrap: wrap; }
+	body:not(.in-game) .FriendsBox .community-page-tab{ flex-basis: calc(50% - 6px) !important; }
+	body:not(.in-game) .FriendsBox .community-lobby-chat-log > .chat-item{ grid-template-columns: 80px minmax(0, 1fr) !important; }
+	body:not(.in-game) .FriendsBox .community-lobby-chat-log > .chat-item > .chat-head{ width: 76px !important; }
+	body:not(.in-game) .FriendsBox .community-lobby-chat-log > .chat-item > .chat-stamp{ display: none; }
+}
+@container clan-creator (max-width: 240px){
+	body:not(.in-game) .ClanBox .clan-banner-builder{ grid-template-columns: minmax(0, 1fr) !important; }
+	body:not(.in-game) .ClanBox .clan-banner-preview-wrap{ flex-direction: row; justify-content: space-between; }
+	body:not(.in-game) .ClanBox .clan-banner-preview{ min-height: 84px; }
+	body:not(.in-game) .ClanBox .clan-banner-preview .clan-banner{ width: 50px !important; }
+}
+@supports not (container-type: inline-size){
+	@media (max-width: 1180px){
+		body:not(.in-game) .ClanBox .clan-page{ overflow-y: auto !important; }
+		body:not(.in-game) .ClanBox :is(.clan-page-layout, .myinfo-clan-body){ flex: 0 0 auto !important; grid-template-columns: minmax(0, 1fr) !important; }
+		body:not(.in-game) .ClanBox :is(.clan-list-panel, .myinfo-clan-chat){ min-height: 320px !important; max-height: 460px; }
+		body:not(.in-game) .FriendsBox .community-page-content{ overflow-y: auto !important; }
+		body:not(.in-game) .FriendsBox :is(.community-view-layout, .friends-page-layout, .community-vocab-layout){ grid-template-columns: minmax(0, 1fr) !important; height: auto !important; }
+		body:not(.in-game) .FriendsBox :is(.community-lobby-chat, .community-library-panel, .community-vocab-panel, .friends-page-panel){ min-height: 320px !important; max-height: 460px; }
+		body:not(.in-game) .FriendsBox .community-lobby-friends-tab{ min-height: 220px !important; }
+	}
+}
+@media (prefers-reduced-motion: reduce){
+	body:not(.in-game) :is(.ClanBox, .FriendsBox) *,
+	body:not(.in-game) :is(.ClanBox, .FriendsBox) *::before,
+	body:not(.in-game) :is(.ClanBox, .FriendsBox) *::after{ animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+	body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(button, .myinfo-clan-btn):hover:not(:disabled),
+	body:not(.in-game) :is(.ClanBox, .FriendsBox) :is(button, .myinfo-clan-btn):active:not(:disabled){ transform: none !important; }
+}

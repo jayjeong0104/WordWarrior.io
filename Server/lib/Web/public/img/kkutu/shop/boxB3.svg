@@ -1,0 +1,58 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="24 24 208 208" role="img" aria-labelledby="title desc">
+	<title id="title">Advanced emblem box</title>
+	<desc id="desc">A blue emblem box with a golden bow and a crystalline shield clasp.</desc>
+	<defs>
+		<linearGradient id="body" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#dce9ff"/>
+			<stop offset="0.5" stop-color="#adccff"/>
+			<stop offset="1" stop-color="#6b9eea"/>
+		</linearGradient>
+		<linearGradient id="lid" x1="0" y1="0" x2="0" y2="1">
+			<stop offset="0" stop-color="#48c3ff"/>
+			<stop offset="0.52" stop-color="#0098ff"/>
+			<stop offset="1" stop-color="#0066e8"/>
+		</linearGradient>
+		<linearGradient id="bow" x1="0" y1="0" x2="0.8" y2="1">
+			<stop offset="0" stop-color="#fff96a"/>
+			<stop offset="0.52" stop-color="#ffed00"/>
+			<stop offset="1" stop-color="#d5b700"/>
+		</linearGradient>
+		<linearGradient id="ribbon" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#ffffff"/>
+			<stop offset="0.58" stop-color="#f4f8ff"/>
+			<stop offset="1" stop-color="#d6e2f5"/>
+		</linearGradient>
+		<linearGradient id="gem" x1="0" y1="0" x2="1" y2="1">
+			<stop offset="0" stop-color="#aaf1ff"/>
+			<stop offset="0.5" stop-color="#31cfff"/>
+			<stop offset="1" stop-color="#1469ee"/>
+		</linearGradient>
+	</defs>
+
+	<path d="M124 73C105 58 100 35 75 35C55 35 47 50 54 65C63 82 94 84 124 78Z" fill="url(#bow)" stroke="#173a78" stroke-width="8" stroke-linejoin="round"/>
+	<path d="M132 73C151 58 156 35 181 35C201 35 209 50 202 65C193 82 162 84 132 78Z" fill="url(#bow)" stroke="#173a78" stroke-width="8" stroke-linejoin="round"/>
+	<path d="M62 59C72 47 93 51 111 69C91 65 75 66 62 59Z" fill="#fffcb2" opacity="0.65"/>
+	<path d="M194 59C184 47 163 51 145 69C165 65 181 66 194 59Z" fill="#fffcb2" opacity="0.65"/>
+
+	<path d="M48 108H208V207Q208 220 195 220H61Q48 220 48 207Z" fill="url(#body)" stroke="#173a78" stroke-width="8" stroke-linejoin="round"/>
+	<path d="M52 113H68V204Q68 212 76 216H61Q52 216 52 207Z" fill="#f0f6ff" opacity="0.78"/>
+	<path d="M188 112H204V207Q204 216 195 216H181Q188 211 188 201Z" fill="#4679c7" opacity="0.34"/>
+	<path d="M53 196H203V207Q203 215 194 215H62Q53 215 53 207Z" fill="#4679c7" opacity="0.35"/>
+	<path d="M106 109H150V184L128 203L106 184Z" fill="url(#ribbon)" stroke="#8aa8d4" stroke-width="5" stroke-linejoin="round"/>
+	<path d="M65 137H81" fill="none" stroke="#eaf2ff" stroke-width="7" stroke-linecap="round"/>
+	<path d="M65 183H81" fill="none" stroke="#eaf2ff" stroke-width="7" stroke-linecap="round"/>
+	<path d="M175 137H191" fill="none" stroke="#3f6fbb" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+	<path d="M175 183H191" fill="none" stroke="#3f6fbb" stroke-width="7" stroke-linecap="round" opacity="0.5"/>
+
+	<path d="M36 77L50 64H206L220 77V117H36Z" fill="url(#lid)" stroke="#173a78" stroke-width="8" stroke-linejoin="round"/>
+	<path d="M43 77L53 69H203L213 77Z" fill="#bfeaff" opacity="0.74"/>
+	<path d="M40 101H216V113H40Z" fill="#004fca" opacity="0.28"/>
+	<path d="M106 65H150V117H106Z" fill="url(#ribbon)" stroke="#8aa8d4" stroke-width="5"/>
+	<path d="M113 69H126V113H113Z" fill="#ffffff" opacity="0.52"/>
+
+	<path d="M107 57Q107 48 116 46H140Q149 48 149 57V75Q149 84 140 86H116Q107 84 107 75Z" fill="url(#bow)" stroke="#173a78" stroke-width="8"/>
+	<path d="M116 54H139" fill="none" stroke="#fffdb2" stroke-width="5" stroke-linecap="round" opacity="0.78"/>
+	<path d="M100 133Q100 126 107 126H149Q156 126 156 133V158Q156 177 128 190Q100 177 100 158Z" fill="url(#ribbon)" stroke="#173a78" stroke-width="7" stroke-linejoin="round"/>
+	<path d="M128 136L143 151L128 170L113 151Z" fill="url(#gem)" stroke="#174d9e" stroke-width="5" stroke-linejoin="round"/>
+	<path d="M119 150L128 141L132 147L124 155Z" fill="#ffffff" opacity="0.76"/>
+</svg>

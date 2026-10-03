@@ -1,0 +1,62 @@
+{
+  "160": {
+    "count": 2128,
+    "sample": [
+      "energy",
+      "gain",
+      "angular frequency",
+      "snow water equivalent",
+      "cosmic density",
+      "q value",
+      "relative molecular mass",
+      "elliptic flow",
+      "global standard stratigraphic age",
+      "heat capacity rate"
+    ]
+  },
+  "530": {
+    "count": 844,
+    "sample": [
+      "hydrogen",
+      "helium",
+      "lithium",
+      "beryllium",
+      "boron",
+      "carbon",
+      "nitrogen",
+      "oxygen",
+      "fluorine",
+      "neon"
+    ]
+  },
+  "CRL": {
+    "count": 121,
+    "sample": [
+      "knight",
+      "archers",
+      "goblins",
+      "giant",
+      "pekka",
+      "minions",
+      "balloon",
+      "witch",
+      "barbarians",
+      "golem"
+    ]
+  },
+  "KPO": {
+    "count": 39957,
+    "sample": [
+      "elvis presley",
+      "bob dylan",
+      "bob marley",
+      "vladimir vysotsky",
+      "patti smith",
+      "brigitte fontaine",
+      "neil young",
+      "kate bush",
+      "stevie wonder",
+      "roman camenzind"
+    ]
+  }
+}

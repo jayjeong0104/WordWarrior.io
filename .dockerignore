@@ -1,0 +1,22 @@
+.git
+.agents
+.codex
+.vscode
+**/node_modules
+tmp
+original file
+Server/run.bat
+Server/lib/sub/auth.json
+Server/lib/sub/global.json
+Server/lib/data/clans.json
+Server/lib/data/dict_requests.json
+file_list.txt
+design-qa.md
+**/*.log
+.env
+.env.*
+!.env.example
+**/*.pem
+**/*.key
+**/*.pfx
+**/*.p12

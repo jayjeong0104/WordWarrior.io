@@ -1,0 +1,222 @@
+/**
+ * Rule the words! KKuTu Online
+ * Copyright (C) 2017 JJoriping(op@jjo.kr)
+ * 
+ * This program is free software: you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License as published by
+ * the Free Software Foundation, either version 3 of the License, or
+ * (at your option) any later version.
+ * 
+ * This program is distributed in the hope that it will be useful,
+ * but WITHOUT ANY WARRANTY; without even the implied warranty of
+ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ * GNU General Public License for more details.
+ * 
+ * You should have received a copy of the GNU General Public License
+ * along with this program. If not, see <http://www.gnu.org/licenses/>.
+ */
+
+#Top{
+	height: 60px;
+}
+#global-notice{
+	position: absolute;
+	left: 0;
+	right: 0;
+	top: 30px;
+	margin-top: 0;
+}
+#gn-content{
+	top: 0;
+}
+#Middle{
+	width: auto;
+	float: none;
+	margin-top: 80px;
+}
+#Bottom{
+	width: auto;
+	float: none;
+	margin: 0 auto;
+}
+#gwalli{
+	width: calc(100% - 40px);
+	max-width: 1280px;
+	margin: 20px auto 40px;
+	padding: 0 10px 20px;
+	box-sizing: border-box;
+}
+.gwalli-nav{
+	position: sticky;
+	top: 40px;
+	z-index: 2;
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	padding: 10px;
+	margin-bottom: 16px;
+	border-radius: 12px;
+	border: 1px solid #333333;
+	background-color: rgba(0, 0, 0, 0.4);
+}
+.gwalli-nav a{
+	display: inline-flex;
+	align-items: center;
+	padding: 6px 10px;
+	border-radius: 8px;
+	border: 1px solid #3c3c3c;
+	background-color: #2b2b2b;
+	color: #eeeeee;
+	text-decoration: none;
+	transition: transform 160ms ease, background-color 160ms ease, border-color 160ms ease;
+}
+.gwalli-nav a:hover{
+	background-color: #3a3a3a;
+	transform: translateY(-1px);
+}
+.gwalli-nav a:active{
+	background-color: #1f1f1f;
+	transform: translateY(0);
+}
+.gwalli-section{
+	margin: 16px 0;
+	padding: 16px;
+	border: 1px solid #333333;
+	border-radius: 12px;
+	background-color: rgba(0, 0, 0, 0.35);
+	scroll-margin-top: 70px;
+}
+.gwalli-section legend{
+	padding: 0 8px;
+	color: #e0e0e0;
+	font-weight: bold;
+}
+.gwalli-section-body{
+	display: flex;
+	flex-direction: column;
+	gap: 10px;
+}
+.gwalli-row{
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+.gwalli-row input,
+.gwalli-row select,
+.gwalli-row button{
+	margin: 0;
+}
+.gwalli-row button{
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+}
+.gwalli-row input,
+.gwalli-row select{
+	display: inline-flex;
+	min-width: 140px;
+	background-color: #111111;
+	color: #eeeeee;
+	border-color: #444444;
+}
+#db-password{ min-width: 180px; }
+#db-lang{ min-width: 120px; }
+#db-word,
+#db-theme,
+#shop-word,
+#user-id,
+#user-nick,
+#gamsi-id{
+	min-width: 200px;
+}
+.gwalli-new-word{
+	display: none;
+	flex-direction: column;
+	gap: 10px;
+	padding: 12px;
+	border: 1px solid #2f2f2f;
+	border-radius: 10px;
+	background-color: rgba(255, 255, 255, 0.04);
+}
+.gwalli-new-word.is-open{
+	display: flex;
+}
+#db-new-word.toggled{
+	background-color: #2a4f82;
+	border-color: #5d87c2;
+	color: #ffffff;
+}
+#new-word-id{
+	min-width: 220px;
+}
+#new-word-subject,
+#new-word-type{
+	min-width: 180px;
+}
+#new-word-definition{
+	min-height: 120px !important;
+}
+.gwalli-table{
+	overflow-x: auto;
+	border-radius: 10px;
+	border: 1px solid #2f2f2f;
+	background-color: rgba(10, 10, 10, 0.6);
+}
+.gwalli-table table{
+	width: 100%;
+	min-width: 720px;
+	border-collapse: collapse;
+}
+.gwalli-table thead td{
+	position: sticky;
+	top: 0;
+	color: #dddddd;
+	font-weight: bold;
+	background-color: #2a2a2a;
+	border-bottom: 1px solid #3a3a3a;
+}
+.gwalli-table td{
+	padding: 6px 8px;
+	border-bottom: 1px solid #2b2b2b;
+}
+.gwalli-table tbody tr:nth-child(even){
+	background-color: rgba(255, 255, 255, 0.03);
+}
+.gwalli-table tbody tr:hover{
+	background-color: rgba(255, 255, 255, 0.07);
+}
+.gwalli-table input{
+	box-sizing: border-box;
+	background-color: #0f0f0f;
+	color: #eeeeee;
+	border-color: #444444;
+}
+#gwalli textarea{
+	width: 100%;
+	min-height: 160px;
+	box-sizing: border-box;
+	background-color: #111111;
+	color: #dddddd;
+	border-color: #444444;
+}
+#kpw-html{
+	min-height: 120px;
+	font-family: Consolas, monospace;
+}
+#word-data{
+	display: flex;
+	flex-direction: column;
+	gap: 8px;
+}
+#wd-flag{
+	max-width: 120px;
+}
+@media (max-width: 900px){
+	#gwalli{
+		width: calc(100% - 20px);
+	}
+	.gwalli-nav{
+		position: static;
+	}
+}

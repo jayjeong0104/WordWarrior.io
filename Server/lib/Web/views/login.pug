@@ -1,0 +1,92 @@
+//-
+	Rule the words! KKuTu Online
+	Copyright (C) 2017 JJoriping(op@jjo.kr)
+	
+	This program is free software: you can redistribute it and/or modify
+	it under the terms of the GNU General Public License as published by
+	the Free Software Foundation, either version 3 of the License, or
+	(at your option) any later version.
+	
+	This program is distributed in the hope that it will be useful,
+	but WITHOUT ANY WARRANTY; without even the implied warranty of
+	MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+	GNU General Public License for more details.
+	
+	You should have received a copy of the GNU General Public License
+	along with this program. If not, see <http://www.gnu.org/licenses/>.
+//-
+	볕뉘 수정사항:
+	* Login 을 Passport 로 수행하기 위한 수정
+
+include module
+
+-
+	function loginText(key, fallback){ return LANG[key] ? L(key) : fallback; }
+	var providerIcons = { google: 'google', facebook: 'facebook', github: 'github', twitter: 'twitter', instagram: 'instagram', spotify: 'spotify', twitch: 'twitch', discord: 'comments', daldalso: 'moon-o', naver: 'leaf', kakao: 'comment', line: 'comment-o' };
+	var providerNames = { google: 'Google', facebook: 'Facebook', github: 'GitHub', twitter: 'Twitter', instagram: 'Instagram', spotify: 'Spotify', twitch: 'Twitch', discord: 'Discord', daldalso: 'Daldalso', naver: 'Naver', kakao: 'KakaoTalk', line: 'LINE' };
+	var providerCount = Object.keys(loginList || {}).length;
+
+doctype html
+html(lang=(locals.lang || 'en_US').replace('_', '-'))
+	head
+		title= L('title')
+		meta(charset='utf-8')
+		meta(name='viewport', content='width=device-width, initial-scale=1')
+		+PageHead()
+	body.login-page
+		span#locale= JSON.stringify(LANG)
+		main.login-screen(aria-labelledby='login-title')
+			div.login-shell
+				section.login-brand(aria-label='KKuTu')
+					div.login-brand-lockup
+						img.login-logo(src='/img/kkutu/short_logo.png', alt='KKuTu', width='200', height='100')
+						p.login-eyebrow= loginText('loginBrandTagline', 'WORD CHAIN ONLINE')
+					div.login-brand-copy
+						p.login-brand-heading= loginText('loginBrandHeading', 'Make your next move a word.')
+						p.login-brand-description= loginText('loginBrandDescription', 'Build a chain, discover new words, and play a round with friends.')
+					div.login-word-scene(aria-hidden='true')
+						div.login-scene-glow
+						div.login-word-tile.login-word-tile-first
+							span a
+							span u
+							span r
+							span o
+							span r
+							span a
+						div.login-word-arrow
+							i.fa.fa-arrow-right
+						div.login-word-tile.login-word-tile-next
+							span a
+							span c
+							span o
+							span r
+							span n
+						div.login-moremi
+							img(src='/img/kkutu/moremi/body_fla.png', alt='')
+							img(src='/img/kkutu/moremi/eye/inverteye.png', alt='')
+							img(src='/img/kkutu/moremi/mouth/laugh.png', alt='')
+							img(src='/img/kkutu/moremi/shoes/brown_oxford.png', alt='')
+							img(src='/img/kkutu/moremi/clothes/blackrobe.png', alt='')
+							img(src='/img/kkutu/moremi/head/brownbere.png', alt='')
+							img.login-moremi-hand(src='/img/kkutu/moremi/hand/lemoncandy.png', alt='')
+					p.login-brand-footer= loginText('loginFooter', 'Rule the words.')
+				section.login-card(aria-labelledby='login-title')
+					div.login-card-heading
+						div.login-heading-icon(aria-hidden='true')
+							i.fa.fa-key
+						h1#login-title= loginText('loginHeading', 'Sign in to KKuTu')
+						p.login-with= loginText('loginIntro', 'Choose an account to enter the lobby.')
+					if locals.text
+						p.login-context= L(locals.text)
+					div.login-buttons(class=providerCount <= 3 ? 'login-buttons-compact' : '')
+						each val in loginList
+							- var providerName = providerNames[val.vendor] || (LANG[val.displayName] ? L(val.displayName) : val.vendor);
+							- var providerLabel = loginText('loginContinueWith', 'Continue with {V1}').replace('{V1}', providerName);
+							a.login-provider.login-btn(href='/login/' + val.vendor, data-provider=val.vendor, style='--provider-color: ' + val.color + '; --provider-ink: ' + val.fontColor + ';')
+								div.login-provider-icon(aria-hidden='true')
+									i(class='fa fa-' + (providerIcons[val.vendor] || 'user'))
+								span.login-provider-label= providerLabel
+					p.login-account-note
+						i.fa.fa-bookmark-o(aria-hidden='true')
+						= ' ' + loginText('loginAccountNote', 'Use the same account to keep your progress.')
+					p.login-legal= loginText('loginLegal', 'You will continue to your chosen provider to sign in.')

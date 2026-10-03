@@ -1,0 +1,99 @@
+{
+  "capture_date": "2026-10-03",
+  "format": "JPEG",
+  "source": "Original Product Design in-app Browser screenshot responses",
+  "viewport": {
+    "width": 1280,
+    "height": 720
+  },
+  "device_pixel_ratio": 1,
+  "edited": false,
+  "native_ui_restored_before_capture": true,
+  "production_ui_changed_during_capture": false,
+  "native_clipping_retained_at_user_request": true,
+  "fictional_demo_data": true,
+  "provenance": "capture-provenance.json",
+  "gameplay": {
+    "mode": "EBT",
+    "mission": true,
+    "banletter": true,
+    "players": 12,
+    "chain": 13,
+    "mission_letter": "r",
+    "banned_letter": "x",
+    "background": "game_img/8e9a668b-3569-4fbb-990e-af576027c7d9.png",
+    "background_scope": "Local demo staging only"
+  },
+  "images": [
+    {
+      "file": "01-gameplay.jpg",
+      "width": 1280,
+      "height": 720,
+      "bytes": 117962,
+      "sha256": "9ab5ee931d237e83f34386d3ba0e9d3eacde771f044e4a5e24af15ae7d1a3b5e",
+      "raw_browser_sha256": "9ab5ee931d237e83f34386d3ba0e9d3eacde771f044e4a5e24af15ae7d1a3b5e",
+      "captured_at": "2026-10-03T21:50:16.981Z",
+      "capture_url": "http://127.0.0.1:4174/?view=game#102"
+    },
+    {
+      "file": "02-lobby.jpg",
+      "width": 1280,
+      "height": 720,
+      "bytes": 122216,
+      "sha256": "b3c7261473190d53c30a9a4cc5b69189f3774c3f9b41d1274026c8847b48438c",
+      "raw_browser_sha256": "b3c7261473190d53c30a9a4cc5b69189f3774c3f9b41d1274026c8847b48438c",
+      "captured_at": "2026-10-03T21:50:32.356Z",
+      "capture_url": "http://127.0.0.1:4174/?view=lobby"
+    },
+    {
+      "file": "03-ready-room.jpg",
+      "width": 1280,
+      "height": 720,
+      "bytes": 99537,
+      "sha256": "e3981b751b0b70cc4d9b87de288c421fd579804efbe9f82b5353eb7271ab62dd",
+      "raw_browser_sha256": "e3981b751b0b70cc4d9b87de288c421fd579804efbe9f82b5353eb7271ab62dd",
+      "captured_at": "2026-10-03T21:50:41.098Z",
+      "capture_url": "http://127.0.0.1:4174/?view=room#102"
+    },
+    {
+      "file": "04-inventory.jpg",
+      "width": 1280,
+      "height": 720,
+      "bytes": 94866,
+      "sha256": "cb1a4b55283aa20cad745e71ce476828282788a44bca436a94bdf80cad4955d0",
+      "raw_browser_sha256": "cb1a4b55283aa20cad745e71ce476828282788a44bca436a94bdf80cad4955d0",
+      "captured_at": "2026-10-03T21:50:59.072Z",
+      "capture_url": "http://127.0.0.1:4174/?view=inventory"
+    },
+    {
+      "file": "05-chest-opening.jpg",
+      "width": 1280,
+      "height": 720,
+      "bytes": 70698,
+      "sha256": "5a99772070715ce8b4bbd858d0b42552a98c0ff074eb7a8c6c8cf4a533a92d99",
+      "raw_browser_sha256": "5a99772070715ce8b4bbd858d0b42552a98c0ff074eb7a8c6c8cf4a533a92d99",
+      "captured_at": "2026-10-03T21:51:44.352Z",
+      "capture_url": "http://127.0.0.1:4174/?view=inventory"
+    },
+    {
+      "file": "06-store.jpg",
+      "width": 1280,
+      "height": 720,
+      "bytes": 125545,
+      "sha256": "b90dc2363e99abafa71e5790c15b473d9d6726d47218ef2fa8c4414d19e2b24a",
+      "raw_browser_sha256": "b90dc2363e99abafa71e5790c15b473d9d6726d47218ef2fa8c4414d19e2b24a",
+      "captured_at": "2026-10-03T21:53:16.323Z",
+      "capture_url": "http://127.0.0.1:4174/?view=shop"
+    },
+    {
+      "file": "07-login.jpg",
+      "width": 1280,
+      "height": 720,
+      "bytes": 85028,
+      "sha256": "30a123707ea822727f5932d23f8505cbbe67d4c7caa1ddf02b3ac60d4f9b17a8",
+      "raw_browser_sha256": "30a123707ea822727f5932d23f8505cbbe67d4c7caa1ddf02b3ac60d4f9b17a8",
+      "captured_at": "2026-10-03T21:52:52.933Z",
+      "capture_url": "http://127.0.0.1:4174/?view=login"
+    }
+  ]
+}

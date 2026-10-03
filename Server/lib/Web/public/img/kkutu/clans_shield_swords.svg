@@ -1,0 +1,46 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" aria-hidden="true">
+  <defs>
+    <linearGradient id="shieldEdge" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#d7e6ef"/>
+      <stop offset="0.5" stop-color="#a8becd"/>
+      <stop offset="1" stop-color="#6e8ea1"/>
+    </linearGradient>
+    <linearGradient id="shieldWood" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8d3c36"/>
+      <stop offset="1" stop-color="#50211f"/>
+    </linearGradient>
+    <linearGradient id="steel" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#eef6ff"/>
+      <stop offset="0.5" stop-color="#bfd1de"/>
+      <stop offset="1" stop-color="#8da4b7"/>
+    </linearGradient>
+    <linearGradient id="gold" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#ffe38a"/>
+      <stop offset="0.5" stop-color="#f4ba43"/>
+      <stop offset="1" stop-color="#bd7f1f"/>
+    </linearGradient>
+    <linearGradient id="grip" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#8d6237"/>
+      <stop offset="1" stop-color="#5a3b21"/>
+    </linearGradient>
+  </defs>
+
+  <path d="M32 3L56 12V30c0 15-11 26-24 31C19 56 8 45 8 30V12Z" fill="url(#shieldEdge)" stroke="#294b5e" stroke-width="1.6" />
+  <path d="M32 8L51 15v14c0 12-9 21-19 26-10-5-19-14-19-26V15Z" fill="url(#shieldWood)" stroke="#2f1f1d" stroke-width="1.4" />
+
+  <g transform="translate(26 33) rotate(-38)">
+    <rect x="-2.1" y="-22" width="4.2" height="28" rx="1.1" fill="url(#steel)" stroke="#627b8f" stroke-width="1" />
+    <path d="M-2.1-22L0-28l2.1 6Z" fill="url(#steel)" stroke="#627b8f" stroke-width="1" />
+    <rect x="-7.2" y="6.2" width="14.4" height="3.2" rx="1.4" fill="url(#gold)" stroke="#946218" stroke-width="1" />
+    <rect x="-1.4" y="9.4" width="2.8" height="8.2" rx="1.2" fill="url(#grip)" stroke="#3f2916" stroke-width="1" />
+    <path d="M0 17.6c2.6 0 4 1.7 4 3.3S2.6 24.2 0 24.2-4 22.5-4 20.9s1.4-3.3 4-3.3z" fill="url(#gold)" stroke="#946218" stroke-width="1" />
+  </g>
+
+  <g transform="translate(38 33) rotate(38)">
+    <rect x="-2.1" y="-22" width="4.2" height="28" rx="1.1" fill="url(#steel)" stroke="#627b8f" stroke-width="1" />
+    <path d="M-2.1-22L0-28l2.1 6Z" fill="url(#steel)" stroke="#627b8f" stroke-width="1" />
+    <rect x="-7.2" y="6.2" width="14.4" height="3.2" rx="1.4" fill="url(#gold)" stroke="#946218" stroke-width="1" />
+    <rect x="-1.4" y="9.4" width="2.8" height="8.2" rx="1.2" fill="url(#grip)" stroke="#3f2916" stroke-width="1" />
+    <path d="M0 17.6c2.6 0 4 1.7 4 3.3S2.6 24.2 0 24.2-4 22.5-4 20.9s1.4-3.3 4-3.3z" fill="url(#gold)" stroke="#946218" stroke-width="1" />
+  </g>
+</svg>

@@ -1,0 +1,2128 @@
+energy
+gain
+angular frequency
+snow water equivalent
+cosmic density
+q value
+relative molecular mass
+elliptic flow
+global standard stratigraphic age
+heat capacity rate
+molecular weight cut-off
+oxygen permeability
+quantum correlation
+stationary orbit
+transactions per second
+transepidermal water loss
+stimulus
+ozone depletion potential
+mass-to-charge ratio
+angular resolution
+critical density
+helicity
+dielectric strength
+effective potential
+water balance
+cycle threshold
+delta-v
+hatta number
+lambda point
+environmental factor
+electron temperature
+seismic moment
+specific storage
+swath width
+charge carrier density
+proper acceleration
+pseudotensor
+spectral flatness
+lande factor
+antenna gain
+q10
+areostationary orbit
+zenithal hourly rate
+film speed
+acceleration
+shearing
+mean radius
+momentum density
+intrinsic brightness
+area under the curve
+wignerseitz radius
+proportional limit
+kovats retention index
+parachor
+spacetime interval
+retarded time
+liquid water content
+isotope fractionation
+annual fuel utilization efficiency
+continuous spectrum
+specific orbital energy
+seasonal energy efficiency ratio
+torsion constant
+cytherocentric orbit
+thermal death time
+quantum capacitance
+carbonate hardness
+absolute molar mass
+angular momentum of light
+saarloos wolfdog
+gravity
+doppler effect
+photoelectric effect
+metamagnetism
+grain boundary sliding
+tea leaf paradox
+relaxation
+smear
+tubular pinch effect
+redshift-space distortions
+weak localization
+sonic black hole
+thomson effect
+teapot effect
+magnetic saturation
+turbulence
+sonoluminescence
+talbot effect
+ibex ribbon
+quantum superabsorption
+gravitational aharonov-bohm effect
+spacetime
+population inversion
+vibration
+helimagnetism
+electric-field screening
+critical opalescence
+cavitation
+titiusbode law
+nuclear magnetic resonance
+aharonovcasher effect
+annihilation radiation
+gravitational force
+deformation
+non-linear inverse compton scattering
+atlantification of the arctic
+glugging
+electronic band
+miyake event
+magnetic diffusion
+buoyancy
+bridge scour
+buttered toast phenomenon
+ion current
+electromagnetically induced acoustic noise
+curved space
+dufour effect
+earth materials
+electron-cloud effect
+electrovibration
+flexoelectricity
+hanbury brown and twiss effect
+head shadow
+inverse faraday effect
+compton effect
+surface tension
+van der waals radius
+brownian motion
+foucault pendulum
+shielding effect
+melting-point depression
+resal effect
+shadow bands
+frank-read source
+peltier effect
+capillary pressure
+snell's window
+lamella
+rehbinder effect
+quantum entanglement
+supercooling
+sisyphus cooling
+total internal reflection
+abrahamlorentz force
+grain boundary strengthening
+casimir effect
+depletion region
+sunspot
+aspiration
+photon diffusion
+shock
+volume contraction
+size effect on structural strength
+sleep architecture
+taylor column
+sympathetic resonance
+advection
+cooperativity
+stark effect
+reverberation
+aharonovbohm effect
+feshbach resonance
+shubnikovde haas effect
+fermipastaulamtsingou problem
+striation
+nuclear acoustic resonance
+relativistic doppler effect
+einsteinde haas effect
+dielectric absorption
+thermophoresis
+cooper pair
+wing car
+contact bounce
+reactive centrifugal force
+vapor cone
+matteucci effect
+guillemin effect
+snowpack
+joule heating
+combustion instability
+dresselhaus effect
+schwinger effect
+superheating
+microwave auditory effect
+leidenfrost effect
+wave shoaling
+coulomb blockade
+neutrino oscillation
+jupiter barrier
+original antigenic sin
+proximity effect
+mictomagnetism
+peps effect
+pouillet effect
+premelting
+rain fade
+thermal conduction
+electromagnetic interaction
+ground effect
+stimulated emission
+biefeldbrown effect
+electrostatic induction
+newton's rings
+length contraction
+skin effect
+gibbonshawking effect
+josephson effect
+yield
+incandescence
+portevinle chatelier effect
+circular dichroism
+pockels effect
+photobleaching
+nuclear overhauser effect
+neutron activation
+coalescence
+marangoni effect
+oxygen enhancement ratio
+petkau effect
+segregation
+quantum fluctuation
+iridium anomaly
+sporadic e propagation
+grain growth
+sachswolfe effect
+chimney effect
+threshold voltage
+wigner effect
+twisted nematic field effect
+photophoresis
+tunnel magnetoresistance
+sound propagation
+hot chocolate effect
+crazing
+kondo effect
+electromagnetic induction
+fragmentation
+backscatter
+ostwald ripening
+paschenback effect
+density anomaly
+pinch effect
+diffusion damping
+conservation of energy
+general relativity
+newton's first law
+cassie's law
+dermott's law
+newton's third law of motion
+special relativity
+gauss's law
+general covariance
+newton's law of cooling
+whole number rule
+kepler orbit
+cassini's laws
+equivalence principle
+joule's laws
+ohm's law
+redshift
+ampere's circuital law
+planck's law
+clausiusmossotti relation
+hubblelemaitre law
+bernoulli's principle
+planckeinstein relation
+neumann's law
+rayleighplesset equation
+stokes' law of sound attenuation
+young temperament
+archimedes' principle
+horror vacui
+bondi accretion
+coulomb damping
+law of the wall
+moffat distribution
+rayleighjeans law
+fick's laws of diffusion
+hagenpoiseuille equation
+faraday's law of induction
+kirchhoff's circuit laws
+lenz's law
+waveparticle duality
+pascal's law
+angular correlation function
+past hypothesis
+kepler's first law
+kepler's second law
+kepler's third law
+ice rules
+jeans equations
+kirchhoff's current law
+kirchhoff's voltage law
+lighthill's eighth power law
+zeldovich approximation
+diffusion
+newton's law of universal gravitation
+hooke's law
+communicating vessels
+kepler's laws of planetary motion
+coulomb's law
+biot-savart law
+gladstonedale relation
+jurin's law
+timetemperature superposition
+wien's displacement law
+beerlambert law
+mohrcoulomb theory
+law of constancy of interfacial angles
+byerlee's law
+cauchy momentum equation
+bloch theorem
+stevin's law
+kozenycarman equation
+curie's law
+de vaucouleurs' law
+lambert's cosine law
+power-law fluid
+sommerfeldkossel displacement law
+vis-viva equation
+lorentzlorenz equation
+kepler's equation
+moseley's law
+wiedemannfranz law
+kelvin equation
+younglaplace equation
+stalagmometric method
+theorem of corresponding states
+kirchhoff's law of thermal radiation
+hess's law
+faraday's laws of electrolysis
+wien approximation
+nernstplanck equation
+margoluslevitin theorem
+constitutive equation
+plateau's laws
+chezy formula
+young's modulus
+malus' law
+rayleigh law
+conservation of momentum
+ampere's force law
+newton's second law of motion for constant mass
+darcy's law
+hund's rules
+theory of impetus
+verdoorn's law
+law of dilution
+buys ballot's law
+landauer's principle
+stefan-boltzmann law
+gauss's law for magnetism
+duanehunt law
+gustafson's law
+fresnel number
+nernst equation
+barometric formula
+raoult's law
+equipartition theorem
+stokes' law
+fresnel equations
+blueshift
+paschen's law
+geigernuttall law
+rayleigh length
+unruh effect
+betz's law
+einstein field equations
+inverse-square law
+bragg's law
+faraday effect
+light-year
+speed of light in vacuum
+boltzmann constant
+elementary charge
+newtonian gravitational constant
+avogadro constant
+molar gas constant
+faraday constant
+fine-structure constant
+permittivity of vacuum
+hartree energy
+planck mass
+bohr radius
+first radiation constant
+second radiation constant
+first radiation constant for spectral radiance
+josephson constant
+proton mass
+electron gyromagnetic ratio
+rydberg constant
+planck temperature
+planck time
+planck length
+chandrasekhar limit
+stefan-boltzmann constant
+impedance of vacuum
+von klitzing constant
+speed of gravity
+solar constant
+cosmological constant
+electronvolt
+standard atmosphere
+henry's law constant
+reduced planck constant
+tolmanoppenheimervolkoff limit
+nuclear magneton
+gaussian gravitational constant
+magnetic constant
+planck constant
+bohr magneton
+loschmidt constant
+cryoscopic constant
+planck energy
+classical electron radius
+magnetic flux quantum
+proton-to-electron mass ratio
+carter constant
+neutron magnetic dipole moment
+electron mass
+standard acceleration of free fall
+electron magnetic dipole moment
+conductance quantum
+proton magnetic dipole moment
+planck acceleration
+avogadro number
+einstein's constant
+angstrom star
+von karman constant
+unified atomic mass constant
+molar mass constant
+pion decay constant
+proton gyromagnetic ratio
+coulomb's constant
+saarland
+thomson
+amagat
+parity
+hydrophilic-lipophilic balance
+molar equivalent
+revolutions per minute
+erlang
+glycemic index
+octane rating
+dioptre
+dollar
+homer
+schoenus
+lines per inch
+flashes per minute
+mantal
+r-value
+steric number
+quinaria
+yule's q
+whey
+brake horsepower per cubic centimeter
+windischkolbach unit
+bacon number
+forpet
+bloom
+saybolt universal second
+olf
+solar neutrino unit
+international unit
+solar luminosity
+cent
+tumen
+water retention curve
+megapixel
+colony-forming unit
+centigon
+milligon
+thread count
+entropy unit
+bing
+octon
+surface imperfections
+osmole
+lacunarity
+years of potential life lost
+x-height
+high-power field
+productivity
+livestock grazing comparison
+barrer
+passenger car equivalent
+dobson unit
+insulin index
+phon
+california postmile
+gallon
+instructions per second
+hundred
+flops
+full load hour
+melt flow index
+dbc
+living planet index
+proof
+sokha
+animal unit
+billion cubic metres of natural gas
+zakat al-fitr
+step
+lot
+unit of alcohol
+metabolic equivalent
+watt peak
+buckingham
+passengers per hour per direction
+page
+cumulative incidence
+block
+cronbach's alpha
+toxic equivalency factor
+daraf
+darcy
+darwin
+cover
+hawking index
+miles per gallon
+tonne-kilometre
+emission intensity
+decipol
+eotvos
+micromort
+field capacity
+international system of electrical and magnetic units
+full-time equivalent
+mired
+mips
+degree day
+capacity utilization
+vitasti
+one-third octave
+dbi
+persoz hardness
+pixel
+literacy rate
+centimorgan
+dots per inch
+carbohydrate counting
+okta
+iops
+enantiomeric excess
+words per minute
+number needed to treat
+vector group
+international bittering units scale
+hubble's constant
+sone
+cetane number
+ligand cone angle
+dgh
+rate equation
+strength of ships
+sabin
+octave band
+wolf number
+brewster
+crown closure
+decibel watt
+qutrit
+speech interference level
+kosten unit
+dbz
+bodansky unit
+cellulase unit
+copper units of pressure
+damage per second
+dirichlet's energy
+dots per centimetre
+dry sheep equivalent
+e-government unit
+expansion ratio
+pari
+quarter
+perm
+flik
+flick
+friedman unit
+gallon per watt-hour
+grain per gallon
+gross ton mile
+jow
+leaf wetness
+equivalent weight
+milk equivalent
+mithkal
+number needed to vaccinate
+passenger miles per gallon
+passeree
+penrig
+plaque-forming unit
+printer point
+protein nitrogen unit
+removal units
+pixels per inch
+lambda
+mem
+kesitah
+metre water equivalent
+solar flux unit
+byzantine units of measurement
+prism dioptre
+helen
+bag
+snowden
+score
+tog
+mouse unit
+hubble length
+a-weighting
+sana lamjel
+siemens mercury unit
+strontium unit
+surface feet per minute
+test weight
+thermal dose unit
+total acid number
+townsend
+twaddell scale
+twists per inch
+vrpm
+welsh units
+double-charm tetraquark
+pomeron
+forty five year old
+perfect twelfth
+diminished twelfth
+augmented twelfth
+diminished third
+minor ninth
+major ninth
+diminished ninth
+augmented ninth
+perfect octave
+eighteen years or older
+diesis
+schisma
+diaschisma
+kleisma
+major limma
+ragisma
+semicomma
+septimal comma
+septimal diesis
+septimal kleisma
+septimal quarter tone
+septimal semicomma
+septimal sixth tone
+st interval in tet
+rd interval in tet
+th interval in tet
+nd interval in tet
+minor tenth
+major tenth
+diminished tenth
+augmented tenth
+perfect prime
+increasing the retirement age
+min entropy
+perfect eleventh
+diminished eleventh
+augmented eleventh
+minor thirteenth
+major thirteenth
+diminished thirteenth
+augmented thirteenth
+minor fourteenth
+major fourteenth
+diminished fourteenth
+augmented fourteenth
+perfect fifteenth
+diminished fifteenth
+augmented fifteenth
+center of mass of the earth
+cadet
+tuvaluan dollar
+ariary
+leone
+samoan tala
+tanzanian shilling
+cape verdean escudo
+fijian dollar
+djiboutian franc
+seychellois rupee
+sri lankan rupee
+solomon islands dollar
+ugandan shilling
+tunisian dinar
+somali shilling
+georgian lari
+tongan paanga
+honduran lempira
+peso
+congolese franc
+rwandan franc
+lilangeni
+euro
+united states dollar
+yen
+philippine peso
+pound sterling
+swiss franc
+danish krone
+parthian coins
+eastern caribbean dollar
+manx pound
+hong kong dollar
+kyrgyz som
+pound scots
+cny
+russian ruble
+gibraltar pound
+rupiah
+forint
+guadeloupe franc
+tripolitanian lira
+zambian kwacha
+indian rupee
+guatemalan peso
+hryvnia
+artsakh dram
+north korean won
+portuguese dinheiro
+swedish krona
+zoty
+albanian lek
+hyperpyron
+armenian dram
+czech koruna
+new shekel
+icelandic krona
+romanian leu
+bitcoin
+norwegian krone
+quantum money
+groschen
+thaler
+malaysian ringgit
+pfennig
+nakfa
+serbian dinar
+bulgarian lev
+turkish lira
+liechtenstein frank
+brazilian real
+tuvan aksa
+kazakhstani tenge
+macedonian denar
+baht
+convertible mark
+moldovan leu
+simec
+rand
+mill
+vatican lira
+mongolian togrog
+ghana cedi
+botswana pula
+denarius
+pakistani rupee
+sultani
+iranian rial
+libyan dinar
+singapore dollar
+faroese krona
+cfa franc
+dinar
+vietnamese ong
+iraqi dinar
+kuwaiti dinar
+sao tome and principe dobra
+bahamian dollar
+barbadian dollar
+bangladeshi taka
+egyptian pound
+afghani
+argentine convertible peso
+algerian dinar
+saudi riyal
+tajikistani somoni
+chilean peso
+lao kip
+moroccan dirham
+united arab emirates dirham
+kwanza
+boliviano
+mozambican metical
+kina
+transnistrian ruble
+cuban peso
+ngultrum
+bahraini dinar
+kyat
+lebanese pound
+surinamese dollar
+won
+namibian dollar
+kenyan shilling
+dalasi
+nepalese rupee
+naira
+jordanian dinar
+gourde
+nuevo sol
+riel
+bir
+brunei dollar
+qatari riyal
+maldivian rufiyaa
+mauritanian ouguiya
+zlatnik
+nicaraguan cordoba
+quetzal
+paraguayan guarani
+vanuatu vatus
+hungarian pengo
+loti
+new taiwan dollar
+uruguayan peso
+jamaican dollar
+panamanian balboa
+bermudian dollar
+malawian kwacha
+mauritian rupee
+guyanese dollar
+guinean franc
+ticinese franco
+cfp franc
+khaleeji
+solidus
+aruban florin
+burundian franc
+south vietnamese ong
+syrian pound
+yemeni rial
+macanese pataca
+trinidad and tobago dollar
+costa rican colon
+dominican peso
+liberian dollar
+south sudanese pound
+colombian peso
+zurich thaler
+equatorial guinean peseta
+guernsey pound
+australian dollar
+rentenmark
+straits dollar
+comorian franc
+sudanese pound
+omani rial
+ecu
+belize dollar
+honduran peso
+livre parisis
+austro hungarian krone
+saxon thaler
+austro hungarian gulden
+cayman islands dollar
+sechsling
+slovak koruna
+falkland islands pound
+salvadoran real
+yugoslav dinar
+saint helena pound
+as
+poltura
+aes grave
+obol
+african monetary union
+akce
+sardinian lira
+friedrich d or
+kronenthaler
+saar mark
+aureus
+german east african rupie
+azerbaijani manat
+turkmenistan new manat
+denga
+uzbekistani som
+south korean hwan
+krakow zoty
+serbian perper
+cook islands dollar
+ecuadorian centavo coins
+netherlands antillean guilder
+french denier
+siliqua
+vereinsthaler
+angolan escudo
+angolan real
+angolan angolar
+sextans
+saar franc
+german mark
+conventionsthaler
+east timor centavo coins
+norwegian speciedaler
+westphalian thaler
+south german gulden
+alderney pound
+antoninianus
+chilean escudo
+paraguayan real
+north yemeni rial
+argenteus
+japanese government issued dollar in south east asia
+armenian rouble
+ambrosino
+confederate states dollar
+manchukuo yuan
+danzig gulden
+bohemian and moravian koruna
+taiwanese yen
+japanese military yen
+old taiwan dollar
+hungarian adopengo
+mongolian dollar
+convertible peso
+liard
+somaliland shilling
+caribbean guilder
+gold coast ackey
+cistophorus
+eco
+terra
+montenegrin perper
+baiocco
+salvadoran colon
+bes
+albus
+mariengroschen
+riau rupiah
+netherlands indies guilder
+b yen
+central african cfa franc
+biafran pound
+west african cfa franc
+korean yen
+new guinean mark
+hungarian korona
+prussian thaler
+seborga luigino
+afghan rupee
+rai stone
+guinea
+east african rupee
+schwyz frank
+british west indies dollar
+spade money
+east african florin
+peso moneda nacional
+maltese scudo
+bukharan tenga
+hacksilver
+shahi
+french indochinese piastre
+frizatik
+monegasque franc
+kiribati dollar
+angel
+sammarinese lira
+knife money
+rwanda and burundi franc
+tetradrachm
+canadian dollar
+danzig thaler
+basel thaler
+berne thaler
+hyderabadi rupee
+berne frank
+geneva thaler
+basel frank
+planck density
+gram per litre
+degree brix
+kilogram per cubic metre
+baume degree
+degree plato
+gram per cubic centimetre
+sigma t
+degree balling
+milligram per cubic metre
+gram per cubic metre
+gram per decilitre
+milligram per decilitre
+milligram per litre
+gram per millilitre
+picogram per litre
+microgram per cubic centimetre
+kilogram per cubic decimetre
+yoctogram per litre
+zeptogram per litre
+attogram per litre
+femtogram per litre
+microgram per litre
+centigram per litre
+decigram per litre
+decagram per litre
+hectogram per litre
+kilogram per litre
+megagram per litre
+gigagram per litre
+teragram per litre
+petagram per litre
+exagram per litre
+zettagram per litre
+yottagram per litre
+gram per yoctolitre
+gram per zeptolitre
+gram per attolitre
+gram per femtolitre
+gram per picolitre
+gram per nanolitre
+gram per microlitre
+gram per centilitre
+gram per decalitre
+gram per hectolitre
+gram per kilolitre
+gram per megalitre
+gram per gigalitre
+gram per teralitre
+gram per petalitre
+gram per exalitre
+gram per zettalitre
+gram per yottalitre
+tonne per cubic metre
+gram per cubic decimetre
+megagram per cubic metre
+microgram per cubic metre
+kilogram per cubic centimetre
+pound per cubic foot
+pound per cubic inch
+pound per cubic yard
+slug per cubic foot
+degree api
+watt
+metric horsepower
+volt ampere
+var
+planck power
+tax horsepower
+bollard pull
+poncelet
+microwatt
+imperial horsepower
+negawatt power
+milliwatt
+kilowatt
+ton of refrigeration
+airwatt
+nominal horsepower
+megavolt ampere
+gigawatt
+indicated horse power
+megawatt
+btuh
+terawatt
+kilovolt ampere
+attowatt
+yoctowatt
+zeptowatt
+femtowatt
+picowatt
+nanowatt
+centiwatt
+deciwatt
+decawatt
+hectowatt
+petawatt
+exawatt
+zettawatt
+solothurn frank
+sucre
+st gallen thaler
+luzern frank
+solothurn thaler
+west irian rupiah
+decussis
+spesmilo
+aes signatum
+victoriatus
+aes rude
+spanish maravedi
+quadrans
+quinarius
+semis
+joachimsthaler
+trachy
+east african shilling
+grosso
+new brunswick dollar
+reunion franc
+katangese franc
+weipfennig
+eritrean tallero
+parsi
+sycee
+chechen naxar
+cape verdean real
+greek phoenix
+algerian budju
+roman scudo
+plate money
+kopeck
+soldo
+transcaucasian ruble
+tremissis
+iraqi swiss dinar
+new zealand dollar
+moidore
+spanish escudo
+gigliato
+prutah
+tari
+groat
+iranian toman
+meiner groschen
+silver as an investment
+kiautschou dollar
+catalan peseta
+sumatran dollar
+palladium as an investment
+portuguese real
+danish west indian daler
+polish marka
+kutch kori
+new hebrides franc
+tibetan srang
+maiorina
+nova scotian dollar
+polushka
+ural franc
+kerenka
+abkhazian apsar
+portuguese timorese pataca
+westphalian frank
+german ostmark
+moroccan franc
+ichibuban
+sahrawi peseta
+netherlands new guinean gulden
+german ostruble
+riffan mamoun
+italian east african lira
+italian somaliland rupia
+italian somaliland somalo
+papal lira
+aksumite currency
+luccan franc
+fribourg frank
+aargau frank
+british north borneo dollar
+danish rigsdaler
+italian somaliland lira
+french indian rupee
+sovznak
+hawaiian dollar
+austrian krone
+south wind
+east wind
+west wind
+sefyr
+north wind
+northeast wind
+southeast wind
+southwest wind
+northwest wind
+sideshore
+montee du gourguillon
+montee des accoules
+dyne steel incline
+montee de la sur vially
+montee du petit versailles
+montee victor hugo
+montee cardinal decourtray
+montee du cardo
+montee saint laurent
+montee des genovefains
+montee jean marie verne
+montee de la rayana
+montee du clapotage
+montee des palmiers
+montee des abimes
+montoir des crepillonnes
+montee des crottes
+montee des cedres
+montee des lilas
+montee cardinal louis marie bille
+montee des carmes dechausses
+montee de chalemont
+montee des iris
+montee des usines
+montee pichou
+yottawatt
+kilowatt thermal
+joule per second
+boiler horsepower
+electric horsepower
+water horsepower
+kilogram square metre per cubic second
+erg per second
+brake horsepower
+kilovar
+megavar
+kilojoule per second
+petajoule per annum
+kilowatt hour per year
+watt electrical
+watt thermal
+pirate ninja
+donkey power
+shaft horsepower
+penny
+stotinka
+israeli agora
+shilling
+avo
+hong kong one mil coin
+chhertum
+farthing
+lipa
+re
+pesewa
+eurocent
+jiao
+sente
+luma
+butut
+qindarka
+pya
+saudi halalah
+ore
+chinese fen
+quartarola
+hao
+finnish penni
+satoshi
+fuang
+mbtc
+afghan pul
+copeck
+tyiyn
+lithuanian cent
+negenmanneke
+centime libre
+sudaysi
+korean bun
+haler
+halier
+wei
+laos att
+millibitcoin
+ssling
+exametre
+metre
+centimetre
+millimetre
+micrometre
+nanometre
+picometre
+decimetre
+femtometre
+kilometre
+hectometre
+decametre
+gigametre
+megametre
+yoctometre
+terametre
+zeptometre
+zettametre
+petametre
+attometre
+yottametre
+ronnametre
+rontometre
+swedish riksdaler
+burmese rupee
+independent state of croatia kuna
+malayan dollar
+paraguayan peso
+quattrino
+portuguese indian rupia
+portuguese indian escudo
+cambodian tical
+french equatorial african franc
+tibetan tangka
+new caledonian franc
+french polynesian franc
+som
+ukrainian shah
+nasry
+iranian qiran
+newfoundland dollar
+sarawak dollar
+cumal
+skilling
+grzywna
+tunisian rial
+tunisian franc
+liechtenstein krone
+yugoslav krone
+scyphate
+cambodian franc
+republika srpska dinar
+biatec
+pim weight
+sao tome and principe escudo
+french west african franc
+southern rhodesian pound
+malawian pound
+zanzibari rupee
+rhodesia and nyasaland pound
+algerian franc
+krajina dinar
+livre tournois
+moldovan cupon
+korean yang
+japanese mon
+ortug
+martinique franc
+ecuadorian real
+ecuadorian peso
+greenlandic krone
+colombian real
+ryo
+europa
+fals
+fels
+milanese scudo
+gros
+kharouba
+coins of turkey
+coins of the helvetic republic
+moroccan rial
+sicilian piastra
+madras fanam
+zanzibari ryal
+azorean real
+togolese franc
+venezolano
+agontano
+am lira
+texas dollar
+british columbia dollar
+prince edward island dollar
+antigua dollar
+grenadan dollar
+nevisian dollar
+saint kitts dollar
+saint vincent dollar
+saint lucia dollar
+tobagan dollar
+trinidadian dollar
+mauritian dollar
+graubunden frank
+appenzell frank
+glarus frank
+giulio
+assignation ruble
+wurttemberg gulden
+peruvian inca
+parman lira
+genoese lira
+luccan pound
+tuscan pound
+saint lucia livre
+german south west african mark
+coinage of the republic of venice
+korean mun
+ionian obol
+peruvian peseta
+costa rican peso
+argentine peso ley
+argentine peso moneda corriente
+puerto rican peso
+salvadoran peso
+venezuelan peso
+ionian gazeta
+argentine real
+norwegian rigsdaler
+danish west indian rigsdaler
+polish rubel
+danish indian rupee
+ryal
+palestine pound
+hesse kassel thaler
+hanoverian thaler
+modenese thaler
+bremen thaler
+khwarazmi tenga
+vietnamese cash
+azerbaijani ruble
+franga
+balysh
+bermudian pound
+boratynka
+broad
+south african pound
+pengo of the allied occupation zone
+schwyz gulden
+st gallen frank
+geneva franc
+luzern gulden
+won of the red army command
+hamburg mark
+portuguese guinean real
+saint pierre and miquelon franc
+danzig mark
+niue dollar
+pitcairn islands dollar
+don ruble
+gold rouble
+reich karbovanets
+kolkhuri tetri
+fiume krone
+kuna
+jamaican pound
+lithuanian long currency
+lombardy venetia pound
+luxembourgian livre
+south west african mark
+money of litzmannstadt ghetto
+mozambican real
+soviet coins
+coins of sindi
+italian lira
+commemorative coins of the soviet union
+penning
+french camerounian franc
+peruvian libra
+piedmontese scudo
+sao tome and principe real
+number average molar mass
+mass average molar mass
+z average molar mass
+viscosity average molar mass
+mars close approach to earth
+renewable energy
+grand unification energy
+landau pole
+electroweak scale
+potential energy of protein
+supersymmetry breaking scale
+integrity energy
+equivalent temperature
+absolute hot
+draper point
+bioheat transfer
+hagedorn temperature
+frozen
+decomposition point
+bio temperature
+physiological equivalent temperature
+reaction half life
+l s
+hydrophilic lipophilic balance
+aerobic threshold
+signature
+colony forming unit
+cavalleria
+tex
+clausius
+quectometre
+quettametre
+deci tex
+degree
+radian
+gradian
+arcminute
+turn
+tierce
+arcsecond
+milliradian
+arcquart
+perigon
+segons
+milliarcsecond
+attoradian
+moa
+petaradian
+gigaradian
+yottaradian
+kiloradian
+megaradian
+centiradian
+deciradian
+angular mil
+microradian
+nanoradian
+femtoradian
+picoradian
+decaradian
+hectoradian
+teraradian
+zettaradian
+zeptoradian
+yoctoradian
+exaradian
+microarcsecond
+minute of right ascension
+second of right ascension
+hour of right ascension
+rhumb
+knot
+kilometre per hour
+metre per second
+mile per hour
+foot per second
+bubnoff unit
+kilometre per second
+inch per second
+metre per hour
+centimetre per second
+metre per minute
+foot per minute
+millimetre per minute
+astronomical unit per year
+millimetre per year
+metre per year
+decimetre per second
+yoctometre per second
+zeptometre per second
+attometre per second
+femtometre per second
+picometre per second
+nanometre per second
+micrometre per second
+millimetre per second
+decametre per second
+hectometre per second
+megametre per second
+gigametre per second
+terametre per second
+petametre per second
+exametre per second
+zettametre per second
+yottametre per second
+centimetre per day
+metre per day
+metre per yoctosecond
+metre per zeptosecond
+metre per attosecond
+metre per femtosecond
+metre per picosecond
+metre per nanosecond
+metre per microsecond
+metre per millisecond
+metre per centisecond
+metre per decisecond
+metre per decasecond
+metre per hectosecond
+metre per kilosecond
+metre per megasecond
+metre per gigasecond
+metre per terasecond
+metre per petasecond
+metre per exasecond
+hejaz saudi riyal
+riyal of qatar and dubai
+ruble zone
+cocos islands rupee
+said rial
+sardinian scudo
+geneva genevoise
+siamese tical
+korce skender
+tuscan florin
+vlore frank
+korce franc
+harbin ruble
+mengjiang yuan
+japanese government issued philippine peso
+angevin pound
+coins and postage stamps of sealand
+austrian netherlands kronenthaler
+baden gulden
+banknotes of the czechoslovak koruna
+basilikon
+bavarian gulden
+ottoman lira
+ceiniog
+cochinchina piastre
+dominican franco
+wu zhu
+emergency circulating notes
+falus
+real de valencia
+zurich frank
+gaucho
+gibraltar real
+greenlandic rigsdaler
+guadeloupe livre
+haitian livre
+mvdol
+hesse kassel vereinsthaler
+tyrian shekel
+cuarto
+dena
+dolar muc
+single south american currency
+sasanian coinage
+tokugawa coinage
+usmani
+mangr
+gazi
+japanese government issued rupee in burma
+cash
+kelantanese dinar
+kushan coinage
+lecop
+leprosy colony money
+made beaver
+umayyad dinar
+mexican real
+mogadishu currency
+thurgau frank
+nepalese mohar
+new design series
+new france livre
+north carolina confederate currency
+north vietnamese ong
+nova scotian pound
+unterwalden frank
+orange free state pound
+cronbach s alpha
+fibre year
+ton of coal equivalent
+tonne kilometre
+unit of volume of cereal grain
+floating point operation
+full time equivalent
+henry s law constant
+alphabet
+martindale
+micronaire
+degree of concentration
+partial pressure value
+author s sheet
+nephelometric turbidity unit
+hubble s constant
+portion
+revision soul
+bioconcentration factor
+concrete compression strength
+api unit
+surface resistance
+jtu
+bedding modulus
+hemoglobin value
+yarn number
+speaker coverage angle
+drop
+craniofacial angle
+x height
+high power field
+cartier degree
+degree centigrade
+gamma
+normal
+screen line
+r value
+point
+schmerber
+yule s q
+intracerebral pathogenicity index
+hartkorn
+accumulated thermal unit
+zakat al fitr
+count per litre
+dirichlet s energy
+e government unit
+car equivalent unit
+penalty in minutes
+gallon per watt hour
+gigaflops
+bit per pixel
+peruvian real
+uri frank
+schaffhausen frank
+south korean won
+stavraton
+tanga
+tin ingot
+tien
+tong bei
+ven
+vermont copper
+korean won
+yarmaq
+baiza
+rigsort
+polish florint
+great qing treasure note
+espadim
+banknotes of the central reserve bank of china
+silver tael
+sichuan rupee
+huanqian
+tianming tongbao
+sure han ni jiha
+chinese national currency
+gold dinar
+bon
+saigo satsu
+seko tsuho
+tenpo tsuho
+meiji tsuho
+minbusho satsu
+chinese gold yuan
+paolo
+masmodina
+beslik
+tem
+nogata
+almoravid dinar
+bani khalid dinar
+mon buvenetik
+noven
+geonwonjungbo
+medieval obol
+vaquetas
+kacidhja
+jiangnan yuan
+hona
+occupation reichsmark
+new turkish lira
+spanish dollar
+ancient drachma
+vaud franc
+iraimbilanja
+spanish guinea peseta
+xin dynasty coinage
+new taiwan dollar coins
+royal canadian mint olympic coins
+ant nose coin
+reichsthaler
+province of canada dollar
+maltese pound
+french sol
+alaskan parchment scrip
+hubu guanpiao
+yongchang tongbao
+neutral unit of construction
+flynt
+java rupiah
+makhno ruble
+conch dollar
+imitation shellfish
+wenxin coins
+chuzan tsuho
+billon real
+peng
+belarusian ruble
+mordovka
+islamic state dinar
+pataca
+chang an coin
+jade shell
+overseas remittance exchange certificate
+xianfeng coin
+carthaginian currency
+grivna
+travancore fanam
+sampietrino
+talent
+indian paisa
+kabuli rupee
+pul
+tostao
+zimbabwean bonds
+trifollaro
+sadagur coins
+tenge
+macuta
+dang
+yuan of the red army command
+new generation currency series
+gold certificates of the russian asian bank
+qiang tie
+velddaalder
+budju of abd el kader
+sovereign bolivar
+african hoe money
+lebanese syrian pound
+liberland merit
+palembang pitis
+zimbabwean dollar
+umayyad currency
+vietnamese mach
+ryukyuan mon
+indo sasanian coinage
+renminbi
+zhuangpiao
+argentine argentino
+lubovniansky zlaty
+metre per zettasecond
+metre per yottasecond
+millimetre per hour
+millimetre per day
+nautical mile per hour
+centimetre per hour
+foot per hour
+mile per minute
+mile per second
+inch per year
+inch per minute
+yard per second
+yard per minute
+yard per hour
+gigapixels per second
+newton
+dyne
+kilogram force
+planck force
+deben
+pound force
+sthene
+poundal
+kip
+kamien
+attonewton
+zettanewton
+kilonewton
+meganewton
+giganewton
+centinewton
+yottanewton
+petanewton
+micronewton
+millinewton
+decanewton
+hectonewton
+decinewton
+teranewton
+nanonewton
+femtonewton
+yoctonewton
+zeptonewton
+exanewton
+piconewton
+gram force
+kilogram metre per square second
+quettanewton
+quectonewton
+ronnanewton
+rontonewton
+tonne force
+long ton force
+short ton force
+statcoulomb
+coulomb
+ampere hour
+planck charge
+faraday
+milliampere second
+milliampere hour
+abcoulomb
+microcoulomb
+nanocoulomb
+attocoulomb
+zettacoulomb
+ampere second
+petacoulomb
+gigacoulomb
+yottacoulomb
+centicoulomb
+megacoulomb
+kilocoulomb
+teracoulomb
+millicoulomb
+decacoulomb
+hectocoulomb
+decicoulomb
+exacoulomb
+picocoulomb
+femtocoulomb
+zeptocoulomb
+yoctocoulomb
+franklin
+ampere minute
+electrostatic unit of charge
+rontocoulomb
+quectocoulomb
+ronnacoulomb
+quettacoulomb
+pint
+acre
+span
+ell
+mile
+finger
+hide
+line
+mbsf
+plaque forming unit
+adamcova mira
+dbd
+dacker
+total competitiveness weights
+fjerding
+cassengeld
+clad coin
+hard bolivar
+marchuwa
+czechoslovak koruna
+ukrainian people s republic currency
+lumi
+japanese military currency
+coroa velha do crunho de franca
+valadia
+reis brancos
+half stater
+north german thaler
+unidad previsional
+mace
+barter rings
+gregorio
+breadcoin
+chromia
+slavic coins
+romanat
+third modern drachma
+lao pdr kip
+third gourde
+second shilling
+old krona
+third zoty
+goldback
+ruble
+almohad dinar
+franc libre
+reichspfennig
+aura
+european composite unit
+european monetary unit
+european unit of account
+uruguay peso en unidades indexadas
+wir bank currency
+ka kim
+cowrie currency
+roman baiocco
+sur
+targe
+warn
+grosh
+hoe money
+assignat of livre
+two assignats of livre
+ten assignats of livre
+british iron bar currency
+zimbabwe gold
+mutawakkilite yemeni riyal
+fatimid coinage
+peso of puerto rico
+ghana pesewa
+arab accounting dinar
+syrian dinar
+bangladeshi twenty taka note
+altlk
+power of
+light year
+fine structure constant
+stefan boltzmann constant
+proton to electron mass ratio
+coulomb s constant
+wien wavelength displacement law constant
+einstein s constant
+rydberg energy
+luminous efficacy of monochromatic radiation of frequency hz
+alpha particle mass
+weak mixing angle constant
+electron compton wavelength
+neutron mass
+planck magnetic flux density
+planck magnetic flux
+reduced electron gyromagnetic ratio
+reduced proton gyromagnetic ratio
+neutron gyromagnetic ratio
+neutron reduced gyromagnetic ratio
+muon mass
+tau mass
+copper x unit
+molybdenum x unit
+molar planck constant
+electron g factor
+proton g factor
+muon g factor
+admittance of vacuum
+weinberg angle
+fermi constant
+solar parallax
+pi
+sphere
+fujiwhara effect
+hongoumandel effect
+charge conservation
+conservation of angular momentum
+b l
+fradkin tensor
+ohm s law
+ampere s circuital law
+coulomb s law
+kepler s laws of planetary motion
+newton s law of universal gravitation
+hooke s law
+biot savart law
+gauss s law
+bernoulli s principle
+archimedes principle
+faraday s law of induction
+kirchhoff s circuit laws
+pascal s law
+radioactive decay law
+lenz s law
+joule s laws
+planck s law
+wien s displacement law
+hess s law
+faraday s laws of electrolysis
+raoult s law
+inverse square law
+darcy s law
+hund s rules
+coulomb friction
+buys ballot s law
+landauer s principle
+stefan boltzmann law
+stokes law
+bragg s law
+fick s laws of diffusion
+kirchhoff s law of thermal radiation
+kepler s equation
+moseley s law
+power law fluid
+failure criterion
+schwarzschild effect
+vis viva equation
+curie s law
+de vaucouleurs law
+lambert s cosine law
+gauss s law for magnetism
+gustafson s law
+law of stokes
+paschen s law
+betz s law
+law of constant travel time
+plateau s laws
+young s modulus
+malus law
+pouillet s law
+steno s law
+ampere s force law
+newton s second law of motion for constant mass
+verdoorn s law
+von neumann s law
+berthollet s law
+castelli s law
+newton s law of cooling
+cassini s laws
+newton s third law of motion
+newton s first law
+cassie s law
+dermott s law
+kohlrausch law
+jurin s law
+nernst einstein equation
+norton hoff law
+soddy s law
+wenzel s law
+youngdupre equation
+continuum mechanics
+stevin s law
+byerlee s law
+kirchhoff s law
+haeckel s law
+principle of identity
+hopkinson s law
+thomson formula
+neumann s law
+stokes law of sound attenuation
+law of combining volumes
+biot s law
+coulomb force
+fourier s law of heat conduction
+lindeman s law
+kirchhoff s voltage law
+kirchhoff s current law
+lighthill s eighth power law
+grotthuss draper law
+boushaki universe expansion tool
+coulomb failure function
+considere criterion
+law of reflection
+starkeinstein law
+kepler s first law
+kepler s second law
+kepler s third law
+goldberg s number
+avogadro s law
+boyle s law
+ideal gas law
+gay lussac s law
+dalton s law
+van der waals equation
+henry s law
+virial expansion
+redlichkwong equation of state
+amagat s law
+graham s law
+combined gas law
+landauyang theorem
+third law of thermodynamics
+second law of thermodynamics
+first law of thermodynamics
+zeroth law of thermodynamics
+principle of minimum energy
+d square law
+conducted electromagnetic interference
+open knowledge
+curies principle
+fundamental principle of statics

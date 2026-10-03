@@ -1,0 +1,232 @@
+/*
+ * Beta Test long-word celebration.
+ *
+ * This layer never owns the submitted word. The gameplay renderer continues
+ * to write directly into .jjo-display; these elements provide emphasis and
+ * short-lived particles around it only.
+ */
+body.in-game.beta-test-mode .GameBox{
+	position: relative;
+}
+
+.beta-longword-vfx,
+.beta-longword-vfx div{
+	float: none !important;
+	box-sizing: border-box;
+}
+
+.beta-longword-vfx{
+	--beta-glow: 1;
+	--beta-ring-scale: 3.1;
+	position: absolute;
+	left: 50%;
+	top: 178px;
+	width: 640px;
+	height: 220px;
+	overflow: visible;
+	pointer-events: none;
+	isolation: isolate;
+	z-index: 28;
+	transform: translate(-50%, -50%);
+}
+
+body.in-game.beta-test-mode .jjoDisplayBar.beta-longword-active{
+	animation: none;
+	box-shadow: none;
+}
+
+body.in-game.beta-test-mode .jjo-display.beta-longword-style{
+	box-shadow: none;
+}
+
+body.in-game.beta-test-mode .jjo-display.beta-longword-style,
+body.in-game.beta-test-mode .jjo-display.beta-longword-style label,
+body.in-game.beta-test-mode .jjo-display.beta-longword-style .display-text{
+	color: #ffffff;
+	font-family: NBGothic, Arial, sans-serif;
+	font-weight: 900;
+	letter-spacing: -0.01em;
+	text-shadow:
+		0 2px 0 rgba(0, 32, 75, 0.76),
+		1px 0 0 rgba(13, 31, 68, 0.38),
+		-1px 0 0 rgba(13, 31, 68, 0.38);
+}
+
+body.in-game.beta-test-mode .jjo-display.beta-longword-active,
+body.in-game.beta-test-mode .jjo-display.beta-longword-active label,
+body.in-game.beta-test-mode .jjo-display.beta-longword-active .display-text{
+	animation: BetaDisplayTextGlow 1.04s cubic-bezier(0.18, 0.85, 0.24, 1) both;
+}
+
+.beta-vfx-ring{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 190px;
+	height: 70px;
+	border: 3px solid rgba(255, 255, 255, 0.74);
+	border-radius: 50%;
+	opacity: 0;
+	filter: drop-shadow(0 0 calc(12px * var(--beta-glow)) rgba(112, 230, 255, 0.8));
+	transform: translate(-50%, -50%) scale(0.2);
+}
+
+.beta-vfx-ring-a{
+	animation: BetaVfxRing 0.58s cubic-bezier(0.13, 0.75, 0.23, 1) both;
+}
+
+.beta-vfx-ring-b{
+	border-color: rgba(255, 235, 91, 0.86);
+	animation: BetaVfxRing 0.66s cubic-bezier(0.13, 0.75, 0.23, 1) 0.07s both;
+}
+
+.beta-vfx-streak{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 230px;
+	height: 7px;
+	border-radius: 999px;
+	opacity: 0;
+	background: linear-gradient(
+		90deg,
+		rgba(255, 255, 255, 0),
+		rgba(255, 255, 255, 0.96),
+		rgba(255, 224, 71, 0)
+	);
+	filter:
+		blur(0.1px)
+		drop-shadow(0 0 calc(8px * var(--beta-glow)) rgba(255, 241, 110, 0.76));
+	transform-origin: left center;
+	animation: BetaVfxStreak 0.46s ease-out var(--beta-delay) both;
+}
+
+.beta-vfx-particle{
+	position: absolute;
+	left: 50%;
+	top: 50%;
+	width: 24px;
+	height: 24px;
+	margin: -12px 0 0 -12px;
+	border-radius: 50%;
+	color: #ffffff;
+	background: rgba(10, 24, 52, 0.58);
+	font-size: 15px;
+	font-weight: 900;
+	line-height: 24px;
+	text-align: center;
+	text-shadow: 0 1px 2px rgba(0, 0, 0, 0.55);
+	box-shadow:
+		inset 0 0 0 1px rgba(255, 255, 255, 0.44),
+		0 0 calc(16px * var(--beta-glow)) rgba(85, 213, 255, 0.82),
+		0 0 calc(24px * var(--beta-glow)) rgba(85, 213, 255, 0.22);
+	animation: BetaVfxParticle 0.72s cubic-bezier(0.15, 0.82, 0.28, 1) var(--beta-delay) both;
+}
+
+@keyframes BetaDisplayTextGlow{
+	0%{
+		text-shadow:
+			0 2px 0 rgba(0, 32, 75, 0.76),
+			1px 0 0 rgba(13, 31, 68, 0.38),
+			-1px 0 0 rgba(13, 31, 68, 0.38);
+	}
+	16%{
+		text-shadow:
+			0 3px 0 rgba(0, 32, 75, 0.82),
+			1px 0 0 rgba(13, 31, 68, 0.42),
+			-1px 0 0 rgba(13, 31, 68, 0.42),
+			0 -1px 0 rgba(255, 232, 112, 0.18);
+	}
+	38%{
+		text-shadow:
+			0 2px 0 rgba(0, 32, 75, 0.78),
+			1px 0 0 rgba(13, 31, 68, 0.38),
+			-1px 0 0 rgba(13, 31, 68, 0.38),
+			0 -1px 0 rgba(101, 220, 255, 0.14);
+	}
+	72%{
+		text-shadow:
+			0 2px 0 rgba(0, 32, 75, 0.76),
+			1px 0 0 rgba(13, 31, 68, 0.34),
+			-1px 0 0 rgba(13, 31, 68, 0.34);
+	}
+	100%{
+		text-shadow:
+			0 2px 0 rgba(0, 32, 75, 0.76),
+			1px 0 0 rgba(13, 31, 68, 0.38),
+			-1px 0 0 rgba(13, 31, 68, 0.38);
+	}
+}
+
+@keyframes BetaVfxRing{
+	0%{
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(0.16);
+	}
+	18%{ opacity: 0.9; }
+	100%{
+		opacity: 0;
+		transform: translate(-50%, -50%) scale(var(--beta-ring-scale));
+	}
+}
+
+@keyframes BetaVfxStreak{
+	0%{
+		opacity: 0;
+		transform: rotate(var(--beta-angle)) translateX(-34px) scaleX(0.05);
+	}
+	28%{ opacity: 0.95; }
+	100%{
+		opacity: 0;
+		transform: rotate(var(--beta-angle)) translateX(128px) scaleX(1);
+	}
+}
+
+@keyframes BetaVfxParticle{
+	0%{
+		opacity: 0;
+		transform: translate(0, 0) rotate(0deg) scale(0.35);
+	}
+	18%{ opacity: 1; }
+	82%{ opacity: 0.92; }
+	100%{
+		opacity: 0;
+		transform:
+			translate(var(--beta-x), var(--beta-y))
+			rotate(var(--beta-rot))
+			scale(0.8);
+	}
+}
+
+@media (max-width: 700px){
+	.beta-longword-vfx{
+		width: 100vw;
+		max-width: 640px;
+		height: 190px;
+	}
+
+	/*
+	 * The mobile chain plaque occupies the right side of the word bar. Keep
+	 * beta long words centered in the unobstructed area instead of letting the
+	 * plaque cover their final letters.
+	 */
+	body.in-game.beta-test-mode .jjo-display.beta-longword-style{
+		box-sizing: border-box;
+		padding-right: 150px;
+	}
+}
+
+@media (prefers-reduced-motion: reduce){
+	body.in-game.beta-test-mode .jjo-display.beta-longword-active,
+	body.in-game.beta-test-mode .jjo-display.beta-longword-active label,
+	body.in-game.beta-test-mode .jjo-display.beta-longword-active .display-text{
+		animation-duration: 0.01ms;
+	}
+
+	.beta-vfx-ring,
+	.beta-vfx-streak,
+	.beta-vfx-particle{
+		animation-duration: 0.01ms;
+		animation-delay: 0ms;
+	}
+}

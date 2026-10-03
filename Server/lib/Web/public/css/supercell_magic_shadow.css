@@ -1,0 +1,189 @@
+/*
+ * SupercellMagic type treatment
+ *
+ * One physical rule is shared by every label: a compact edge and a hard,
+ * zero-blur extrusion cast at 90 degrees. Contexts may tune edge and shadow
+ * colors independently while preserving that geometry. Gameplay text is an
+ * explicit boundary: native GameBox typography owns all of its effects.
+ */
+:root{
+	--sc-magic-display-edge: #17243b;
+	--sc-magic-display-stroke: clamp(0.75px, 0.0625em, 2.5px);
+	--sc-magic-display-depth: clamp(1px, 0.11em, 4px);
+	--sc-magic-ink-edge: rgba(13, 29, 50, 0.34);
+	--sc-magic-ink-stroke: clamp(0.35px, 0.028em, 0.85px);
+	--sc-magic-ink-depth: clamp(1px, 0.075em, 2.25px);
+}
+
+body:not(.in-game) .sc-magic-shadow{
+	font-family: 'SupercellMagic', NBGothic, sans-serif;
+}
+
+/* Display type: white, cream, or other light faces on saturated surfaces. */
+body:not(.in-game) .sc-magic-shadow,
+.top-profile-gems .currency-amount,
+.kkutu-menu button,
+.kkutu-menu button:hover,
+.kkutu-menu button:focus-visible,
+body:not(.in-game) .kkutu-menu button.menu-glass-flash.menu-glass-flash-deselect:hover,
+body.in-game .kkutu-menu #ExitBtn:hover,
+body.in-game .kkutu-menu #DictionaryBtn:hover,
+body:not(.in-game) .match1v1-title,
+body:not(.in-game) .match1v1-opponent-ghost::before,
+body:not(.in-game) .match1v1-vs-text,
+body:not(.in-game) .FriendsBox .product-title,
+body:not(.in-game) .ClanBox .product-title,
+body:not(.in-game) .FriendsBox .community-command-name,
+body:not(.in-game) .ClanBox .clan-command-name,
+body:not(.in-game) .room-head-id,
+body.in-room:not(.in-game) .RoomBox .product-title .room-head-id,
+body.in-room:not(.in-game) .GameBox .product-title .room-head-id,
+body:not(.in-game) .room-user-readied .room-user-ready-text,
+body:not(.in-game) .room-user-spectate .room-user-ready-text,
+body:not(.in-game) .room-user-practice .room-user-ready-text,
+body:not(.in-game) .room-user-master .room-user-ready-text,
+body:not(.in-game) .clan-banner-logo-text,
+body:not(.in-game) .goods-title,
+body:not(.in-game) .emblem-chest-close > span,
+body:not(.in-game) .emblem-chest-tier,
+body:not(.in-game) .emblem-chest-title,
+body:not(.in-game) .emblem-chest-action-label{
+	-webkit-text-stroke: var(--sc-magic-display-stroke) var(--sc-edge, var(--sc-magic-display-edge)) !important;
+	paint-order: stroke fill !important;
+	text-shadow: 0 var(--sc-magic-display-depth) 0 var(--sc-shadow, var(--sc-edge, var(--sc-magic-display-edge))) !important;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: geometricPrecision;
+}
+
+/* Restrained type: dark faces and very small labels keep the same geometry. */
+body:not(.in-game) .sc-magic-shadow.sc-magic-shadow-ink,
+body:not(.in-game) .FriendsBox .community-page-tab,
+body:not(.in-game) .FriendsBox .community-page-tab > span,
+body:not(.in-game) .myinfo-tab,
+body:not(.in-game) .myinfo-hero-name,
+body:not(.in-game) .myinfo-panel-title,
+body:not(.in-game) .myinfo-inventory-name,
+body:not(.in-game) .ClanBox .myinfo-clan-title,
+body:not(.in-game) .ClanBox .myinfo-clan-name,
+body:not(.in-game) .team-button[data-team-label]::after,
+body:not(.in-game) .room-user-noready .room-user-ready-text,
+body:not(.in-game) .room-invite-card-label,
+body:not(.in-game) .FriendsBox .community-panel-title,
+body:not(.in-game) .FriendsBox .friends-panel-title,
+body:not(.in-game) .FriendsBox .community-room-id,
+body:not(.in-game) .goods-cost .currency-amount,
+body:not(.in-game) .shop-cart-item-name,
+body:not(.in-game) .shop-cart-item-cost,
+body:not(.in-game) .emblem-chest-result-kicker{
+	-webkit-text-stroke: var(--sc-magic-ink-stroke) var(--sc-ink-edge, var(--sc-magic-ink-edge)) !important;
+	paint-order: stroke fill !important;
+	text-shadow: 0 var(--sc-magic-ink-depth) 0 var(--sc-ink-edge, var(--sc-magic-ink-edge)) !important;
+	-webkit-font-smoothing: antialiased;
+	text-rendering: geometricPrecision;
+}
+
+/* Theme-matched edge colors preserve the same apparent depth across surfaces. */
+.top-profile-gems .currency-amount{
+	--sc-edge: #111b2c;
+}
+.match1v1-title,
+.match1v1-vs-text{
+	--sc-edge: #17243b;
+}
+.match1v1-opponent-ghost::before{
+	--sc-edge: #455264;
+}
+.match1v1-battle,
+.emblem-chest-action-label{
+	--sc-edge: #5b3512;
+}
+body:not(.in-game) .match1v1-battle{
+	-webkit-text-stroke: var(--sc-magic-display-stroke) var(--sc-edge) !important;
+	paint-order: stroke fill !important;
+	text-shadow: 0 var(--sc-magic-display-depth) 0 var(--sc-edge) !important;
+}
+.FriendsBox .product-title,
+.FriendsBox .community-command-name{
+	--sc-edge: #332044;
+}
+.ClanBox .product-title,
+.ClanBox .clan-command-name{
+	--sc-edge: #162d3a;
+}
+.clan-banner-logo-text{
+	--sc-edge: #142033;
+}
+.goods-title{
+	--sc-edge: #182337;
+}
+.emblem-chest-close > span,
+.emblem-chest-tier,
+.emblem-chest-title{
+	--sc-edge: #293a85;
+}
+.emblem-chest-action:disabled .emblem-chest-action-label{
+	--sc-edge: rgba(24, 42, 88, 0.62);
+}
+
+/* Side-button labels use a true-black extrusion and near-black, subtly hue-biased edges. */
+.kkutu-menu button{
+	--sc-edge: #0e1117;
+	--sc-shadow: #000000;
+}
+#LeaderboardBtn{ --sc-edge: #1c0a13; }
+#NewRoomBtn{ --sc-edge: #111b06; }
+#Match1v1Btn{ --sc-edge: #170d05; }
+#DictionaryBtn{ --sc-edge: #09160f; }
+#ShopBtn{ --sc-edge: #091614; }
+#ClansBtn{ --sc-edge: #0a141d; }
+#CommunityBtn{ --sc-edge: #110917; }
+#ExitBtn{ --sc-edge: #190a0d; }
+#StartBtn,
+#ReadyBtn{ --sc-edge: #1a1006; }
+#PracticeBtn{ --sc-edge: #1a1605; }
+#InviteBtn{ --sc-edge: #0b190d; }
+#SetRoomBtn,
+#SettingBtn{ --sc-edge: #0a151e; }
+#SpectateBtn{ --sc-edge: #130d1c; }
+#ReplayBtn{ --sc-edge: #0d0e14; }
+
+/* The rotating room palette gets an equally deep, hue-matched room number. */
+body:not(.in-game)[data-room-theme="blue"] .room-head-id{ --sc-edge: #123861; }
+body:not(.in-game)[data-room-theme="brown"] .room-head-id{ --sc-edge: #4b2b19; }
+body:not(.in-game)[data-room-theme="gray"] .room-head-id{ --sc-edge: #243142; }
+body:not(.in-game)[data-room-theme="green"] .room-head-id{ --sc-edge: #164a38; }
+body:not(.in-game)[data-room-theme="pink"] .room-head-id{ --sc-edge: #552040; }
+body:not(.in-game)[data-room-theme="purple"] .room-head-id{ --sc-edge: #3b215e; }
+body:not(.in-game)[data-room-theme="red"] .room-head-id{ --sc-edge: #5a202a; }
+body:not(.in-game)[data-room-theme="yellow"] .room-head-id{ --sc-edge: #513b16; }
+
+/* Badge colors keep their meaning without changing the shared shadow angle. */
+.room-user-readied .room-user-ready-text{ --sc-edge: #224f8d; }
+.room-user-spectate .room-user-ready-text{ --sc-edge: #4f397e; }
+.room-user-practice .room-user-ready-text{ --sc-edge: #735117; }
+.room-user-master .room-user-ready-text{ --sc-edge: #762a1a; }
+.room-invite-card-label{ --sc-ink-edge: rgba(29, 78, 36, 0.48); }
+.emblem-chest-result-kicker{ --sc-ink-edge: rgba(29, 43, 103, 0.42); }
+
+/* Light text in dark-mode cards needs a firmer micro edge, not extra depth. */
+body.dark-mode .myinfo-tab,
+body.dark-mode .myinfo-hero-name,
+body.dark-mode .myinfo-panel-title,
+body.dark-mode .myinfo-inventory-name,
+body.dark-mode .ClanBox .myinfo-clan-title,
+body.dark-mode .ClanBox .myinfo-clan-name,
+body.dark-mode .FriendsBox .community-page-tab,
+body.dark-mode .FriendsBox .community-panel-title,
+body.dark-mode .FriendsBox .friends-panel-title,
+body.dark-mode .FriendsBox .community-room-id{
+	--sc-ink-edge: rgba(4, 13, 25, 0.76);
+}
+
+/* FontAwesome glyphs are not Supercell text and retain their own icon styling. */
+.community-page-tab i,
+.FriendsBox .product-title i,
+.ClanBox .product-title i{
+	-webkit-text-stroke: 0 transparent !important;
+	paint-order: normal !important;
+	text-shadow: none !important;
+}
