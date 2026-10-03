@@ -37,7 +37,7 @@ html(lang=(locals.lang || 'en_US').replace('_', '-'))
 		span#locale= JSON.stringify(LANG)
 		main.login-screen(aria-labelledby='login-title')
 			div.login-shell
-				section.login-brand(aria-label='KKuTu')
+				section.login-brand(aria-label='WordWarrior.io')
 					div.login-brand-lockup
 						img.login-logo(src='/img/kkutu/short_logo.png', alt='KKuTu', width='200', height='100')
 						p.login-eyebrow= loginText('loginBrandTagline', 'WORD CHAIN ONLINE')
@@ -74,7 +74,7 @@ html(lang=(locals.lang || 'en_US').replace('_', '-'))
 					div.login-card-heading
 						div.login-heading-icon(aria-hidden='true')
 							i.fa.fa-key
-						h1#login-title= loginText('loginHeading', 'Sign in to KKuTu')
+						h1#login-title= loginText('loginHeading', 'Sign in to WordWarrior.io')
 						p.login-with= loginText('loginIntro', 'Choose an account to enter the lobby.')
 					if locals.text
 						p.login-context= L(locals.text)

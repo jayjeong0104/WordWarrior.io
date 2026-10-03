@@ -78,7 +78,7 @@ function renderPage(url){
 		locale: Object.assign({}, language.GLOBAL, language.kkutu), lang: "en_US", page: "kkutu",
 		session: { profile, guest: false, admin: false }, data: { _id: profile.id },
 		published: false, mobile: false, as_pc: false, PROTOCOL: "ws", HOST: "127.0.0.1", PORT, _id: "demo-session",
-		ogImage: "/img/ogImage.png", ogURL: "/", ogTitle: "KKuTu demo session", ogDescription: "Fictional local demo session"
+		ogImage: "/img/ogImage.png", ogURL: "/", ogTitle: "WordWarrior.io demo session", ogDescription: "Fictional local demo session"
 	});
 	let html = pug.renderFile(path.join(VIEWS, "kkutu.pug"), locals);
 	// All original scripts (including inline WebSocket locking, analytics and
@@ -112,7 +112,7 @@ function renderLogin(){
 		locale: Object.assign({}, language.GLOBAL, language.login), lang: "en_US", page: "login",
 		session: { profile: null, guest: true, admin: false }, data: {}, published: false,
 		mobile: false, as_pc: false, loginList: providers,
-		ogTitle: "KKuTu", ogDescription: "Word-chain online", ogURL: "/login", ogImage: "/img/ogImage.png"
+		ogTitle: "WordWarrior.io", ogDescription: "Word-chain online", ogURL: "/login", ogImage: "/img/ogImage.png"
 	});
 	html = html.replace(/<script\b[^>]*>[\s\S]*?<\/script\s*>/gi, "");
 	// The screenshot adapter exposes no sign-in or legal acceptance action.
@@ -157,4 +157,4 @@ const server = http.createServer((req, res) => {
 		return send(res, 500, "text/plain; charset=utf-8", "Demo fixture is not ready: " + err.message);
 	}
 });
-server.listen(PORT, "127.0.0.1", () => console.log("Read-only KKuTu demo: http://127.0.0.1:" + PORT + "/?view=lobby"));
+server.listen(PORT, "127.0.0.1", () => console.log("Read-only WordWarrior.io demo: http://127.0.0.1:" + PORT + "/?view=lobby"));

@@ -1,4 +1,4 @@
-# JayWord Online
+# WordWarrior.io
 
 An educational multiplayer word-game project built on **KKuTu**, with word-chain challenges, dictionary definitions, vocabulary collections, and social play. It supports vocabulary and spelling practice through interactive language games. This repository includes the current source, game assets, dictionary seed, client build tools, regression tests, and demo screenshots.
 

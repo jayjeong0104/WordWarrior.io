@@ -107,7 +107,7 @@
 		"500_e": "Internal server stopped working due to an unexpected reason."
 	},
 	"login": {
-		"title": "login",
+		"title": "Sign in | WordWarrior.io",
 		"loginWith": "Choose a method to log in.",
 		"withNaver": "NAVER",
 		"withFacebook": "FACEBOOK",
@@ -120,7 +120,7 @@
 		"withLine": "LINE",
 		"withInstagram": "INSTAGRAM",
 		"withSpotify": "SPOTIFY",
-		"login_kkutu": "Log in to play JayWord."
+		"login_kkutu": "Log in to play WordWarrior.io."
 	},
 	"loginfail": {
 		"title": "Failed to Login.",
@@ -128,11 +128,11 @@
 		"login": "login"
 	},
 	"kkutu": {
-		"title": "JayWord word-chain Online",
+		"title": "WordWarrior.io",
 		"version": "2.5.1",
 		
 		"meta_desc": "From Online Word Chain, Reversed Word Chain, to Typing Battle! Be faster and smarter than others!",
-		"meta_keys": "끄투,kkutu,끝말잇기,온라인,웹,쿵쿵따,영어끝말잇기,영어쿵쿵따,시리토리,끝말잇기사이트,자음퀴즈,초성퀴즈,자퀴,십자말풀이,가로세로,타자,타자연습,앞말잇기",
+		"meta_keys": "WordWarrior.io,끄투,kkutu,끝말잇기,온라인,웹,쿵쿵따,영어끝말잇기,영어쿵쿵따,시리토리,끝말잇기사이트,자음퀴즈,초성퀴즈,자퀴,십자말풀이,가로세로,타자,타자연습,앞말잇기",
 		
 		"gameStart": "GAME START!",
 		"serverList": "Server List",
@@ -199,9 +199,9 @@
 		"error_442": "The connection to the server has been terminated due to inactivity for more than 5 minutes.",
 		"error_443": "Chatting has been restricted by a moderater due to a certain reason.",
 		"error_444": "You have been restricted from playing by a moderator.\nReason: ",
-		"error_445": "Verification successful. Thank you for using JayWord.",
+		"error_445": "Verification successful. Thank you for using WordWarrior.io.",
 		"error_446": "Your IP address has been restricted from playing the game by a moderator.\nReason: ",
-		"error_450": "The user is not connected to JayWord or server.",
+		"error_450": "The user is not connected to WordWarrior.io or server.",
 		"error_451": "Community features are only available after logging in.\nClick the login button at the top right to log in!",
 		"error_452": "You can no longer add more friends.",
 		"error_453": "Guests cannot be added as friends.",
@@ -221,7 +221,7 @@
 		"turnError_410": "Too short for long-word mode",
 		"turnError_411": "Too long for short-word mode",
 		"turnError_404": "Word does not exist",
-		"checkAgeAsk": "To verify your identity, JayWord requires your date of birth. The entered date of birth will only be used for verification and internal processing and will not be disclosed to third parties.\nWould you like to proceed with verification?",
+		"checkAgeAsk": "To verify your identity, WordWarrior.io requires your date of birth. The entered date of birth will only be used for verification and internal processing and will not be disclosed to third parties.\nWould you like to proceed with verification?",
 		"checkAgeNo": "The entered value is incorrect. Please check again.",
 		"checkAgeInput1": "Enter the year of your birth (4 digits).",
 		"checkAgeInput2": "Enter the month of your birth (1–12).",
@@ -761,7 +761,7 @@
 		"shopTotal": "TOTAL",
 		"purchased": "Successfully purchased. Purchased items can be checked by clicking [My Info] > [프로필 관리] at the bottom-left.",
 
-		"okgExpl": "<h4><label style='color: #FFFF44;'>Thank you for playing JayWord!</label></h4>Whenever you play JayWord, every 10 minutes you will get buffed which <br>makes you get more EXP and coins : <label style='color: #FFFF44;'>오끄감 버프</label>!",
+		"okgExpl": "<h4><label style='color: #FFFF44;'>Thank you for playing WordWarrior.io!</label></h4>Whenever you play WordWarrior.io, every 10 minutes you will get buffed which <br>makes you get more EXP and coins : <label style='color: #FFFF44;'>오끄감 버프</label>!",
 		"okgNotice": "게임 플레이 시간 10분을 달성하여 오끄감 버프를 획득했습니다!",
 		"okgCurrent": "현재 오끄감 버프 중첩 (최대 18): ",
 		"okgExpired": "자정이 지나 오끄감 버프 중첩이 초기화되었습니다.",

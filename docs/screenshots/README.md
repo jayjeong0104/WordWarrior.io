@@ -1,5 +1,7 @@
 # Demo screenshots
 
+These captures were taken before the project was renamed **WordWarrior.io** and retain the on-screen branding from that date.
+
 The unrequested player-card, level-icon sizing, sidebar proportion, and HUD overrides were removed on 2026-10-03. These replacement captures use the restored original layout. Its native clipping and scrolling at 1280 × 720 are retained by explicit request; twelve players are present, but they are not all visible simultaneously. The previous capture bundle was archived before restoration.
 
 Seven complete **1280 × 720** game screens, freshly retaken through **Product Design's in-app Browser workflow** at 100% zoom and device pixel ratio 1. Every JPEG is the original screenshot response saved byte for byte. The images show the current templates, styles, avatar layers, item artwork, and client renderers.
