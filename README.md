@@ -33,9 +33,9 @@ The Docker build includes the client builder and excludes real configuration and
 
 ## Demo screenshots
 
-![Native Beta Test match with Mission and Ban Letter enabled](docs/screenshots/01-gameplay.jpg)
+![Complete twelve-player Beta Test match with a 24-word chain, Mission, and Ban Letter](docs/screenshots/01-gameplay.jpg)
 
-[View the screenshot gallery and reproduce the demo](docs/screenshots/README.md). Seven direct **1280 × 720** browser captures show the restored native game layout and the requested Store, inventory, and sign-in refinements. The original layout's clipping at this resolution is retained by request. Players and conversations are fictional local demo data.
+[View all seven screenshots and reproduce the demo](docs/screenshots/README.md). These **1920 × 1080** browser captures show gameplay, the lobby, all twelve ready-room players, inventory, a chest reward, the store, and community chat. The real game interface renders fictional players, rooms, inventories, conversations, and simulated game progress.
 
 ## 한국어
 > 글자로 놀자! 끄투 온라인

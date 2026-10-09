@@ -4,7 +4,8 @@
 // application services, read user records, or mutate the shipped catalogue.
 // Item IDs/groups/prices/options below come from db.sql's kkutu_shop COPY data;
 // every chosen cosmetic has a matching asset in Web/public/img/kkutu/moremi.
-const NOW = Date.UTC(2026, 9, 3, 18, 35);
+// October 9, 2026 at 7:35 p.m. in America/New_York.
+const NOW = Date.UTC(2026, 9, 9, 23, 35);
 const DAY = 86400000;
 const USER_ID = "fixture-you";
 const MODES = ["EKT", "ESH", "KKT", "KSH", "CSQ", "KCW", "KTY", "ETY", "KAP", "HUN", "KDA", "EDA", "KSS", "ESS", "EAP", "EBT"];
@@ -80,36 +81,30 @@ itemRows.forEach(row => {
 });
 
 const outfits = [
-	{Mhead: "blue_headphone", Meye: "inverteye", Mmouth: "laugh", Mclothes: "blue_vest", Mshoes: "black_oxford", Mlhand: "bluecandy", Mrhand: "purple_ice", BDG: "b4_mint"},
+	{Mhead: "blue_headphone", Meye: "inverteye", Mmouth: "laugh", Mclothes: "blue_vest", Mshoes: "black_oxford", Mrhand: "bluecandy", BDG: "b4_mint"},
 	{Mhead: "redbere", Meye: "bigeye", Mmouth: "cat_mouth", Mclothes: "pink_vest", Mshoes: "loosesocks", Mrhand: "pinkcandy"},
-	{Mhead: "orange_headphone", Meye: "brave_eyes", Mmouth: "laugh", Mclothes: "orange_vest", Mshoes: "black_shoes", Mrhand: "melon_ice"},
-	{Mhead: "brownbere", Meye: "scouter", Mmouth: "beardoll", Mclothes: "blackrobe", Mshoes: "brown_oxford", Mrhand: "spanner", BDG: "b3_hwa"},
-	{Mhead: "nekomimi", Meye: "bigeye", Mmouth: "cat_mouth", Mclothes: "water", Mshoes: "loosesocks", Mrhand: "purple_ice"},
+	{Mhead: "orange_headphone", Meye: "brave_eyes", Mmouth: "laugh", Mclothes: "orange_vest", Mshoes: "brown_oxford", Mrhand: "lemoncandy"},
+	{Mhead: "brownbere", Meye: "close_eye", Mmouth: "beardoll", Mclothes: "orange_vest", Mshoes: "brown_oxford", Mrhand: "choco_ice", BDG: "b3_hwa"},
+	{Mhead: "nekomimi", Meye: "bigeye", Mmouth: "cat_mouth", Mclothes: "blue_vest", Mshoes: "loosesocks", Mrhand: "purple_ice"},
 	{Mhead: "hamster_O", Meye: "close_eye", Mmouth: "laugh", Mclothes: "orange_vest", Mshoes: "brown_oxford", Mrhand: "lemoncandy"},
-	{Mhead: "haksamo", Meye: "lazy_eye", Mmouth: "beardoll", Mclothes: "blackrobe", Mshoes: "black_oxford", Mrhand: "bokjori", BDG: "b2_fire"},
-	{Mhead: "blackbere", Meye: "sunglasses", Mmouth: "oh", Mclothes: "blue_vest", Mshoes: "black_shoes", Mrhand: "choco_ice"},
-	{Mhead: "hamster_G", Meye: "inverteye", Mmouth: "merong", Mclothes: "pink_vest", Mshoes: "loosesocks", Mrhand: "bluecandy"},
+	{Mhead: "haksamo", Meye: "lazy_eye", Mmouth: "beardoll", Mclothes: "blackrobe", Mshoes: "black_oxford", BDG: "b2_fire"},
+	{Mhead: "blackbere", Meye: "sunglasses", Mmouth: "laugh", Mclothes: "blue_vest", Mshoes: "black_shoes", Mrhand: "bluecandy"},
+	{Mhead: "hamster_G", Meye: "inverteye", Mmouth: "laugh", Mclothes: "pink_vest", Mshoes: "loosesocks", Mrhand: "pinkcandy"},
 	{Mhead: "miljip", Meye: "brave_eyes", Mmouth: "laugh", Mclothes: "water", Mshoes: "brown_oxford", Mrhand: "melon_ice"},
-	{Mhead: "redbere", Meye: "lazy_eye", Mmouth: "cat_mouth", Mclothes: "blue_vest", Mshoes: "black_shoes", Mrhand: "lemoncandy"},
-	{Mhead: "brownbere", Meye: "close_eye", Mmouth: "beardoll", Mclothes: "orange_vest", Mshoes: "brown_oxford", Mrhand: "spanner"},
-	{Mhead: "blue_headphone", Meye: "bigeye", Mmouth: "oh", Mclothes: "sqpants", Mshoes: "loosesocks", Mrhand: "pinkcandy"},
+	{Mhead: "redbere", Meye: "lazy_eye", Mmouth: "cat_mouth", Mclothes: "pink_vest", Mshoes: "black_shoes", Mrhand: "pinkcandy"},
+	{Mhead: "brownbere", Meye: "inverteye", Mmouth: "beardoll", Mclothes: "blackrobe", Mshoes: "brown_oxford", Mrhand: "choco_ice"},
+	{Mhead: "blue_headphone", Meye: "bigeye", Mmouth: "laugh", Mclothes: "blue_vest", Mshoes: "loosesocks", Mrhand: "bluecandy"},
 	{Mhead: "blackbere", Meye: "inverteye", Mmouth: "laugh", Mclothes: "water", Mshoes: "black_oxford", Mrhand: "purple_ice"}
 ];
-// Mix the existing layers for a larger lobby without inventing cosmetic IDs.
-const extraHeads = ["blue_headphone", "redbere", "brownbere", "blackbere", "hamster_O", "hamster_G", "orange_headphone", "nekomimi", "miljip", "haksamo"];
-const extraClothes = ["blue_vest", "orange_vest", "pink_vest", "blackrobe", "water", "sqpants"];
-const extraEyes = ["brave_eyes", "close_eye", "lazy_eye", "bigeye", "inverteye", "sunglasses", "scouter"];
+// Keep complete color palettes together; facial expressions add lobby variety.
+const outfitNameColors = ["blue_name", "pink_name", "orange_name", "orange_name", "purple_name", "orange_name", "indigo_name", "blue_name", "pink_name", "green_name", "red_name", "indigo_name", "blue_name", "purple_name"];
+outfits.forEach((equip, index) => { equip.NIK = outfitNameColors[index]; });
+const extraEyes = ["brave_eyes", "close_eye", "lazy_eye", "bigeye", "inverteye"];
 for(let index = 14; index < 66; index++){
-	outfits.push(Object.assign({}, outfits[index % 14], {
-		Mhead: extraHeads[index % extraHeads.length],
-		Mclothes: extraClothes[Math.floor(index / extraHeads.length) % extraClothes.length],
-		Meye: extraEyes[index % extraEyes.length],
-		Mrhand: ["bluecandy", "lemoncandy", "pinkcandy", "purple_ice", "melon_ice", "choco_ice"][index % 6]
+	outfits.push(Object.assign({}, outfits[(index * 5 + 3) % 14], {
+		Meye: extraEyes[index % extraEyes.length]
 	}));
 }
-outfits.forEach((equip, index) => {
-	equip.NIK = ["blue_name", "pink_name", "orange_name", "indigo_name", "purple_name", "green_name", "red_name"][index % 7];
-});
 
 // Match getRequiredScore()/ready.js exactly. The browser adds the two Infinity
 // sentinel entries after serialization; the fixture itself stays JSON-safe.
@@ -205,14 +200,14 @@ const profiles = {};
 const users = {};
 // Display handles are fictional; stable IDs keep room/social references intact.
 const handles = [
-	"InkMoth", "quietcomet", "PixelPudding", "MapleCircuit", "NectarNinja", "TeaAndTypos", "PaperDragon", "LowkeyLumen",
-	"EchoPebble", "RowanOnRepeat", "PocketFinch", "CedarSketch", "KiteAfterCoffee", "OrbitInk", "WrenRadio", "EmberWaffle",
-	"FernAndFig", "IrisInMotion", "VelvetVale", "ReedBetweenLines", "CloverQuest", "SolarToast", "Tessellate", "AlderArcade",
-	"HazelHaze", "LyraLoops", "RueTheDay", "MossBoss", "PipSqueak", "WillowWisp", "RobinRewind", "MapleSyrup", "AspenAfterhours",
-	"OpalOddity", "BrookBook", "AsterOrbit", "JadeJelly", "DoodleDusk", "WishfulWisp", "SpruceGoose", "GroveGlider",
-	"DuneDancer", "CoveCoffee", "PoppyByte", "BirchPlease", "FableFox", "RookAndRoll", "LotusLogic", "pebble.exe", "MoonlitMarlow",
-	"SoraScribbles", "GladeRunner", "CopperKite", "SunnySideQuest", "BreezeBytes", "Snowglobe", "ThistleWhistle", "BrambleJam",
-	"VesperVibes", "CloudSketch", "RainCheck", "FoxgloveFizz", "SproutScout", "MeadowMuse", "GaleForce", "CoralCrunch"
+	"InkMoth", "Mira", "pixeljam", "atlas_7", "Nova", "minttea", "sage", "lumen",
+	"echoo", "Rowan", "finch", "cedar", "kite.exe", "orbit", "wren", "ember",
+	"fern", "iris", "vale", "reed_91", "clover", "sol", "Tess", "alder",
+	"hazel", "lyra", "rue", "mossy", "Pip", "willow", "robin", "maple", "aspen",
+	"opal", "brook", "aster", "Jade", "dusk", "wisp", "spruce", "grove",
+	"dune", "cove", "poppy", "birch", "fable", "rook", "lotus", "pebble.exe", "Marlow",
+	"sora", "glade", "copper", "sunnyday", "breeze", "snowglobe", "thistle", "bramble",
+	"vesper", "cloud9", "raincheck", "foxglove", "sprout", "meadow", "gale", "Coral"
 ];
 roster.forEach((row, index) => {
 	const score = scoreAt(row[2], 0.38 + index % 4 * 0.12);
@@ -233,7 +228,7 @@ roster.forEach((row, index) => {
 	const trophy = index === 0 ? 842 : 450 + row[2] * 9;
 	const user = {
 		id: row[0], guest: false, profile: {id: row[0], name: handles[index], title: handles[index], type: "demo", image: null},
-		data: {score, playTime: games * 105000, joinedAt: NOW - DAY * (90 + row[2]), connectDate: 3,
+		data: {score, playTime: games * 105000, joinedAt: NOW - DAY * (90 + row[2]), connectDate: 9,
 			record, ranked: {trophy, best: trophy + 38, wins: rankedWins, losses: rankedLosses, draws: 2, games: rankedGames}, trophy},
 		money: row[3], equip, box: ownedOutfit(equip), exordial: row[4], place: 0,
 		game: {ready: false, form: "J", team: 0, practice: 0, score: 0, item: []}
@@ -270,30 +265,30 @@ function makeRoom(id, title, master, players, mode, opts, gaming){
 		game: {round: gaming ? 2 : 0, turn: 0, seq: gaming ? players.slice() : [], title: "abcdefghij"}};
 }
 const rooms = {
-	101: makeRoom(101, "Cozy chains, no rush", "mira", ["mira", "pixel"], "ESH", {mission: true}, false),
-	102: makeRoom(102, "One chain, twelve minds", "atlas", ["atlas", "echo", "orbit", "nova", "sage", "lumen", "finch", "aspen", "grove", "poppy", "pebble", "marlow"], "EBT", {mission: true, banletter: true}, true),
-	103: makeRoom(103, "Coffee, keys, repeat", "juniper", ["juniper", "kite", "rowan"], "ETY", {proverb: true}, false),
-	104: makeRoom(104, "Three-letter detours", "cedar", ["cedar"], "EKT", {mission: true}, false),
-	105: makeRoom(105, "Space nerds welcome", "fern", ["fern", "iris", "reed", "sol"], "EDA", {injpick: ["450"], mission: true}, false),
-	106: makeRoom(106, "Slow chains, good company", "vale", ["vale"], "ESH", {}, false),
-	107: makeRoom(107, "Typos happen", "clover", ["clover"], "ETY", {}, false),
-	108: makeRoom(108, "Word hunt in the garden", "tess", ["tess", "alder", "lyra"], "ESS", {}, false),
-	109: makeRoom(109, "Mind your manners", "hazel", ["hazel"], "EKT", {manner: true, mission: true}, false),
-	110: makeRoom(110, "Snack words, anyone?", "rue", ["rue", "moss"], "EDA", {injpick: ["e13"]}, false),
-	111: makeRoom(111, "Just one more word", "pip", ["pip"], "ESH", {}, false),
-	112: makeRoom(112, "Proverbs and peppermint", "robin", ["robin", "maple", "willow"], "ETY", {proverb: true}, false),
-	113: makeRoom(113, "Three letters, many ways out", "wisp", ["wisp", "spruce", "fable"], "EKT", {}, false),
-	114: makeRoom(114, "Rematch before the kettle boils", "dune", ["dune", "cove"], "ESH", {mission: true}, true),
-	115: makeRoom(115, "Plant and Garden Words", "birch", ["birch"], "EDA", {injpick: ["e20"]}, false),
-	116: makeRoom(116, "Keys warmed, tea cooling", "rook", ["rook", "lotus"], "ETY", {}, true),
-	117: makeRoom(117, "Lost in the letter grid", "sora", ["sora", "glade", "sunny"], "ESS", {}, false),
-	118: makeRoom(118, "Manner rematch", "copper", ["copper"], "EKT", {manner: true}, false),
-	119: makeRoom(119, "New here? Pull up a chair", "breeze", ["breeze", "snow"], "ESH", {}, false),
-	120: makeRoom(120, "Long-word treasure hunt", "thistle", ["thistle", "bramble"], "ESS", {no2: true}, true),
-	121: makeRoom(121, "Postcards from everywhere", "vesper", ["vesper", "cloud"], "EDA", {injpick: ["1001"]}, false),
-	122: makeRoom(122, "Sayings at sunset", "rain", ["rain", "foxglove", "coral"], "ETY", {proverb: true}, false),
-	123: makeRoom(123, "Chasing the mission letter", "sprout", ["sprout", "meadow"], "EKT", {mission: true}, false),
-	124: makeRoom(124, "The dinner-can-wait club", "gale", ["gale"], "ESH", {mission: true}, false)
+	101: makeRoom(101, "English chain / casual", "mira", ["mira", "pixel"], "ESH", {mission: true}, false),
+	102: makeRoom(102, "Mission + Ban | 3 rounds", "atlas", ["atlas", "echo", "orbit", "nova", "sage", "lumen", "finch", "aspen", "grove", "poppy", "pebble", "marlow"], "EBT", {mission: true, banletter: true}, true),
+	103: makeRoom(103, "typing warm-up", "juniper", ["juniper", "kite", "rowan"], "ETY", {proverb: true}, false),
+	104: makeRoom(104, "3-letter chain", "cedar", ["cedar"], "EKT", {mission: true}, false),
+	105: makeRoom(105, "Space words", "fern", ["fern", "iris", "reed", "sol"], "EDA", {injpick: ["450"], mission: true}, false),
+	106: makeRoom(106, "casual / anyone welcome", "vale", ["vale"], "ESH", {}, false),
+	107: makeRoom(107, "typing practice", "clover", ["clover"], "ETY", {}, false),
+	108: makeRoom(108, "Word hunt", "tess", ["tess", "alder", "lyra"], "ESS", {}, false),
+	109: makeRoom(109, "Manners + mission", "hazel", ["hazel"], "EKT", {manner: true, mission: true}, false),
+	110: makeRoom(110, "Food & drink", "rue", ["rue", "moss"], "EDA", {injpick: ["e13"]}, false),
+	111: makeRoom(111, "one more round", "pip", ["pip"], "ESH", {}, false),
+	112: makeRoom(112, "Proverbs / 5 rounds", "robin", ["robin", "maple", "willow"], "ETY", {proverb: true}, false),
+	113: makeRoom(113, "3 letters, no mission", "wisp", ["wisp", "spruce", "fable"], "EKT", {}, false),
+	114: makeRoom(114, "rematch?", "dune", ["dune", "cove"], "ESH", {mission: true}, true),
+	115: makeRoom(115, "Plants & gardens", "birch", ["birch"], "EDA", {injpick: ["e20"]}, false),
+	116: makeRoom(116, "typing / 5 rounds", "rook", ["rook", "lotus"], "ETY", {}, true),
+	117: makeRoom(117, "Word hunt - join in", "sora", ["sora", "glade", "sunny"], "ESS", {}, false),
+	118: makeRoom(118, "Manner practice", "copper", ["copper"], "EKT", {manner: true}, false),
+	119: makeRoom(119, "Beginners welcome", "breeze", ["breeze", "snow"], "ESH", {}, false),
+	120: makeRoom(120, "Long words only", "thistle", ["thistle", "bramble"], "ESS", {no2: true}, true),
+	121: makeRoom(121, "Around the world", "vesper", ["vesper", "cloud"], "EDA", {injpick: ["1001"]}, false),
+	122: makeRoom(122, "Proverb practice", "rain", ["rain", "foxglove", "coral"], "ETY", {proverb: true}, false),
+	123: makeRoom(123, "Mission chains", "sprout", ["sprout", "meadow"], "EKT", {mission: true}, false),
+	124: makeRoom(124, "Friday evening chains", "gale", ["gale"], "ESH", {mission: true}, false)
 };
 Object.assign(rooms[102].game, {
 	turn: 0, char: "n", mission: "r", banLetters: ["x"], roundTime: 38500, turnTime: 12000,
@@ -338,11 +333,11 @@ const myClan = Object.assign({}, clone(clans[0]), {owner: USER_ID, createdAt: NO
 	members: northstarIds.map((id, index) => ({id, name: profiles[id].profile.title, role: index === 0 ? "owner" : "member", online: !!users[id], joinedAt: NOW - DAY * (48 - index * 5)})),
 	chat: [
 		{type: "system", text: "InkMoth updated the clan crest.", time: NOW - 55 * 60000},
-		{senderId: "mira", text: "Room 101 is open. Slow chains and a cup of tea?", time: NOW - 17 * 60000},
-		{senderId: "pixel", text: "Yes please. I just typed 'harbour' three times in a row.", time: NOW - 15 * 60000},
-		{senderId: "atlas", text: "Our Beta room has twelve now. Mission R, ban X. Wish us luck.", time: NOW - 12 * 60000},
-		{senderId: USER_ID, text: "Joining after I pick a hat. The hamster is winning.", time: NOW - 10 * 60000},
-		{senderId: "cedar", text: "86 / 120 on the clan mission. A few rounds should do it.", time: NOW - 7 * 60000}
+		{senderId: "mira", text: "101 is open if anyone wants a few casual rounds", time: NOW - 17 * 60000},
+		{senderId: "pixel", text: "joining now", time: NOW - 15 * 60000},
+		{senderId: "atlas", text: "102 is full now. Mission + ban tonight", time: NOW - 12 * 60000},
+		{senderId: USER_ID, text: "I'll catch the next round", time: NOW - 10 * 60000},
+		{senderId: "cedar", text: "nice, almost done with the clan mission", time: NOW - 7 * 60000}
 	]});
 clans[0].owner = USER_ID;
 clans[0].members = clone(myClan.members);
@@ -368,18 +363,18 @@ myClan.chat.forEach(row => { if(row.senderId) row.senderName = profiles[row.send
 const clan = {my: myClan, list: clone(clans)};
 function chatLine(uid, value, minutes){ return {profile: clone(profiles[uid].profile), value, timestamp: NOW - minutes * 60000}; }
 const chat = [
-	chatLine("juniper", "Two spots open for a quick typing warm-up in 103.", 18),
-	chatLine("kite", "Joining. I keep swapping the last two letters when I rush.", 17),
-	chatLine("mira", "English chain in 101, three rounds. Beginners welcome.", 14),
-	chatLine("finch", "Beta room in 102 has space. Are four-letter words okay?", 13),
-	chatLine("atlas", "Yep. Mission R for a bonus, and no X this round.", 12),
-	chatLine(USER_ID, "I'll come over in a minute. Finishing my outfit first.", 9),
-	chatLine("cedar", "Three-letter chains in 104. Bring your oddest endings.", 6),
-	chatLine("rowan", "We have room. No pressure to be quick on the first round.", 5)
+	chatLine("juniper", "typing warm-up in 103, anyone can join", 18),
+	chatLine("kite", "omw, haven't played in a week", 17),
+	chatLine("mira", "101 for casual English chains :)", 14),
+	chatLine("finch", "are four-letter words okay in beta?", 13),
+	chatLine("atlas", "yep! mission + ban are on", 12),
+	chatLine(USER_ID, "I'll join the next round", 9),
+	chatLine("cedar", "3-letter chain in 104 if anyone's up for it", 6),
+	chatLine("rowan", "103 still has room, we're just warming up", 5)
 ];
 const roomChat = [
-	chatLine("atlas", "Nice chain. R words are paying off.", 2),
-	chatLine("echo", "Saving 'rainbow' for an R turn.", 1)
+	chatLine("atlas", "nice chain", 2),
+	chatLine("echo", "I had rainbow ready lol", 1)
 ];
 const vocab = {lists: [
 	{id: "fixture-nature", name: "Nature notebook", createdAt: NOW - DAY * 12, words: [

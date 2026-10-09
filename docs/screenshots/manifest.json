@@ -1,99 +1,68 @@
 {
-  "capture_date": "2026-10-03",
+  "title": "WordWarrior.io release screenshots",
+  "date": "2026-10-09",
   "format": "JPEG",
-  "source": "Original Product Design in-app Browser screenshot responses",
-  "viewport": {
-    "width": 1280,
-    "height": 720
-  },
-  "device_pixel_ratio": 1,
-  "edited": false,
-  "native_ui_restored_before_capture": true,
-  "production_ui_changed_during_capture": false,
-  "native_clipping_retained_at_user_request": true,
-  "fictional_demo_data": true,
-  "provenance": "capture-provenance.json",
-  "gameplay": {
-    "mode": "EBT",
-    "mission": true,
-    "banletter": true,
-    "players": 12,
-    "chain": 13,
-    "mission_letter": "r",
-    "banned_letter": "x",
-    "background": "game_img/8e9a668b-3569-4fbb-990e-af576027c7d9.png",
-    "background_scope": "Local demo staging only"
-  },
+  "width": 1920,
+  "height": 1080,
+  "originalBrowserBytes": true,
+  "postProcessed": false,
+  "fictionalDemoData": true,
   "images": [
     {
       "file": "01-gameplay.jpg",
-      "width": 1280,
-      "height": 720,
-      "bytes": 117962,
-      "sha256": "9ab5ee931d237e83f34386d3ba0e9d3eacde771f044e4a5e24af15ae7d1a3b5e",
-      "raw_browser_sha256": "9ab5ee931d237e83f34386d3ba0e9d3eacde771f044e4a5e24af15ae7d1a3b5e",
-      "captured_at": "2026-10-03T21:50:16.981Z",
-      "capture_url": "http://127.0.0.1:4174/?view=game#102"
+      "width": 1920,
+      "height": 1080,
+      "bytes": 183139,
+      "sha256": "0a0a12309928a7301cbf861a9cf5d626af1bb51d6631fa2f4a698671f07c4a86",
+      "note": "Entered novel through the game input, then advanced eleven simulated client turns using Alt+Right. Chain 24; InkMoth score 107. Next word kite is drafted in the input."
     },
     {
       "file": "02-lobby.jpg",
-      "width": 1280,
-      "height": 720,
-      "bytes": 122216,
-      "sha256": "b3c7261473190d53c30a9a4cc5b69189f3774c3f9b41d1274026c8847b48438c",
-      "raw_browser_sha256": "b3c7261473190d53c30a9a4cc5b69189f3774c3f9b41d1274026c8847b48438c",
-      "captured_at": "2026-10-03T21:50:32.356Z",
-      "capture_url": "http://127.0.0.1:4174/?view=lobby"
+      "width": 1920,
+      "height": 1080,
+      "bytes": 221123,
+      "sha256": "bd1d1c3aa78c5206fc96e6af4e18a2a8d078dc40cd95e1478d0fc69291af2a56",
+      "note": "Populated native lobby with 64 simulated users and 24 rooms; shortened titles and coordinated avatar assets."
     },
     {
       "file": "03-ready-room.jpg",
-      "width": 1280,
-      "height": 720,
-      "bytes": 99537,
-      "sha256": "e3981b751b0b70cc4d9b87de288c421fd579804efbe9f82b5353eb7271ab62dd",
-      "raw_browser_sha256": "e3981b751b0b70cc4d9b87de288c421fd579804efbe9f82b5353eb7271ab62dd",
-      "captured_at": "2026-10-03T21:50:41.098Z",
-      "capture_url": "http://127.0.0.1:4174/?view=room#102"
+      "width": 1920,
+      "height": 1080,
+      "bytes": 154812,
+      "sha256": "f2782b5c8b5c3737c98fb1bd5cd2c74abcd17dcd8f7de7c48cdefc9b0e056448",
+      "note": "All twelve complete native player cards, varied ready states, and five realistic chat messages visible."
     },
     {
       "file": "04-inventory.jpg",
-      "width": 1280,
-      "height": 720,
-      "bytes": 94866,
-      "sha256": "cb1a4b55283aa20cad745e71ce476828282788a44bca436a94bdf80cad4955d0",
-      "raw_browser_sha256": "cb1a4b55283aa20cad745e71ce476828282788a44bca436a94bdf80cad4955d0",
-      "captured_at": "2026-10-03T21:50:59.072Z",
-      "capture_url": "http://127.0.0.1:4174/?view=inventory"
+      "width": 1920,
+      "height": 1080,
+      "bytes": 138446,
+      "sha256": "20ed6a9df7edeb332bc9169bafaca7e2e5a75f0d9acd2bf23c19e1dce1124be8",
+      "note": "Native inventory showing InkMoth's coordinated avatar, equipped items, consumables, emblems, and chest quantities; 48 owned entries."
     },
     {
       "file": "05-chest-opening.jpg",
-      "width": 1280,
-      "height": 720,
-      "bytes": 70698,
-      "sha256": "5a99772070715ce8b4bbd858d0b42552a98c0ff074eb7a8c6c8cf4a533a92d99",
-      "raw_browser_sha256": "5a99772070715ce8b4bbd858d0b42552a98c0ff074eb7a8c6c8cf4a533a92d99",
-      "captured_at": "2026-10-03T21:51:44.352Z",
-      "capture_url": "http://127.0.0.1:4174/?view=inventory"
+      "width": 1920,
+      "height": 1080,
+      "bytes": 101141,
+      "sha256": "d42a9f9ea8f6b55b5cd2d1ef68cd2d53fe9548337eb1878316152faafedcf858",
+      "note": "Selected the Silver emblem chest and clicked Open Chest. Native reveal granted a Steel emblem for seven days; chest quantity changed from three to two."
     },
     {
       "file": "06-store.jpg",
-      "width": 1280,
-      "height": 720,
-      "bytes": 125545,
-      "sha256": "b90dc2363e99abafa71e5790c15b473d9d6726d47218ef2fa8c4414d19e2b24a",
-      "raw_browser_sha256": "b90dc2363e99abafa71e5790c15b473d9d6726d47218ef2fa8c4414d19e2b24a",
-      "captured_at": "2026-10-03T21:53:16.323Z",
-      "capture_url": "http://127.0.0.1:4174/?view=shop"
+      "width": 1920,
+      "height": 1080,
+      "bytes": 241756,
+      "sha256": "775d9f78cda3d2e807a56b563b5026d71b3b663aa3146758212d30cf11426dbd",
+      "note": "Selected Cat ears, Pink vest, and Cat smile through the native catalog. Coordinated preview; three-item cart totals 1,900 gems and leaves 940."
     },
     {
-      "file": "07-login.jpg",
-      "width": 1280,
-      "height": 720,
-      "bytes": 85028,
-      "sha256": "30a123707ea822727f5932d23f8505cbbe67d4c7caa1ddf02b3ac60d4f9b17a8",
-      "raw_browser_sha256": "30a123707ea822727f5932d23f8505cbbe67d4c7caa1ddf02b3ac60d4f9b17a8",
-      "captured_at": "2026-10-03T21:52:52.933Z",
-      "capture_url": "http://127.0.0.1:4174/?view=login"
+      "file": "08-community-chat.jpg",
+      "width": 1920,
+      "height": 1080,
+      "bytes": 152211,
+      "sha256": "9ea5a040c40acbd687a44f7e70fab80e8901c0aaf80201977155d7298c0dbc70",
+      "note": "Submitted a lobby chat message through the native Message/Chat controls; nine chat lines, four online friends, and room presence visible."
     }
   ]
 }

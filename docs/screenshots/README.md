@@ -1,64 +1,58 @@
-# Demo screenshots
+# WordWarrior.io — release screenshots
 
-These captures were taken before the project was renamed **WordWarrior.io** and retain the on-screen branding from that date.
+Seven complete **1920 × 1080** screenshots captured on **October 9, 2026** in the Codex in-app browser. Use **01-gameplay.jpg** as the lead image for the GitHub release.
 
-The unrequested player-card, level-icon sizing, sidebar proportion, and HUD overrides were removed on 2026-10-03. These replacement captures use the restored original layout. Its native clipping and scrolling at 1280 × 720 are retained by explicit request; twelve players are present, but they are not all visible simultaneously. The previous capture bundle was archived before restoration.
+These are real browser captures of the project's existing game templates, styles, avatar assets, and client renderers. Players, rooms, inventory, and conversations are fictional demo data. The local harness simulates server messages and player actions in memory; it does not represent a live production population or test independent network clients.
 
-Seven complete **1280 × 720** game screens, freshly retaken through **Product Design's in-app Browser workflow** at 100% zoom and device pixel ratio 1. Every JPEG is the original screenshot response saved byte for byte. The images show the current templates, styles, avatar layers, item artwork, and client renderers.
+The supplied `game_img/8e9a668b-3569-4fbb-990e-af576027c7d9.png` is fitted with `background-size: cover`, centered without stretching, for the demo match only. Production backgrounds and game UI files were not changed for these captures. All twelve player cards fit in the gameplay and ready-room images.
 
-The original card renderers and viewport behavior were restored before capture, and UI code stayed fixed while taking the screenshots. No pixels were redrawn, traced, moved, cropped, or resized after capture. [capture-provenance.json](capture-provenance.json) records each capture's time, URL, source snapshot, and matching browser-response/saved-file SHA-256 hashes. Only previously requested lobby tile, Store, login, inventory, English text, and Ranked button refinements remain.
+The JPEGs are the original browser response bytes, with no image editing, resizing, compositing, or post-capture cropping. The capture rectangle is the entire 1920 × 1080 browser content viewport. [manifest.json](manifest.json) records dimensions and hashes; [capture-provenance.json](capture-provenance.json) records capture actions, URLs, timestamps, and source hashes.
 
-Players, rooms, conversations, inventories, and statistics are fictional demo data. The local adapter replays client messages and simulates actions in memory; it does not connect to production services or a database. The match, lobby, ready-room, inventory, and store captures carry a small **DEMO SESSION** label. The sign-in page uses sample provider availability and does not initiate authentication.
+## Gameplay
 
-## Beta Test match
+A twelve-player Beta Test match in round two, with Mission and Ban Letter enabled. InkMoth submitted `novel` through the actual input, then eleven simulated players took their turns. The chain reached **24**, all twelve scores updated, and InkMoth is drafting `kite` for the next turn. The latest words and definitions remain visible at right.
 
-Twelve equipped players in round two, with **Mission and Ban Letter enabled**. InkMoth submitted `novel` through the game input, advancing the chain to thirteen and the score to 107. The next turn belongs to MapleCircuit; Mission R is active and X remains banned.
-
-The supplied arena image, `game_img/8e9a668b-3569-4fbb-990e-af576027c7d9.png`, is fitted to the viewport for this local demo only. Production background selection is unchanged.
-
-![Original Beta Test layout after a real word submission, retaining native player-card clipping at 1280 pixels](01-gameplay.jpg)
+![Full twelve-player match with a 24-word chain and supplied arena background](01-gameplay.jpg)
 
 ## Lobby
 
-Sixty-four fictional players and twenty-four rooms, with varied occupancy, natural room titles, waiting and playing states, and room cards that fill the available space. The Ranked control shares the other sidebar buttons' shape and icon treatment.
+**64 simulated users and 24 rooms**, with varied occupancy, active and waiting sessions, concise room titles, and coordinated avatars.
 
-![Populated lobby with varied room occupancy and original sidebar proportions](02-lobby.jpg)
+![Populated lobby with complete room grid and player sidebar](02-lobby.jpg)
 
 ## Ready room
 
-All twelve players are present, with varied outfit combinations, nickname colors, native level icons, emblems, clan membership, and readiness. The original card positions, native scrolling, and overflow remain intact. Only two short chat balloons are active; earlier conversation remains in the chat history with English timestamps. Added corner clan crests were removed with the unrequested card redesign.
+Twelve complete player cards, host and readiness states, natural nicknames, and a short pre-game conversation. The outfits use coordinated existing cosmetic layers with at most one hand item.
 
-![Original ready-room cards and scrolling with twelve participants and varied readiness](03-ready-room.jpg)
+![Twelve-player ready room with all cards and chat visible](03-ready-room.jpg)
 
 ## Inventory
 
-InkMoth's forty-eight owned item entries include cosmetics, colored nicknames, backgrounds, consumables, emblems, and several chest tiers. Equipped items, quantities, category filters, and inventory actions use the native interface.
+InkMoth's **48 owned item entries** include cosmetics, nickname colors, backgrounds, consumables, emblems, and chest tiers. Equipped items and quantities use the native interface.
 
-![Inventory with an equipped avatar and forty-eight varied item entries](04-inventory.jpg)
+![Full inventory with avatar preview and owned items](04-inventory.jpg)
 
 ## Chest opening
 
-The native Silver emblem chest reveals a **Steel emblem with seven days of use**. Opening the chest through its real control reduced the local inventory from three silver chests to two and added the reward.
+Opening a Silver emblem chest through its native button awarded a **Steel emblem with seven days of use** and reduced the remaining chest count from **three to two**.
 
-![Native chest reward reveal showing the Steel emblem and two remaining chests](05-chest-opening.jpg)
+![Native chest reward reveal with two chests remaining](05-chest-opening.jpg)
 
 ## Store
 
-Cat ears and an orange vest are selected through the store controls. The avatar previews the outfit, the cart totals 1,700 gems, and the projected balance is 1,140. The preview, cart, purchase action, and catalog remain inside the store surface; gem numbers use white text with a dark outline.
+Cat ears, Pink vest, and Cat smile were selected through the actual catalog. The preview shows the outfit; the cart totals **1,900 gems**, leaving **940** from the starting balance of 2,840.
 
-![Refined store with a live outfit preview, two-item cart, and readable gem prices](06-store.jpg)
+![Store with coordinated cat outfit preview and a three-item cart](06-store.jpg)
 
-## Sign in
+## Community chat
 
-The actual sign-in template uses the game's existing logo and avatar artwork, a restrained ink-and-gold palette, clear provider choices, and formal account guidance.
+Nine natural chat messages, friend avatars, four online friends, and room presence. The final InkMoth message was submitted through the actual chat controls.
 
-![Refined English sign-in page with all provider choices visible](07-login.jpg)
+![Community chat with realistic conversation and friend presence](08-community-chat.jpg)
 
-## Reproduce the captures
+## Reproduce
 
-Run from the repository root using the installed Pug and Acorn dependencies. No PostgreSQL, Redis, OAuth, or production configuration is required.
-
-Windows PowerShell:
+From the repository root, using the already-installed Pug and Acorn dependencies:
 
 ```powershell
 Get-Content -Raw -LiteralPath tools/demo_game_server.js | node --preserve-symlinks
@@ -70,31 +64,27 @@ Other shells:
 node --preserve-symlinks --preserve-symlinks-main tools/demo_game_server.js
 ```
 
-Open `http://127.0.0.1:4174/?view=lobby`. The server listens only on loopback; `GAME_DEMO_PORT` can change the port.
+Open `http://127.0.0.1:4174/` with a **1920 × 1080 browser content viewport**, 100% zoom, and device pixel ratio 1. Wait for fonts, avatar images, and `body[data-demo-ready="true"]`. Capture the entire viewport without browser chrome. `GAME_DEMO_PORT` can override the loopback-only port.
 
-| Screenshot | URL query | Capture action |
+| File | Query | Action |
 | --- | --- | --- |
-| Beta Test match | `?view=game` | Type `novel` in the game input and press Enter; capture the following turn. |
-| Lobby | `?view=lobby` | Capture the initial populated view. |
-| Ready room | `?view=room` | Capture the initial twelve-player view. |
-| Inventory | `?view=inventory` | Capture the initial inventory view. |
-| Chest opening | `?view=inventory` | Select Silver emblem chest, click Open Chest, and capture the reward reveal. |
-| Store | `?view=shop` | Select Cat ears and Orange vest, return to All, and scroll the catalog to the top. |
-| Sign in | `?view=login` | Capture the initial sign-in page. |
+| 01-gameplay.jpg | `?view=game` | Submit `novel`, press Alt + Right eleven times, then type `kite` without submitting. |
+| 02-lobby.jpg | `?view=lobby` | Capture the populated lobby. |
+| 03-ready-room.jpg | `?view=room` | Capture the ready room and chat. |
+| 04-inventory.jpg | `?view=inventory` | Capture the initial inventory. |
+| 05-chest-opening.jpg | `?view=inventory` | Select Silver emblem chest, click Open Chest, wait for the reward reveal. |
+| 06-store.jpg | `?view=shop` | Select Cat ears, Pink vest, and Cat smile. |
+| 08-community-chat.jpg | `?view=community` | Send `back from beta, that last round was close lol` through Message / Chat. |
 
-Use a **1280 × 720 browser content viewport**, load the selected view at that size, and wait for fonts, avatar images, and `body[data-demo-ready="true"]`. Move the pointer away from expandable sidebar buttons. Capture the viewport without browser chrome, cropping, or image editing. Preserve native clipping instead of repositioning or resizing cards to fit. Reloading restores the fixture.
-
-Enter submits InkMoth's word. Alt + Right advances the next simulated player's turn. These demo interactions use native client handlers and an in-memory adapter; they do not validate production multiplayer or payments.
+Reloading resets the local simulation. No database, OAuth, or production services are used. The unchanged `07-login.jpg` is a legacy capture and is excluded from this release set and manifest.
 
 ## Verification
 
-- Inspected each saved image for the complete browser viewport, English interface text, loaded artwork, and the requested original layout, including its existing clipping.
-- Compared rendered native reference and restored screens at the same viewport and state; player-card, avatar, level-icon, readiness, and sidebar geometry matches the saved pre-screenshot source. Native level assets are unchanged.
-- Submitted `novel` through the real game input: chain 12 → 13, InkMoth score 40 → 107, and the next mission/turn updated.
-- Opened the chest through its actual control: three chests → two, with a timed Steel emblem added to inventory.
-- Built the store outfit through actual item controls; preview, cart, and projected balance agree.
-- Validated room membership, host/readiness data, varied occupancy, item IDs, equipment, quantities, expiry, clan membership, native Beta scoring, and chest consumption semantics.
-- Client rendering regressions cover all sixteen modes. The browser reported no JavaScript errors in the captured views.
-- The local adapter blocks network connections, rejects HTTP writes, and uses no production database or authentication services.
+- Visually inspected all seven exports at their complete viewport dimensions.
+- Verified all twelve gameplay and ready-room cards are visible, including names and scores/readiness.
+- Exercised word submission, simulated player turns, chest consumption/reward, store selection, and chat submission through the existing controls.
+- Validated fixture names, room membership, host/readiness state, cosmetic IDs, ownership, and emblem expiry.
+- Confirmed all seven files are 1920 × 1080 and their SHA-256 hashes match the original browser responses.
+- No browser warnings or errors were observed during the final capture pass.
 
-Image dimensions, byte sizes, and SHA-256 hashes are recorded in [manifest.json](manifest.json). The browser capture records are in [capture-provenance.json](capture-provenance.json). Existing source and asset licenses apply; see the repository [README](../../README.md#license) and [LICENSE](../../LICENSE).
+Existing source and asset licenses apply; see the repository [README](../../README.md#license) and [LICENSE](../../LICENSE).

@@ -452,10 +452,10 @@ function bootstrap(fixture, rules, options){
 			flush(3000);
 			applyMiddleScale();
 		}else{
-			[ ["atlas", "Twelve in. Mission and Ban on. Ready?"], ["echo", "Ready. Saving a few R words."], ["nova", "Hat on. Tea ready."] ]
+			[ ["atlas", "mission + ban, three rounds"], ["echo", "sounds good"], ["nova", "ready!"] ]
 				.forEach((line, index) => receive({ type: "chat", profile: $data.users[line[0]].profile, value: line[1], timestamp: fixture.now - (5 - index) * 60000 }));
 			flush(3000);
-			[ ["sage", "One sec, swapping my hat."], [fixture.id, "Ready when you are."] ]
+			[ ["sage", "one sec, changing my hat"], [fixture.id, "glhf"] ]
 				.forEach((line, index) => receive({ type: "chat", profile: $data.users[line[0]].profile, value: line[1], timestamp: fixture.now - (2 - index) * 60000 }));
 		}
 		window.__demoSnapshot = { view: gaming ? "game" : "room", words: gameWordsPlayed, mode: MODE[room.mode] };

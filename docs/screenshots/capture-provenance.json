@@ -1,234 +1,141 @@
 {
-  "workflow": "Product Design native UI restoration and direct browser capture",
+  "capturedOn": "2026-10-09",
   "browser": "Codex in-app Browser",
-  "viewport": {
-    "width": 1280,
-    "height": 720
-  },
-  "device_pixel_ratio": 1,
-  "body_zoom": 1,
-  "format": "Original browser JPEG",
-  "native_layout_restored_before_capture": true,
-  "native_1280_clipping_retained_at_user_request": true,
-  "image_editing": false,
-  "cropping": false,
-  "resampling": false,
-  "fictional_demo_data": true,
-  "images": [
+  "format": "Original browser JPEG bytes",
+  "postProcessing": "None",
+  "session": "Fictional users and in-memory simulated server messages through the real game client",
+  "captures": [
     {
       "file": "01-gameplay.jpg",
-      "description": "Original twelve-player Beta layout after novel: Mission R, Ban X, chain 13; native 1280 clipping retained.",
       "url": "http://127.0.0.1:4174/?view=game#102",
-      "captured_at": "2026-10-03T21:50:16.981Z",
-      "capture_api": "Product Design in-app Browser / tab.screenshot({fullPage:false})",
-      "raw_browser_sha256": "9ab5ee931d237e83f34386d3ba0e9d3eacde771f044e4a5e24af15ae7d1a3b5e",
-      "saved_sha256": "9ab5ee931d237e83f34386d3ba0e9d3eacde771f044e4a5e24af15ae7d1a3b5e",
-      "bytes": 117962,
-      "postprocessing": false,
-      "evidence": {
-        "dpr": 1,
-        "height": 720,
-        "ready": "true",
-        "width": 1280,
-        "zoom": "1"
-      }
+      "capturedAt": "2026-10-09T19:20:00.903Z",
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "deviceScaleFactor": 1
+      },
+      "bytes": 183139,
+      "sha256": "0a0a12309928a7301cbf861a9cf5d626af1bb51d6631fa2f4a698671f07c4a86",
+      "savedFileSha256": "0a0a12309928a7301cbf861a9cf5d626af1bb51d6631fa2f4a698671f07c4a86",
+      "note": "Entered novel through the game input, then advanced eleven simulated client turns using Alt+Right. Chain 24; InkMoth score 107. Next word kite is drafted in the input.",
+      "width": 1920,
+      "height": 1080
     },
     {
       "file": "02-lobby.jpg",
-      "description": "Populated lobby retaining original sidebar proportions and the requested uniform Ranked button.",
       "url": "http://127.0.0.1:4174/?view=lobby",
-      "captured_at": "2026-10-03T21:50:32.356Z",
-      "capture_api": "Product Design in-app Browser / tab.screenshot({fullPage:false})",
-      "raw_browser_sha256": "b3c7261473190d53c30a9a4cc5b69189f3774c3f9b41d1274026c8847b48438c",
-      "saved_sha256": "b3c7261473190d53c30a9a4cc5b69189f3774c3f9b41d1274026c8847b48438c",
-      "bytes": 122216,
-      "postprocessing": false,
-      "evidence": {
-        "dpr": 1,
-        "height": 720,
-        "ready": "true",
-        "width": 1280,
-        "zoom": "1"
-      }
+      "capturedAt": "2026-10-09T19:20:07.502Z",
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "deviceScaleFactor": 1
+      },
+      "bytes": 221123,
+      "sha256": "bd1d1c3aa78c5206fc96e6af4e18a2a8d078dc40cd95e1478d0fc69291af2a56",
+      "savedFileSha256": "bd1d1c3aa78c5206fc96e6af4e18a2a8d078dc40cd95e1478d0fc69291af2a56",
+      "note": "Populated native lobby with 64 simulated users and 24 rooms; shortened titles and coordinated avatar assets.",
+      "width": 1920,
+      "height": 1080
     },
     {
       "file": "03-ready-room.jpg",
-      "description": "Twelve-player ready room with original card layout, native scrolling and 1280 clipping retained.",
       "url": "http://127.0.0.1:4174/?view=room#102",
-      "captured_at": "2026-10-03T21:50:41.098Z",
-      "capture_api": "Product Design in-app Browser / tab.screenshot({fullPage:false})",
-      "raw_browser_sha256": "e3981b751b0b70cc4d9b87de288c421fd579804efbe9f82b5353eb7271ab62dd",
-      "saved_sha256": "e3981b751b0b70cc4d9b87de288c421fd579804efbe9f82b5353eb7271ab62dd",
-      "bytes": 99537,
-      "postprocessing": false,
-      "evidence": {
-        "dpr": 1,
-        "height": 720,
-        "ready": "true",
-        "width": 1280,
-        "zoom": "1"
-      }
+      "capturedAt": "2026-10-09T19:20:15.114Z",
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "deviceScaleFactor": 1
+      },
+      "bytes": 154812,
+      "sha256": "f2782b5c8b5c3737c98fb1bd5cd2c74abcd17dcd8f7de7c48cdefc9b0e056448",
+      "savedFileSha256": "f2782b5c8b5c3737c98fb1bd5cd2c74abcd17dcd8f7de7c48cdefc9b0e056448",
+      "note": "All twelve complete native player cards, varied ready states, and five realistic chat messages visible.",
+      "width": 1920,
+      "height": 1080
     },
     {
       "file": "04-inventory.jpg",
-      "description": "Varied inventory with original sidebar proportions and retained English labels.",
       "url": "http://127.0.0.1:4174/?view=inventory",
-      "captured_at": "2026-10-03T21:50:59.072Z",
-      "capture_api": "Product Design in-app Browser / tab.screenshot({fullPage:false})",
-      "raw_browser_sha256": "cb1a4b55283aa20cad745e71ce476828282788a44bca436a94bdf80cad4955d0",
-      "saved_sha256": "cb1a4b55283aa20cad745e71ce476828282788a44bca436a94bdf80cad4955d0",
-      "bytes": 94866,
-      "postprocessing": false,
-      "evidence": {
-        "dpr": 1,
-        "height": 720,
-        "ready": "true",
-        "width": 1280,
-        "zoom": "1"
-      }
+      "capturedAt": "2026-10-09T19:20:21.975Z",
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "deviceScaleFactor": 1
+      },
+      "bytes": 138446,
+      "sha256": "20ed6a9df7edeb332bc9169bafaca7e2e5a75f0d9acd2bf23c19e1dce1124be8",
+      "savedFileSha256": "20ed6a9df7edeb332bc9169bafaca7e2e5a75f0d9acd2bf23c19e1dce1124be8",
+      "note": "Native inventory showing InkMoth's coordinated avatar, equipped items, consumables, emblems, and chest quantities; 48 owned entries.",
+      "width": 1920,
+      "height": 1080
     },
     {
       "file": "05-chest-opening.jpg",
-      "description": "Native Silver chest reward reveal with Steel emblem, seven days of use and two chests remaining.",
       "url": "http://127.0.0.1:4174/?view=inventory",
-      "captured_at": "2026-10-03T21:51:44.352Z",
-      "capture_api": "Product Design in-app Browser / tab.screenshot({fullPage:false})",
-      "raw_browser_sha256": "5a99772070715ce8b4bbd858d0b42552a98c0ff074eb7a8c6c8cf4a533a92d99",
-      "saved_sha256": "5a99772070715ce8b4bbd858d0b42552a98c0ff074eb7a8c6c8cf4a533a92d99",
-      "bytes": 70698,
-      "postprocessing": false,
-      "evidence": {
-        "dpr": 1,
-        "height": 720,
-        "ready": "true",
-        "width": 1280,
-        "zoom": "1"
-      }
+      "capturedAt": "2026-10-09T19:20:34.727Z",
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "deviceScaleFactor": 1
+      },
+      "bytes": 101141,
+      "sha256": "d42a9f9ea8f6b55b5cd2d1ef68cd2d53fe9548337eb1878316152faafedcf858",
+      "savedFileSha256": "d42a9f9ea8f6b55b5cd2d1ef68cd2d53fe9548337eb1878316152faafedcf858",
+      "note": "Selected the Silver emblem chest and clicked Open Chest. Native reveal granted a Steel emblem for seven days; chest quantity changed from three to two.",
+      "width": 1920,
+      "height": 1080
     },
     {
       "file": "06-store.jpg",
-      "description": "Requested Store refinement retained with original sidebar, top-of-catalog outfit preview, 1700 cart and 1140 remaining gems.",
       "url": "http://127.0.0.1:4174/?view=shop",
-      "captured_at": "2026-10-03T21:53:16.323Z",
-      "capture_api": "Product Design in-app Browser / tab.screenshot({fullPage:false})",
-      "raw_browser_sha256": "b90dc2363e99abafa71e5790c15b473d9d6726d47218ef2fa8c4414d19e2b24a",
-      "saved_sha256": "b90dc2363e99abafa71e5790c15b473d9d6726d47218ef2fa8c4414d19e2b24a",
-      "bytes": 125545,
-      "postprocessing": false,
-      "evidence": {
-        "dpr": 1,
-        "height": 720,
-        "ready": "true",
-        "width": 1280,
-        "zoom": "1"
-      }
+      "capturedAt": "2026-10-09T19:21:55.649Z",
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "deviceScaleFactor": 1
+      },
+      "bytes": 241756,
+      "sha256": "775d9f78cda3d2e807a56b563b5026d71b3b663aa3146758212d30cf11426dbd",
+      "savedFileSha256": "775d9f78cda3d2e807a56b563b5026d71b3b663aa3146758212d30cf11426dbd",
+      "note": "Selected Cat ears, Pink vest, and Cat smile through the native catalog. Coordinated preview; three-item cart totals 1,900 gems and leaves 940.",
+      "width": 1920,
+      "height": 1080
     },
     {
-      "file": "07-login.jpg",
-      "description": "Previously requested formal English sign-in design retained, with existing logo and provider controls.",
-      "url": "http://127.0.0.1:4174/?view=login",
-      "captured_at": "2026-10-03T21:52:52.933Z",
-      "capture_api": "Product Design in-app Browser / tab.screenshot({fullPage:false})",
-      "raw_browser_sha256": "30a123707ea822727f5932d23f8505cbbe67d4c7caa1ddf02b3ac60d4f9b17a8",
-      "saved_sha256": "30a123707ea822727f5932d23f8505cbbe67d4c7caa1ddf02b3ac60d4f9b17a8",
-      "bytes": 85028,
-      "postprocessing": false,
-      "evidence": {
-        "dpr": 1,
-        "height": 720,
-        "ready": "true",
-        "width": 1280,
-        "zoom": "1"
-      }
-    }
-  ],
-  "superseded_capture_records": [
-    {
-      "file": "06-store.jpg",
-      "description": "Requested Store design retained with native sidebar: Cat ears and Orange vest, 1700 cart, 1140 remaining gems.",
-      "url": "http://127.0.0.1:4174/?view=shop",
-      "captured_at": "2026-10-03T21:52:24.961Z",
-      "capture_api": "Product Design in-app Browser / tab.screenshot({fullPage:false})",
-      "raw_browser_sha256": "bb44ef832c1af83e4e1ae113f5834a5ba2288ac36cd8ae07e8893f95f18ed4ee",
-      "saved_sha256": "bb44ef832c1af83e4e1ae113f5834a5ba2288ac36cd8ae07e8893f95f18ed4ee",
-      "bytes": 120636,
-      "postprocessing": false,
-      "evidence": {
-        "dpr": 1,
-        "height": 720,
-        "ready": "true",
-        "width": 1280,
-        "zoom": "1"
+      "file": "08-community-chat.jpg",
+      "url": "http://127.0.0.1:4174/?view=community",
+      "capturedAt": "2026-10-09T19:24:32.533Z",
+      "viewport": {
+        "width": 1920,
+        "height": 1080,
+        "deviceScaleFactor": 1
+      },
+      "bytes": 152211,
+      "sha256": "9ea5a040c40acbd687a44f7e70fab80e8901c0aaf80201977155d7298c0dbc70",
+      "savedFileSha256": "9ea5a040c40acbd687a44f7e70fab80e8901c0aaf80201977155d7298c0dbc70",
+      "note": "Submitted a lobby chat message through the native Message/Chat controls; nine chat lines, four online friends, and room presence visible.",
+      "width": 1920,
+      "height": 1080,
+      "captureOptions": {
+        "fullPage": true,
+        "clip": {
+          "x": 0,
+          "y": 0,
+          "width": 1920,
+          "height": 1080
+        }
       }
     }
   ],
-  "production_ui_changes_this_retake": "User-requested restoration before capture; no UI source changes while capturing",
-  "source_snapshot": [
-    {
-      "file": "Server/lib/Web/views/kkutu.pug",
-      "sha256": "5b5d1e72129787d76199766911b13d20d8cef3a50feb88055c0bc0f299f272c9"
-    },
-    {
-      "file": "Server/lib/Web/views/m_kkutu.pug",
-      "sha256": "93728e00e166b8cfa07d858919b53421450ccf374f98ed8bced8f3cbbe0c9ec4"
-    },
-    {
-      "file": "Server/lib/Web/views/login.pug",
-      "sha256": "a1cb5587776c2e25694b57f6a7af2b0649c9e9162d59770fe308d9651cf35828"
-    },
-    {
-      "file": "Server/lib/Web/public/css/game_ui.css",
-      "sha256": "dbea6463f92494f3ec5cb1a30bc5bd066e3419ccfebe1852b89203c5efd38a95"
-    },
-    {
-      "file": "Server/lib/Web/public/css/in_kkutu.css",
-      "sha256": "857c292a909ad634a448564f68c5ccf699e7b2aab42aa7246db6cedc28ea7a12"
-    },
-    {
-      "file": "Server/lib/Web/public/css/in_game_kkutu_shop.css",
-      "sha256": "029af929f167108a8fc50f42d10bc3ececcc20fda79fec52051318dd06609d5e"
-    },
-    {
-      "file": "Server/lib/Web/public/css/in_login.css",
-      "sha256": "3dbc343e49788a5095a9a32343d3ef415bb701c15f2340d5f396c0ffce42e04c"
-    },
-    {
-      "file": "Server/lib/Web/lib/kkutu/body.js",
-      "sha256": "6c5d0adfc601849ff780ab9f371946f369ec56038f05066b18721d1b7c4fb2d3"
-    },
-    {
-      "file": "Server/lib/Web/lib/kkutu/ready.js",
-      "sha256": "a1d71b7a86468698dec2647b7e7e16b516ece543109d4550e4278f3f6b8797bc"
-    },
-    {
-      "file": "Server/lib/Web/lang/en_US.json",
-      "sha256": "4dcff75d2d736a9fa7b8b6762cad686ec9abe06edd034a389300696c36024ad4"
-    },
-    {
-      "file": "tools/demo_game_server.js",
-      "sha256": "44a653f4de659266cc74a3202ae861aa0411c6dad8389abd95222a7dc94b0279"
-    },
-    {
-      "file": "tools/demo_game_client.js",
-      "sha256": "ac272e383bce527a698725c8fa7653bff2a67c368d747ff0f13a8474559fa254"
-    },
-    {
-      "file": "tools/demo_game_fixture.js",
-      "sha256": "7e836d547478e9c6cd1acb018db16088413a7c3be560a3adbe507cfa58393179"
-    },
-    {
-      "file": "Server/lib/Web/public/img/kkutu/lv/newlv.png",
-      "sha256": "e2a2de4911deb468f5a4e2c5d307645fb222384fff82c3be401cf13cf01be51a"
-    }
-  ],
-  "browser_errors": [],
-  "original_level_artwork_changed": false,
-  "official_server_used_for_fictional_data": false,
-  "staging_notes": [
-    "The original player-card, level-icon, sidebar and HUD appearance was restored before capture.",
-    "The user explicitly requested the exact original 1280x720 layout, including clipping.",
-    "All twelve players remain in both room fixtures; native overflow means not all cards are visible simultaneously.",
-    "Supplied arena background is local demo staging only.",
-    "Fictional users and item interactions are isolated in memory; the official server was not restarted."
-  ]
+  "sourceHashes": {
+    "tools/demo_game_server.js": "13311f9cfb3a2bba15e407de44fdad48d8000d33ca4eb9848f85c053a5f30200",
+    "tools/demo_game_client.js": "0ce1207f8ad131aed7a090826cb101c6acb78cfce4d4cb777245eed38314e24c",
+    "tools/demo_game_fixture.js": "6c6ac7d1afc986714b1ea8bdeec45b5caf64a4a84f9ba4fd24ec3a96a2c11a6b",
+    "Server/lib/Web/views/kkutu.pug": "5b5d1e72129787d76199766911b13d20d8cef3a50feb88055c0bc0f299f272c9",
+    "Server/lib/Web/public/css/in_game_kkutu.css": "b8df42c1c1fd2f2bb6564016a1098df79b9ded69f0d4f4191f3e2ab5fe1ef006",
+    "Server/lib/Web/public/css/in_game_kkutu_shop.css": "029af929f167108a8fc50f42d10bc3ececcc20fda79fec52051318dd06609d5e",
+    "Server/lib/Web/public/css/game_ui.css": "dbea6463f92494f3ec5cb1a30bc5bd066e3419ccfebe1852b89203c5efd38a95",
+    "Server/lib/Web/lib/kkutu/body.js": "6c5d0adfc601849ff780ab9f371946f369ec56038f05066b18721d1b7c4fb2d3",
+    "game_img/8e9a668b-3569-4fbb-990e-af576027c7d9.png": "eee7371589caa93202dec6d5a307092e4916b6e2a75c527f169b3e5e81378e43"
+  }
 }
